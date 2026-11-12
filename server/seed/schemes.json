@@ -1,0 +1,410 @@
+[
+  {
+    "id": "scheme-001",
+    "title": "Sample Senior Citizen Social Security Pension",
+    "shortDescription": "Monthly financial assistance for senior citizens from low-income households to ensure dignity and basic livelihood security.",
+    "category": "senior_citizens",
+    "level": "state",
+    "state": "Karnataka",
+    "benefits": [
+      "Direct benefit transfer of ₹1,200 to ₹2,000 per month into bank account",
+      "Free health screening at designated primary health centers",
+      "Priority assistance at district social welfare offices"
+    ],
+    "documentsRequired": [
+      "Age proof (Birth Certificate / Voter ID / School certificate)",
+      "Proof of residence in Karnataka (Ration Card or Utility Bill)",
+      "Income certificate issued by Revenue Department (Tahsildar)",
+      "Bank account passbook copy"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-15T00:00:00.000Z",
+    "isSample": true,
+    "translations": {
+      "kn": {
+        "title": "ಮಾದರಿ ಹಿರಿಯ ನಾಗರಿಕರ ಸಾಮಾಜಿಕ ಭದ್ರತಾ ಪಿಂಚಣಿ",
+        "shortDescription": "ಕಡಿಮೆ ಆದಾಯ ಹೊಂದಿರುವ ಹಿರಿಯ ನಾಗರಿಕರಿಗೆ ಗೌರವಯುತ ಜೀವನ ಮತ್ತು ಮೂಲಭೂತ ಬೆಂಬಲ ನೀಡುವ ಮಾಸಿಕ ಆರ್ಥಿಕ ನೆರವು.",
+        "benefits": [
+          "ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಪ್ರತಿ ತಿಂಗಳು ₹1,200 ರಿಂದ ₹2,000 ನೇರ ವರ್ಗಾವಣೆ",
+          "ಪ್ರಾಥಮಿಕ ಆರೋಗ್ಯ ಕೇಂದ್ರಗಳಲ್ಲಿ ಉಚಿತ ಆರೋಗ್ಯ ತಪಾಸಣೆ",
+          "ತಾಲೂಕು ಸಮಾಜ ಕಲ್ಯಾಣ ಇಲಾಖೆಯಲ್ಲಿ ಆದ್ಯತಾ ಸೇವೆ"
+        ]
+      },
+      "hi": {
+        "title": "नमूना वरिष्ठ नागरिक सामाजिक सुरक्षा पेंशन",
+        "shortDescription": "कम आय वाले परिवारों के वरिष्ठ नागरिकों के लिए सम्मानजनक जीवन यापन हेतु मासिक वित्तीय सहायता।",
+        "benefits": [
+          "बैंक खाते में ₹1,200 से ₹2,000 प्रति माह प्रत्यक्ष लाभ अंतरण (DBT)",
+          "प्राथमिक स्वास्थ्य केंद्रों पर निःशुल्क स्वास्थ्य जांच",
+          "जिला समाज कल्याण कार्यालयों में प्राथमिकता सहायता"
+        ]
+      }
+    },
+    "rules": [
+      { "field": "age", "op": "gte", "value": 60, "required": true, "label": "Age 60 years or above" },
+      { "field": "state", "op": "in", "value": ["Karnataka", "All"], "required": true, "label": "Resident of Karnataka" },
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle"], "required": true, "label": "Low or lower-middle household income" },
+      { "field": "category", "op": "includesAny", "value": ["senior_citizen"], "required": true, "label": "Identified as Senior Citizen" }
+    ]
+  },
+  {
+    "id": "scheme-002",
+    "title": "Sample Rural Artisan & Traditional Weaver Support",
+    "shortDescription": "Equipment grants, raw material subsidy, and craft preservation stipend for traditional artisans and craftspeople.",
+    "category": "employment",
+    "level": "state",
+    "state": "Karnataka",
+    "benefits": [
+      "One-time tool-kit subsidy up to ₹15,000",
+      "Subsidized working capital loan with 5% interest subvention",
+      "Free marketing access in state handicraft exhibitions"
+    ],
+    "documentsRequired": [
+      "Artisan Pehchan Card or Handicraft board registration",
+      "Residence certificate (Karnataka)",
+      "Bank account details"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-20T00:00:00.000Z",
+    "isSample": true,
+    "translations": {
+      "kn": {
+        "title": "ಮಾದರಿ ಗ್ರಾಮೀಣ ಕುಶಲಕರ್ಮಿ ಮತ್ತು ನೇಕಾರರ ಪ್ರೋತ್ಸಾಹ ಯೋಜನೆ",
+        "shortDescription": "ಸಾಂಪ್ರದಾಯಿಕ ಕುಶಲಕರ್ಮಿಗಳಿಗೆ ಸಲಕರಣೆ ಅನುದಾನ, ಕಚ್ಚಾ ವಸ್ತು ಸಬ್ಸಿಡಿ ಮತ್ತು ಕಲೆ ಸಂರಕ್ಷಣಾ ಗೌರವಧನ.",
+        "benefits": [
+          "ರೂ. 15,000 ವರೆಗೆ ಉಪಕರಣ ಕಿಟ್ ಸಬ್ಸಿಡಿ",
+          "ಶೇಕಡಾ 5 ರ ಬಡ್ಡಿ ರಿಯಾಯಿತಿಯೊಂದಿಗೆ ರಿಯಾಯಿತಿ ಸಾಲ",
+          "ರಾಜ್ಯ ಕರಕುಶಲ ಮೇಳಗಳಲ್ಲಿ ಉಚಿತ ಪ್ರದರ್ಶನ ಅವಕಾಶ"
+        ]
+      },
+      "hi": {
+        "title": "नमूना ग्रामीण कारीगर व बुनकर सहायता योजना",
+        "shortDescription": "पारंपरिक कारीगरों और शिल्पकारों के लिए उपकरण अनुदान, कच्चा माल सब्सिडी और आजीविका सहायता।",
+        "benefits": [
+          "₹15,000 तक का एकमुश्त टूल-किट अनुदान",
+          "5% ब्याज छूट के साथ रियायती कार्यशील पूंजी ऋण",
+          "राज्य हस्तशिल्प प्रदर्शनियों में निःशुल्क स्टॉल"
+        ]
+      }
+    },
+    "rules": [
+      { "field": "state", "op": "in", "value": ["Karnataka", "All"], "required": true, "label": "Resident of Karnataka" },
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle"], "required": true, "label": "Annual income in low or lower-middle bracket" },
+      { "field": "occupation", "op": "eq", "value": "artisan", "required": true, "label": "Occupation verified as traditional artisan or craftsperson" }
+    ]
+  },
+  {
+    "id": "scheme-003",
+    "title": "Sample Higher Education Merit & Need Scholarship",
+    "shortDescription": "Annual tuition reimbursement and book allowance for post-secondary students pursuing undergraduate and technical diplomas.",
+    "category": "education",
+    "level": "central",
+    "state": "All",
+    "benefits": [
+      "Annual fee support up to ₹25,000 directly credited to institution/student",
+      "Books and stationery allowance of ₹3,000 per academic year",
+      "Mentorship and skill certification test fee reimbursement"
+    ],
+    "documentsRequired": [
+      "Current college admission confirmation or fee receipt",
+      "Class 10 and 12 mark sheets",
+      "Income certificate of parent/guardian",
+      "Student bank account passbook"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-11-01T00:00:00.000Z",
+    "isSample": true,
+    "translations": {
+      "kn": {
+        "title": "ಮಾದರಿ ಉನ್ನತ ಶಿಕ್ಷಣ ಅರ್ಹತೆ ಮತ್ತು ಪ್ರೋತ್ಸಾಹಕ ವಿದ್ಯಾರ್ಥಿವೇತನ",
+        "shortDescription": "ಪದವಿ ಮತ್ತು ಡಿಪ್ಲೊಮಾ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ವಾರ್ಷಿಕ ಬೋಧನಾ ಶುಲ್ಕ ಮರುಪಾವತಿ ಮತ್ತು ಪುಸ್ತಕ ಭತ್ಯೆ.",
+        "benefits": [
+          "ವಾರ್ಷಿಕ ₹25,000 ವರೆಗೆ ಶುಲ್ಕ ನೆರವು",
+          "ಪುಸ್ತಕ ಮತ್ತು ಲೇಖನ ಸಾಮಗ್ರಿಗಳಿಗೆ ₹3,000 ಭತ್ಯೆ",
+          "ಕೌಶಲ್ಯ ತರಬೇತಿ ಪರೀಕ್ಷಾ ಶುಲ್ಕ ರಿಯಾಯಿತಿ"
+        ]
+      },
+      "hi": {
+        "title": "नमूना उच्च शिक्षा मेधावी एवं जरूरतमंद छात्रवृत्ति",
+        "shortDescription": "स्नातक और तकनीकी डिप्लोमा छात्रों के लिए वार्षिक शिक्षण शुल्क प्रतिपूर्ति एवं पुस्तक भत्ता।",
+        "benefits": [
+          "प्रति वर्ष ₹25,000 तक की शिक्षण शुल्क सहायता",
+          "₹3,000 का वार्षिक पुस्तक एवं अध्ययन सामग्री भत्ता",
+          "कौशल प्रमाणन परीक्षा शुल्क प्रतिपूर्ति"
+        ]
+      }
+    },
+    "rules": [
+      { "field": "age", "op": "lte", "value": 28, "required": true, "label": "Age 28 years or below" },
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle"], "required": true, "label": "Family income in low or lower-middle bracket" },
+      { "field": "category", "op": "includesAny", "value": ["student"], "required": true, "label": "Enrolled student status" }
+    ]
+  },
+  {
+    "id": "scheme-004",
+    "title": "Sample Maternal & Infant Nutrition Support Scheme",
+    "shortDescription": "Nutritional kits and cash assistance for expectant and lactating mothers to combat malnutrition and encourage hospital deliveries.",
+    "category": "women_child",
+    "level": "state",
+    "state": "Karnataka",
+    "benefits": [
+      "Cash incentive of ₹6,000 in three tranches linked to health checkups",
+      "Free supplementary nutrition kit containing fortified pulses, oil, and iron syrups",
+      "Free transport to taluk hospital for institutional childbirth"
+    ],
+    "documentsRequired": [
+      "Mother and Child Tracking card (MCH / Thayi card)",
+      "Identity proof and residence certificate",
+      "Bank account details seeded with beneficiary name"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-10T00:00:00.000Z",
+    "isSample": true,
+    "translations": {
+      "kn": {
+        "title": "ಮಾದರಿ ಮಾತೃ ಮತ್ತು ಶಿಶು ಪೌಷ್ಟಿಕಾಂಶ ನೆರವು ಯೋಜನೆ",
+        "shortDescription": "ಗರ್ಭಿಣಿ ಮತ್ತು ಹಾಲುಣಿಸುವ ತಾಯಂದಿರಿಗೆ ಪೌಷ್ಟಿಕ ಆಹಾರ ಕಿಟ್ ಮತ್ತು ಆರ್ಥಿಕ ಪ್ರೋತ್ಸಾಹಧನ.",
+        "benefits": [
+          "ಆರೋಗ್ಯ ತಪಾಸಣೆಗಳ ಆಧಾರದ ಮೇಲೆ ₹6,000 ನಗದು ಪ್ರೋತ್ಸಾಹ",
+          "ಪೌಷ್ಟಿಕ ಆಹಾರ ಕಿಟ್ ಉಚಿತ ವಿತರಣೆ",
+          "ಹೆರಿಗೆಗಾಗಿ ಆಸ್ಪತ್ರೆಗೆ ಉಚಿತ ಆಂಬ್ಯುಲೆನ್ಸ್ ಸೌಲಭ್ಯ"
+        ]
+      },
+      "hi": {
+        "title": "नमूना मातृ एवं शिशु पोषण सहायता योजना",
+        "shortDescription": "गर्भवती और धात्री माताओं के लिए स्वास्थ्य जांच से जुड़ी पोषण सामग्री एवं नकद सहायता।",
+        "benefits": [
+          "नियमित स्वास्थ्य जांच पर ₹6,000 की तीन किस्तों में नकद सहायता",
+          "दालें, तेल एवं आयरन सप्लीमेंट युक्त निःशुल्क पोषण किट",
+          "संस्थागत प्रसव हेतु निःशुल्क एम्बुलेंस सेवा"
+        ]
+      }
+    },
+    "rules": [
+      { "field": "state", "op": "in", "value": ["Karnataka", "All"], "required": true, "label": "Resident of Karnataka" },
+      { "field": "category", "op": "includesAny", "value": ["woman", "child"], "required": true, "label": "Beneficiary is a woman or mother" },
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle", "middle"], "required": true, "label": "Eligible household income" }
+    ]
+  },
+  {
+    "id": "scheme-005",
+    "title": "Sample Universal Family Health Protection Cover",
+    "shortDescription": "Cashless secondary and tertiary hospitalization cover up to ₹5 Lakh per eligible family per year across empaneled hospitals.",
+    "category": "healthcare",
+    "level": "central",
+    "state": "All",
+    "benefits": [
+      "Cashless health insurance coverage up to ₹5,00,000 per family per year",
+      "Covers pre-existing diseases from day one",
+      "3 days pre-hospitalization and 15 days post-hospitalization medicine expenses"
+    ],
+    "documentsRequired": [
+      "Family ration card or verified identity card",
+      "Aadhaar enrollment acknowledgment or voter ID",
+      "Medical recommendation / doctor note for elective procedures"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-11-05T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle"], "required": true, "label": "Low or lower-middle income bracket" }
+    ]
+  },
+  {
+    "id": "scheme-006",
+    "title": "Sample Affordable Pucca Housing Assistance",
+    "shortDescription": "Subsidized construction assistance and interest subsidy for homeless or kutcha-house dwelling families in semi-urban and rural areas.",
+    "category": "housing",
+    "level": "central",
+    "state": "All",
+    "benefits": [
+      "Direct grant of ₹1,50,000 in 4 milestone stages for house construction",
+      "Additional ₹12,000 assistance for hygienic toilet construction",
+      "90 days of guaranteed wage employment support under rural employment guarantee"
+    ],
+    "documentsRequired": [
+      "Land ownership document or patta in female family head's name (or joint)",
+      "Proof of currently living in non-pucca/kutcha shelter",
+      "Family income certificate",
+      "Bank account details"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-25T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "incomeRange", "op": "in", "value": ["low"], "required": true, "label": "Low income household status" },
+      { "field": "age", "op": "gte", "value": 21, "required": true, "label": "Adult household applicant (Age 21+)" }
+    ]
+  },
+  {
+    "id": "scheme-007",
+    "title": "Sample Small & Marginal Farmer Crop Protection & Input Support",
+    "shortDescription": "Direct financial assistance of ₹6,000 per year paid in three installments to smallholder farmers for procurement of seeds and bio-fertilizers.",
+    "category": "agriculture",
+    "level": "central",
+    "state": "All",
+    "benefits": [
+      "₹6,000 per year transferred directly to bank account in 3 installments of ₹2,000",
+      "Discounted seed kits and soil health card advisory services",
+      "Access to subsidized solar water pump installation schemes"
+    ],
+    "documentsRequired": [
+      "Land holding records (RTC / Pahani document <= 2 hectares)",
+      "Bank account passbook",
+      "Identity verification document"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-28T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "category", "op": "includesAny", "value": ["farmer"], "required": true, "label": "Engaged in farming / agriculture" },
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle"], "required": true, "label": "Smallholder income threshold" }
+    ]
+  },
+  {
+    "id": "scheme-008",
+    "title": "Sample Youth Vocational Skill & Apprenticeship Scheme",
+    "shortDescription": "Free industry-recognized vocational certification programs with a monthly stipend during apprenticeship for youth seeking formal employment.",
+    "category": "employment",
+    "level": "central",
+    "state": "All",
+    "benefits": [
+      "100% free technical skill courses in IT, logistics, healthcare, and green energy",
+      "Monthly apprenticeship stipend of ₹4,500 for up to 6 months",
+      "Direct placement assistance with partner employers"
+    ],
+    "documentsRequired": [
+      "School leaving certificate (minimum 8th or 10th standard)",
+      "Age proof document",
+      "Recent passport photographs"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-11-03T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "age", "op": "gte", "value": 18, "required": true, "label": "Minimum age 18" },
+      { "field": "age", "op": "lte", "value": 35, "required": true, "label": "Maximum age 35" }
+    ]
+  },
+  {
+    "id": "scheme-009",
+    "title": "Sample Assistive Devices & Livelihood Grant for Persons with Disabilities",
+    "shortDescription": "Free distribution of motorized tricycles, hearing aids, braille kits, and seed capital for micro-enterprises run by individuals with disabilities.",
+    "category": "healthcare",
+    "level": "state",
+    "state": "Karnataka",
+    "benefits": [
+      "Customized assistive equipment and mobility aids distributed free of charge",
+      "One-time self-employment seed capital grant up to ₹25,000",
+      "Free travel concession on state public transport buses"
+    ],
+    "documentsRequired": [
+      "Unique Disability ID (UDID) card or Disability Medical Certificate (40%+ benchmark)",
+      "Karnataka domicile certificate",
+      "Income certificate of family"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-18T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "state", "op": "in", "value": ["Karnataka", "All"], "required": true, "label": "Resident of Karnataka" },
+      { "field": "category", "op": "includesAny", "value": ["disabled"], "required": true, "label": "Registered person with disability" }
+    ]
+  },
+  {
+    "id": "scheme-010",
+    "title": "Sample Women Self-Help Group (SHG) Micro-Enterprise Revolving Fund",
+    "shortDescription": "Interest-free revolving funds and collateral-free enterprise credit to women self-help groups starting collective food processing or tailoring businesses.",
+    "category": "women_child",
+    "level": "state",
+    "state": "Karnataka",
+    "benefits": [
+      "Revolving fund of ₹15,000 per eligible SHG group",
+      "Collateral-free group enterprise loan up to ₹2,00,000 with 4% prompt repayment incentive",
+      "Packaging and branding training from Karnataka Rural Development Institute"
+    ],
+    "documentsRequired": [
+      "SHG registration resolution and minutes book",
+      "Bank passbook of SHG joint account",
+      "KYC documents of group office bearers"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-30T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "state", "op": "in", "value": ["Karnataka", "All"], "required": true, "label": "Resident of Karnataka" },
+      { "field": "category", "op": "includesAny", "value": ["woman"], "required": true, "label": "Woman applicant or SHG member" }
+    ]
+  },
+  {
+    "id": "scheme-011",
+    "title": "Sample Senior Citizen Day-Care & Geriatric Wellness Grant",
+    "shortDescription": "Community wellness centers providing recreational spaces, physical therapy, and daily nutritious snacks for elderly citizens living alone or with family.",
+    "category": "senior_citizens",
+    "level": "central",
+    "state": "All",
+    "benefits": [
+      "Free access to community recreation center and yoga/physiotherapy classes",
+      "Daily fortified morning snack and herbal tea",
+      "Free bi-weekly geriatric doctor consultation and prescription monitoring"
+    ],
+    "documentsRequired": [
+      "Age proof document (Age 60+)",
+      "Address proof",
+      "Emergency contact details"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-11-04T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "age", "op": "gte", "value": 60, "required": true, "label": "Age 60 years or above" },
+      { "field": "category", "op": "includesAny", "value": ["senior_citizen"], "required": true, "label": "Senior citizen beneficiary" }
+    ]
+  },
+  {
+    "id": "scheme-012",
+    "title": "Sample Primary School Girl-Child Education Retention Stipend",
+    "shortDescription": "Bicycle distribution and conditional cash transfer for families with school-going daughters to prevent dropouts during transition from middle to high school.",
+    "category": "education",
+    "level": "state",
+    "state": "Karnataka",
+    "benefits": [
+      "Free standard bicycle for students traveling more than 2 km to government school",
+      "Annual retention stipend of ₹3,000 credited to mother's account upon 80% attendance",
+      "Free set of uniforms and textbooks"
+    ],
+    "documentsRequired": [
+      "School enrollment certificate signed by headmaster",
+      "Attendance record proof",
+      "Student and mother's joint bank account details"
+    ],
+    "applyUrl": "https://www.myscheme.gov.in/",
+    "sourceUrl": "https://www.myscheme.gov.in/",
+    "lastVerified": "2026-10-22T00:00:00.000Z",
+    "isSample": true,
+    "translations": {},
+    "rules": [
+      { "field": "state", "op": "in", "value": ["Karnataka", "All"], "required": true, "label": "Resident of Karnataka" },
+      { "field": "category", "op": "includesAny", "value": ["child", "woman", "student"], "required": true, "label": "Girl child / student category" },
+      { "field": "incomeRange", "op": "in", "value": ["low", "lower_middle"], "required": true, "label": "Low or lower-middle income family" }
+    ]
+  }
+]

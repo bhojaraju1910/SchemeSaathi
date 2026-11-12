@@ -1,0 +1,6 @@
+{
+  "name": "SchemeSaathi",
+  "description": "Discover potentially relevant government social-protection schemes for your family with clear plain-language explanations in English, Kannada, and Hindi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
