@@ -4,6 +4,7 @@ import { connectDB } from '../src/config/db';
 async function runSeed() {
   console.log('[SchemeSaathi] Starting database seed...');
   await connectDB();
+  await initSeedData(true);
   console.log('[SchemeSaathi] Database seeded successfully!');
   console.log('--------------------------------------------------');
   console.log('Demo Accounts Created:');

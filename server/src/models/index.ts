@@ -92,8 +92,8 @@ export function generateId(): string {
   return `id_${Date.now()}_${idCounter}`;
 }
 
-export async function initSeedData() {
-  if (inMemoryDB.isInitialized && inMemoryDB.schemes.size > 0) return;
+export async function initSeedData(force = false) {
+  if (!force && inMemoryDB.isInitialized && inMemoryDB.schemes.size > 0) return;
 
   // Read schemes.json
   const seedPath = path.resolve(process.cwd(), 'server/src/seed/schemes.json');
@@ -120,8 +120,8 @@ export async function initSeedData() {
         documentsRequired: item.documentsRequired || [],
         applyUrl: item.applyUrl || 'https://www.myscheme.gov.in/',
         sourceUrl: item.sourceUrl || 'https://www.myscheme.gov.in/',
-        lastVerified: new Date(item.lastVerified || '2026-10-15'),
-        isSample: item.isSample !== undefined ? item.isSample : true,
+        lastVerified: new Date(item.lastVerified || '2026-11-01'),
+        isSample: Boolean(item.isSample),
         translations: item.translations || {},
         createdAt: new Date(),
       };

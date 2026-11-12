@@ -144,7 +144,6 @@ export const Schemes: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#EAF1FB] font-heading">
               {t('schemesPage.title')}
             </h1>
-            <SampleBadge />
           </div>
           <p className="text-sm text-[#9FB0C8]">
             {t('schemesPage.foundCount', { count: total })}

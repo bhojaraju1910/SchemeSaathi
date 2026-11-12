@@ -169,10 +169,9 @@ export const Landing: React.FC = () => {
               <h2 className="text-2xl font-bold text-[#EAF1FB] font-heading">
                 Popular Welfare Schemes
               </h2>
-              <SampleBadge />
             </div>
             <p className="text-sm text-[#9FB0C8]">
-              Sample social protection programs across Karnataka and Central jurisdictions.
+              Flagship social protection and welfare programs across Karnataka and Central Government.
             </p>
           </div>
           <Link

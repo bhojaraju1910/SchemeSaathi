@@ -17,8 +17,8 @@ SchemeSaathi helps Indian households discover central and state government socia
 - **Full Tri-lingual Localization**: UI and scheme metadata in English, Kannada, and Hindi with immediate language switching.
 - **Official Portal Outlinks**: Direct links to designated portals (such as [myScheme.gov.in](https://www.myscheme.gov.in/) and Seva Sindhu). Every official link click is logged for transparency.
 - **Personal Welfare Dashboard**: Metrics for Available Schemes, Potential Matches, Bookmarked Shortlist, and Portal Interactions.
-- **Admin Management & Interactive Rule Builder**: Admins can create and edit schemes, update structured criteria rules, and adjust multi-language titles and benefits.
-- **Clear Sample Data Indicators**: All sample schemes are marked with an explicit `Sample data` badge to avoid misrepresentation.
+- **22 Authentic Karnataka & Central Schemes**: Pre-loaded with real government welfare programs including Karnataka's 5 Guarantees (Gruha Lakshmi, Gruha Jyothi, Yuva Nidhi, Shakti, Anna Bhagya), Sandhya Suraksha, Raitha Vidya Nidhi, Vidyasiri, Ganga Kalyana, PM-KISAN, Ayushman Bharat PM-JAY, PMAY, PMUY, SSY, PM SVANidhi, and Atal Pension Yojana.
+- **Clear Demonstration Transparency**: Support for both real verified government schemes and flagged sample records with verified links to official portals.
 
 ---
 
