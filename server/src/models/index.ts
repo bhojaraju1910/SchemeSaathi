@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
+import { HARDCODED_SCHEMES } from '../../../src/data/schemes';
 
 // Let's create an in-memory fallback store for zero-dependency demo reliability
 export interface IUser {
@@ -92,23 +93,31 @@ export function generateId(): string {
   return `id_${Date.now()}_${idCounter}`;
 }
 
+let seedPromise: Promise<void> | null = null;
+
 export async function initSeedData(force = false) {
   if (!force && inMemoryDB.isInitialized && inMemoryDB.schemes.size > 0) return;
+  if (!force && seedPromise) return seedPromise;
 
-  // Read schemes.json
-  const seedPath = path.resolve(process.cwd(), 'server/src/seed/schemes.json');
-  const altSeedPath = path.resolve(process.cwd(), 'server/seed/schemes.json');
-  const targetPath = fs.existsSync(seedPath) ? seedPath : altSeedPath;
+  const runSeed = async () => {
+    if (!force && inMemoryDB.isInitialized && inMemoryDB.schemes.size > 0) return;
 
-  if (fs.existsSync(targetPath)) {
-    const raw = fs.readFileSync(targetPath, 'utf-8');
-    const seedSchemes = JSON.parse(raw);
+    // Read schemes.json on disk, or fall back to static HARDCODED_SCHEMES (e.g. serverless bundles)
+    const seedPath = path.resolve(process.cwd(), 'server/src/seed/schemes.json');
+    const altSeedPath = path.resolve(process.cwd(), 'server/seed/schemes.json');
+    const targetPath = fs.existsSync(seedPath) ? seedPath : altSeedPath;
+
+    let seedSchemes: any[] = HARDCODED_SCHEMES;
+    if (fs.existsSync(targetPath)) {
+      const raw = fs.readFileSync(targetPath, 'utf-8');
+      seedSchemes = JSON.parse(raw);
+    }
 
     inMemoryDB.schemes.clear();
     inMemoryDB.criteria.clear();
 
     for (const item of seedSchemes) {
-      const schemeId = item.id || generateId();
+      const schemeId = item.id || item._id || generateId();
       const scheme: IScheme = {
         _id: schemeId,
         title: item.title,
@@ -136,7 +145,6 @@ export async function initSeedData(force = false) {
         inMemoryDB.criteria.set(schemeId, crit);
       }
     }
-  }
 
   // Admin user
   const adminSalt = await bcrypt.genSalt(10);
@@ -180,8 +188,14 @@ export async function initSeedData(force = false) {
   };
   inMemoryDB.profiles.set(demoUser._id, demoProfile);
 
-  inMemoryDB.isInitialized = true;
-  console.log(`[SchemeSaathi DB] Seeded ${inMemoryDB.schemes.size} schemes and 2 accounts (Admin & Demo User)`);
+    inMemoryDB.isInitialized = true;
+    console.log(`[SchemeSaathi DB] Seeded ${inMemoryDB.schemes.size} schemes and 2 accounts (Admin & Demo User)`);
+  };
+
+  seedPromise = runSeed().finally(() => {
+    seedPromise = null;
+  });
+  return seedPromise;
 }
 
 // User Model Adapter

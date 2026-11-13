@@ -5,6 +5,11 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import StatCard from '../components/StatCard';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
+import { HARDCODED_SCHEMES } from '../data/schemes';
+import {
+  getMirrorDashboardStats,
+  isMirrorToken,
+} from '../services/authMirrorService';
 import {
   LayoutDashboard,
   Compass,
@@ -43,24 +48,37 @@ const CATEGORIES = [
 
 export const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function loadStats() {
+      const applyMirrorStats = () => {
+        setStats(getMirrorDashboardStats(user?.id || 'user_demo'));
+      };
+
       try {
         setLoading(true);
+        if (isMirrorToken(token)) {
+          applyMirrorStats();
+          return;
+        }
         const res = await api.get('/dashboard/stats');
-        setStats(res.data);
+        if (res.data && typeof res.data === 'object' && typeof res.data.availableSchemes === 'number') {
+          setStats(res.data);
+        } else {
+          applyMirrorStats();
+        }
       } catch (err) {
-        console.error('Failed to load dashboard stats:', err);
+        console.error('Failed to load dashboard stats, mirroring locally:', err);
+        applyMirrorStats();
       } finally {
         setLoading(false);
       }
     }
     loadStats();
-  }, []);
+  }, [user, token]);
 
   if (loading) {
     return (
@@ -102,7 +120,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           label={t('dashboard.statAvailable')}
-          value={stats?.availableSchemes ?? 12}
+          value={stats?.availableSchemes ?? HARDCODED_SCHEMES.length}
           icon={Compass}
           subtext="Catalog database count"
           accentColor="text-[#5AA9FF]"

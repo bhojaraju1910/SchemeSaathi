@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
+import {
+  getMirrorProfile,
+  isApiUnavailableError,
+  isMirrorToken,
+  saveMirrorProfile,
+} from '../services/authMirrorService';
 import {
   User,
   ShieldCheck,
@@ -46,6 +53,7 @@ const CATEGORY_KEYS = [
 export const Profile: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user, token } = useAuth();
 
   const [age, setAge] = useState<string>('');
   const [state, setState] = useState<string>('Karnataka');
@@ -59,27 +67,42 @@ export const Profile: React.FC = () => {
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const applyProfileState = (d: any) => {
+    setAge(d.age !== null && d.age !== undefined ? String(d.age) : '');
+    setState(d.state || 'Karnataka');
+    setIncomeRange(d.incomeRange || 'low');
+    setCategory(Array.isArray(d.category) ? d.category : []);
+    setOccupation(d.occupation || '');
+    setFamilySize(d.familySize !== null && d.familySize !== undefined ? String(d.familySize) : '');
+  };
+
   useEffect(() => {
     async function loadProfile() {
+      if (isMirrorToken(token) && user) {
+        applyProfileState(getMirrorProfile(user.id));
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get('/profile');
-        if (res.data) {
-          const d = res.data;
-          setAge(d.age !== null && d.age !== undefined ? String(d.age) : '');
-          setState(d.state || 'Karnataka');
-          setIncomeRange(d.incomeRange || 'low');
-          setCategory(Array.isArray(d.category) ? d.category : []);
-          setOccupation(d.occupation || '');
-          setFamilySize(d.familySize !== null && d.familySize !== undefined ? String(d.familySize) : '');
+        if (res.data && typeof res.data === 'object') {
+          applyProfileState(res.data);
+          if (user) {
+            saveMirrorProfile(user.id, res.data);
+          }
         }
       } catch (err) {
-        console.error('Failed to load profile:', err);
+        console.error('Failed to load profile from API, using mirror profile:', err);
+        if (user) {
+          applyProfileState(getMirrorProfile(user.id));
+        }
       } finally {
         setLoading(false);
       }
     }
     loadProfile();
-  }, []);
+  }, [user, token]);
 
   const handleCategoryToggle = (catKey: string) => {
     setCategory((prev) =>
@@ -93,19 +116,38 @@ export const Profile: React.FC = () => {
     setError(null);
     setSavedSuccess(false);
 
+    const payload = {
+      age: age ? Number(age) : null,
+      state,
+      incomeRange,
+      category,
+      occupation,
+      familySize: familySize ? Number(familySize) : undefined,
+    };
+
+    if (user) {
+      saveMirrorProfile(user.id, payload);
+    }
+
+    if (isMirrorToken(token)) {
+      setSavedSuccess(true);
+      setSaving(false);
+      return;
+    }
+
     try {
       await api.put('/profile', {
-        age: age ? Number(age) : null,
-        state,
-        incomeRange,
-        category,
-        occupation,
+        ...payload,
         familySize: familySize ? Number(familySize) : null,
       });
 
       setSavedSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update profile.');
+      if (isApiUnavailableError(err) || err?.response?.status === 401) {
+        setSavedSuccess(true);
+      } else {
+        setError(err.response?.data?.message || 'Failed to update profile.');
+      }
     } finally {
       setSaving(false);
     }

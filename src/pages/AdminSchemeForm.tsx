@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
+import { getHardcodedSchemeById } from '../services/schemeMirrorService';
 import {
   ArrowLeft,
   Plus,
   Trash2,
-  CheckCircle2,
   AlertCircle,
   Loader2,
   Scale,
-  Sparkles,
   Save,
 } from 'lucide-react';
 
@@ -26,7 +25,7 @@ export const AdminSchemeForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   const [title, setTitle] = useState('');
   const [shortDescription, setShortDescription] = useState('');
@@ -52,47 +51,61 @@ export const AdminSchemeForm: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const populateForm = (scheme: any, criteria?: any) => {
+    setTitle(scheme.title || '');
+    setShortDescription(scheme.shortDescription || '');
+    setCategory(scheme.category || 'senior_citizens');
+    setLevel(scheme.level || 'central');
+    setState(scheme.state || 'All');
+    setBenefitsText((scheme.benefits || []).join('\n'));
+    setDocumentsText((scheme.documentsRequired || []).join('\n'));
+    setApplyUrl(scheme.applyUrl || 'https://www.myscheme.gov.in/');
+    setSourceUrl(scheme.sourceUrl || 'https://www.myscheme.gov.in/');
+    setIsSample(scheme.isSample !== undefined ? scheme.isSample : true);
+
+    if (scheme.translations?.kn) {
+      setKnTitle(scheme.translations.kn.title || '');
+      setKnDesc(scheme.translations.kn.shortDescription || '');
+    }
+    if (scheme.translations?.hi) {
+      setHiTitle(scheme.translations.hi.title || '');
+      setHiDesc(scheme.translations.hi.shortDescription || '');
+    }
+
+    const rawRules = criteria?.rules || scheme.rules;
+    if (Array.isArray(rawRules)) {
+      setRules(
+        rawRules.map((r: any) => ({
+          field: r.field || 'age',
+          op: r.op || 'gte',
+          value: Array.isArray(r.value) ? r.value.join(', ') : String(r.value),
+          required: r.required !== false,
+          label: r.label || '',
+        }))
+      );
+    }
+  };
+
   useEffect(() => {
     async function loadSchemeForEdit() {
       if (!isEditMode || !id) return;
       setLoading(true);
+      const hardcoded = getHardcodedSchemeById(id);
+      if (hardcoded) {
+        populateForm(hardcoded.scheme, hardcoded.criteria);
+      }
+
       try {
         const res = await api.get(`/schemes/${id}`);
-        const { scheme, criteria } = res.data;
-        setTitle(scheme.title || '');
-        setShortDescription(scheme.shortDescription || '');
-        setCategory(scheme.category || 'senior_citizens');
-        setLevel(scheme.level || 'central');
-        setState(scheme.state || 'All');
-        setBenefitsText((scheme.benefits || []).join('\n'));
-        setDocumentsText((scheme.documentsRequired || []).join('\n'));
-        setApplyUrl(scheme.applyUrl || 'https://www.myscheme.gov.in/');
-        setSourceUrl(scheme.sourceUrl || 'https://www.myscheme.gov.in/');
-        setIsSample(scheme.isSample !== undefined ? scheme.isSample : true);
-
-        if (scheme.translations?.kn) {
-          setKnTitle(scheme.translations.kn.title || '');
-          setKnDesc(scheme.translations.kn.shortDescription || '');
-        }
-        if (scheme.translations?.hi) {
-          setHiTitle(scheme.translations.hi.title || '');
-          setHiDesc(scheme.translations.hi.shortDescription || '');
-        }
-
-        if (criteria?.rules) {
-          setRules(
-            criteria.rules.map((r: any) => ({
-              field: r.field || 'age',
-              op: r.op || 'gte',
-              value: Array.isArray(r.value) ? r.value.join(', ') : String(r.value),
-              required: r.required !== false,
-              label: r.label || '',
-            }))
-          );
+        if (res.data?.scheme) {
+          populateForm(res.data.scheme, res.data.criteria);
+          setError(null);
         }
       } catch (err: any) {
         console.error('Failed to load scheme:', err);
-        setError('Could not load scheme data.');
+        if (!hardcoded) {
+          setError('Could not load scheme data.');
+        }
       } finally {
         setLoading(false);
       }

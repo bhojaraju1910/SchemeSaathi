@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
-import SampleBadge from '../components/SampleBadge';
+import { HARDCODED_SCHEMES } from '../data/schemes';
 import api from '../api/axios';
 import {
   Sparkles,
@@ -20,16 +20,21 @@ import {
 export const Landing: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [featuredSchemes, setFeaturedSchemes] = useState<SchemeData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [featuredSchemes, setFeaturedSchemes] = useState<SchemeData[]>(
+    HARDCODED_SCHEMES.slice(0, 3)
+  );
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadFeatured() {
       try {
         const res = await api.get('/schemes?limit=3');
-        setFeaturedSchemes(res.data.schemes || []);
+        if (Array.isArray(res.data?.schemes) && res.data.schemes.length > 0) {
+          setFeaturedSchemes(res.data.schemes);
+        }
       } catch (err) {
-        console.error('Failed to load featured schemes:', err);
+        console.error('Failed to load featured schemes, using hardcoded catalog:', err);
+        setFeaturedSchemes(HARDCODED_SCHEMES.slice(0, 3));
       } finally {
         setLoading(false);
       }

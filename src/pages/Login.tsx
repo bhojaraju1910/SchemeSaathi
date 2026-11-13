@@ -25,13 +25,20 @@ export const Login: React.FC = () => {
       return;
     }
 
+    let wasExplicitLogout = false;
+    try {
+      wasExplicitLogout = sessionStorage.getItem('schemesaathi_explicit_logout') === '1';
+    } catch {
+      wasExplicitLogout = false;
+    }
+
     setLoading(true);
     setError(null);
     try {
       await login(email, password);
-      navigate(from, { replace: true });
+      navigate(wasExplicitLogout ? '/dashboard' : from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check credentials.');
+      setError(err.response?.data?.message || err.message || 'Login failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
@@ -44,7 +51,7 @@ export const Login: React.FC = () => {
       await login('demo@schemesaathi.test', 'Demo@123');
       navigate('/recommendations', { replace: true });
     } catch (err: any) {
-      setError('Demo login failed. Make sure the database is seeded.');
+      setError(err.response?.data?.message || err.message || 'Demo user login failed.');
     } finally {
       setLoading(false);
     }
@@ -57,7 +64,7 @@ export const Login: React.FC = () => {
       await login('admin@schemesaathi.test', 'Admin@123');
       navigate('/admin', { replace: true });
     } catch (err: any) {
-      setError('Admin demo login failed.');
+      setError(err.response?.data?.message || err.message || 'Admin demo login failed.');
     } finally {
       setLoading(false);
     }

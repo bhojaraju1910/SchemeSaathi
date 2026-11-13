@@ -4,13 +4,11 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
 import EmptyState from '../components/EmptyState';
-import SampleBadge from '../components/SampleBadge';
+import { queryHardcodedSchemes } from '../services/schemeMirrorService';
 import {
   Search,
-  Filter,
   ChevronLeft,
   ChevronRight,
-  Loader2,
   X,
   Compass,
 } from 'lucide-react';
@@ -41,12 +39,6 @@ export const Schemes: React.FC = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [schemes, setSchemes] = useState<SchemeData[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
-
   // Filters state from URL or defaults
   const queryParam = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || '';
@@ -54,15 +46,44 @@ export const Schemes: React.FC = () => {
   const levelParam = searchParams.get('level') || 'All';
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
+  const initialMirror = queryHardcodedSchemes({
+    q: queryParam,
+    category: categoryParam,
+    state: stateParam,
+    level: levelParam,
+    page: pageParam || 1,
+    limit: 9,
+  });
+
+  const [schemes, setSchemes] = useState<SchemeData[]>(initialMirror.schemes);
+  const [total, setTotal] = useState<number>(initialMirror.total);
+  const [page, setPage] = useState<number>(initialMirror.page);
+  const [totalPages, setTotalPages] = useState<number>(initialMirror.totalPages);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [searchTerm, setSearchTerm] = useState(queryParam);
   const [category, setCategory] = useState(categoryParam);
   const [state, setState] = useState(stateParam);
   const [level, setLevel] = useState(levelParam);
 
-  // Fetch schemes
+  // Sync with backend API and mirror with hardcoded frontend schemes on fallback/empty DB
   useEffect(() => {
+    const mirrorFilters = {
+      q: queryParam,
+      category: categoryParam,
+      state: stateParam,
+      level: levelParam,
+      page: pageParam || 1,
+      limit: 9,
+    };
+
+    const mirrored = queryHardcodedSchemes(mirrorFilters);
+    setSchemes(mirrored.schemes);
+    setTotal(mirrored.total);
+    setPage(mirrored.page);
+    setTotalPages(mirrored.totalPages);
+
     async function fetchSchemes() {
-      setLoading(true);
       try {
         const params = new URLSearchParams();
         if (queryParam) params.set('q', queryParam);
@@ -73,12 +94,22 @@ export const Schemes: React.FC = () => {
         params.set('limit', '9');
 
         const res = await api.get(`/schemes?${params.toString()}`);
-        setSchemes(res.data.schemes || []);
-        setTotal(res.data.total || 0);
-        setPage(res.data.page || 1);
-        setTotalPages(res.data.totalPages || 1);
+        const hasFilters = Boolean(
+          queryParam || categoryParam || (stateParam && stateParam !== 'All') || (levelParam && levelParam !== 'All')
+        );
+
+        if (Array.isArray(res.data?.schemes) && (res.data.total > 0 || hasFilters)) {
+          setSchemes(res.data.schemes);
+          setTotal(res.data.total || 0);
+          setPage(res.data.page || 1);
+          setTotalPages(res.data.totalPages || 1);
+        }
       } catch (err) {
-        console.error('Failed to load schemes:', err);
+        console.error('Failed to load schemes from API, using hardcoded frontend catalog:', err);
+        setSchemes(mirrored.schemes);
+        setTotal(mirrored.total);
+        setPage(mirrored.page);
+        setTotalPages(mirrored.totalPages);
       } finally {
         setLoading(false);
       }

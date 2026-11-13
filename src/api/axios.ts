@@ -19,18 +19,17 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      // If unauthorized on a protected call (not during login check), clear stale token
-      const isAuthRoute = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
-      if (!isAuthRoute) {
-        localStorage.removeItem('schemesaathi_token');
-        localStorage.removeItem('schemesaathi_user');
-      }
+  (response) => {
+    if (
+      response &&
+      typeof response.data === 'string' &&
+      response.data.trim().startsWith('<')
+    ) {
+      return Promise.reject(new Error('NON_JSON_HTML_RESPONSE'));
     }
-    return Promise.reject(error);
-  }
+    return response;
+  },
+  (error) => Promise.reject(error)
 );
 
 export default api;

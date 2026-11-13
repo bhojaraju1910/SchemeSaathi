@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
 import EmptyState from '../components/EmptyState';
+import { matchHardcodedSchemes } from '../services/schemeMirrorService';
+import {
+  getMirrorProfile,
+  getMirrorSavedSchemes,
+  isMirrorToken,
+} from '../services/authMirrorService';
 import {
   Sparkles,
   Info,
-  Loader2,
   SlidersHorizontal,
   BookmarkCheck,
   CheckCircle2,
@@ -23,6 +29,7 @@ interface MatchItem {
 
 export const Recommendations: React.FC = () => {
   const { t } = useTranslation();
+  const { user, token } = useAuth();
   const [matches, setMatches] = useState<MatchItem[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [filterMatch, setFilterMatch] = useState<'all' | 'High' | 'Medium'>('all');
@@ -31,28 +38,54 @@ export const Recommendations: React.FC = () => {
 
   useEffect(() => {
     async function fetchMatches() {
+      const loadLocalMatches = async () => {
+        let profileData = user ? getMirrorProfile(user.id) : {};
+        if (!isMirrorToken(token)) {
+          try {
+            const profileRes = await api.get('/profile');
+            if (profileRes.data && typeof profileRes.data === 'object') {
+              profileData = profileRes.data;
+            }
+          } catch {
+            // keep mirror profile
+          }
+        }
+        setMatches(matchHardcodedSchemes(profileData));
+        if (user) {
+          setSavedIds(new Set(getMirrorSavedSchemes(user.id).map((s) => s.schemeId)));
+        }
+        setError(null);
+      };
+
       try {
         setLoading(true);
-        // Call match API using stored user profile
+        if (isMirrorToken(token)) {
+          await loadLocalMatches();
+          return;
+        }
+
         const [matchRes, savedRes] = await Promise.all([
           api.post('/match', {}),
           api.get('/saved'),
         ]);
 
-        setMatches(matchRes.data || []);
-
-        const ids = new Set<string>((savedRes.data || []).map((s: any) => s.schemeId));
-        setSavedIds(ids);
+        if (Array.isArray(matchRes.data)) {
+          setMatches(matchRes.data);
+          const ids = new Set<string>((savedRes.data || []).map((s: any) => s.schemeId));
+          setSavedIds(ids);
+        } else {
+          await loadLocalMatches();
+        }
       } catch (err: any) {
-        console.error('Failed to evaluate recommendations:', err);
-        setError('Could not evaluate scheme matches. Please verify your profile.');
+        console.error('Failed to evaluate recommendations via API, mirroring locally:', err);
+        await loadLocalMatches();
       } finally {
         setLoading(false);
       }
     }
 
     fetchMatches();
-  }, []);
+  }, [user, token]);
 
   const handleSaveToggle = (schemeId: string, saved: boolean) => {
     setSavedIds((prev) => {

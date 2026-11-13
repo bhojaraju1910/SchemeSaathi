@@ -35,7 +35,7 @@ export const Register: React.FC = () => {
       await register(name, email, password, preferredLanguage);
       navigate('/profile');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please check inputs.');
+      setError(err.response?.data?.message || err.message || 'Registration failed. Please check inputs.');
     } finally {
       setLoading(false);
     }

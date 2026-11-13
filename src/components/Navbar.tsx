@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import LanguageSelector from './LanguageSelector';
@@ -20,7 +20,14 @@ export const Navbar: React.FC = () => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    logout();
+    navigate('/login', { replace: true, state: null });
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -108,7 +115,7 @@ export const Navbar: React.FC = () => {
                 </Link>
 
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   aria-label="Log out"
                   className="p-1.5 text-[#9FB0C8] hover:text-[#FF7BA5] hover:bg-[#14213B] border border-transparent hover:border-[#243A63] rounded-lg transition-colors"
                   title={t('nav.logout')}
@@ -189,10 +196,7 @@ export const Navbar: React.FC = () => {
                   <span>{user.name} ({user.email})</span>
                 </Link>
                 <button
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[#FF7BA5] hover:bg-[#14213B] text-left"
                 >
                   <LogOut className="w-4 h-4" />

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import SampleBadge from '../components/SampleBadge';
 import EmptyState from '../components/EmptyState';
+import { HARDCODED_SCHEMES } from '../data/schemes';
 import {
   Settings,
   Plus,
@@ -12,26 +13,30 @@ import {
   Scale,
   Building,
   Loader2,
-  Calendar,
-  ExternalLink,
-  ShieldCheck,
 } from 'lucide-react';
 
 export const AdminSchemes: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [schemes, setSchemes] = useState<any[]>([]);
+  const [schemes, setSchemes] = useState<any[]>(HARDCODED_SCHEMES);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchSchemes = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await api.get('/admin/schemes');
-      setSchemes(res.data || []);
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setSchemes(res.data);
+      } else {
+        setSchemes(HARDCODED_SCHEMES);
+      }
     } catch (err) {
-      console.error('Failed to load admin schemes:', err);
+      console.error('Failed to load admin schemes, showing hardcoded catalog:', err);
+      setSchemes(HARDCODED_SCHEMES);
     } finally {
       setLoading(false);
     }
@@ -43,13 +48,14 @@ export const AdminSchemes: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     setActionLoading(id);
+    setError(null);
     try {
       await api.delete(`/admin/schemes/${id}`);
       setSchemes((prev) => prev.filter((s) => s._id !== id));
       setDeleteConfirmId(null);
     } catch (err) {
       console.error('Failed to delete scheme:', err);
-      alert('Failed to delete scheme.');
+      setError('Failed to delete scheme on server. Database connection may be in read-only demo mode.');
     } finally {
       setActionLoading(null);
     }
@@ -82,6 +88,12 @@ export const AdminSchemes: React.FC = () => {
           <span>{t('admin.addNew')}</span>
         </Link>
       </div>
+
+      {error && (
+        <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300">
+          {error}
+        </div>
+      )}
 
       {/* Schemes Table */}
       {loading ? (

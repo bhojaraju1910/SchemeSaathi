@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import SampleBadge from '../components/SampleBadge';
 import EmptyState from '../components/EmptyState';
+import { getHardcodedSchemeById } from '../services/schemeMirrorService';
+import {
+  addMirrorSavedScheme,
+  getMirrorSavedSchemes,
+  isMirrorToken,
+  recordMirrorApplicationStatus,
+  removeMirrorSavedScheme,
+} from '../services/authMirrorService';
 import {
   ArrowLeft,
   ExternalLink,
@@ -22,56 +30,83 @@ import {
 export const SchemeDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
 
-  const [data, setData] = useState<any>(null);
+  const initialScheme = id ? getHardcodedSchemeById(id) : null;
+  const [data, setData] = useState<any>(initialScheme);
   const [isSaved, setIsSaved] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!initialScheme);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadScheme() {
       if (!id) return;
-      setLoading(true);
+      const hardcodedMatch = getHardcodedSchemeById(id);
+      if (hardcodedMatch) {
+        setData(hardcodedMatch);
+        setError(null);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
+      if (user) {
+        const localSaved = getMirrorSavedSchemes(user.id).some((s) => s.schemeId === id);
+        if (localSaved) setIsSaved(true);
+      }
+
       try {
         const [schemeRes, savedRes] = await Promise.all([
           api.get(`/schemes/${id}`),
-          user ? api.get('/saved') : Promise.resolve({ data: [] }),
+          user && !isMirrorToken(token) ? api.get('/saved') : Promise.resolve({ data: null }),
         ]);
 
-        setData(schemeRes.data);
+        if (schemeRes.data?.scheme) {
+          setData(schemeRes.data);
+          setError(null);
+        }
 
-        if (user && savedRes.data) {
+        if (user && Array.isArray(savedRes.data)) {
           const found = savedRes.data.some((s: any) => s.schemeId === id);
           setIsSaved(found);
         }
       } catch (err: any) {
-        console.error('Failed to load scheme details:', err);
-        setError('Scheme could not be loaded or was removed.');
+        console.error('Failed to load scheme details from API:', err);
+        if (hardcodedMatch) {
+          setData(hardcodedMatch);
+          setError(null);
+        } else {
+          setError('Scheme could not be loaded or was removed.');
+        }
       } finally {
         setLoading(false);
       }
     }
     loadScheme();
-  }, [id, user]);
+  }, [id, user, token]);
 
   const handleSaveToggle = async () => {
-    if (!user) {
-      window.location.href = '/login';
+    if (!user || !id) {
+      navigate('/login');
       return;
     }
     setSaveLoading(true);
     try {
       if (isSaved) {
-        await api.delete(`/saved/${id}`);
+        removeMirrorSavedScheme(user.id, id);
+        if (!isMirrorToken(token)) {
+          await api.delete(`/saved/${id}`).catch(() => {});
+        }
         setIsSaved(false);
       } else {
-        await api.post('/saved', { schemeId: id });
+        addMirrorSavedScheme(user.id, id);
+        if (!isMirrorToken(token)) {
+          await api.post('/saved', { schemeId: id }).catch(() => {});
+        }
         setIsSaved(true);
       }
-    } catch (err) {
-      console.error('Failed to toggle save:', err);
     } finally {
       setSaveLoading(false);
     }
@@ -79,10 +114,13 @@ export const SchemeDetails: React.FC = () => {
 
   const handleOfficialClick = async () => {
     if (user && id) {
-      try {
-        await api.post('/applications/click', { schemeId: id, status: 'clicked' });
-      } catch (err) {
-        // non-blocking
+      recordMirrorApplicationStatus(user.id, id, 'clicked');
+      if (!isMirrorToken(token)) {
+        try {
+          await api.post('/applications/click', { schemeId: id, status: 'clicked' });
+        } catch {
+          // non-blocking
+        }
       }
     }
   };

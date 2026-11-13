@@ -1,0 +1,1174 @@
+export interface SchemeRule {
+  field: 'age' | 'incomeRange' | 'state' | 'category' | 'occupation' | string;
+  op: 'gte' | 'lte' | 'eq' | 'in' | 'includesAny' | string;
+  value: unknown;
+  required?: boolean;
+  label: string;
+}
+
+export interface SchemeTranslations {
+  kn?: {
+    title?: string;
+    shortDescription?: string;
+    benefits?: string[];
+  };
+  hi?: {
+    title?: string;
+    shortDescription?: string;
+    benefits?: string[];
+  };
+}
+
+export interface HardcodedScheme {
+  _id: string;
+  id: string;
+  title: string;
+  shortDescription: string;
+  category:
+    | 'education'
+    | 'healthcare'
+    | 'housing'
+    | 'employment'
+    | 'women_child'
+    | 'senior_citizens'
+    | 'agriculture';
+  level: 'central' | 'state';
+  state: string;
+  benefits: string[];
+  documentsRequired: string[];
+  applyUrl: string;
+  sourceUrl: string;
+  lastVerified: string;
+  isSample: boolean;
+  translations?: SchemeTranslations;
+  rules: SchemeRule[];
+}
+
+/**
+ * 22 Karnataka State (12) and Central Government (10) welfare schemes
+ * hardcoded directly inside frontend TypeScript source code (no localStorage).
+ */
+export const HARDCODED_SCHEMES: HardcodedScheme[] = [
+  {
+    _id: 'kar-001',
+    id: 'kar-001',
+    title: 'Gruha Lakshmi Scheme (ಗೃಹಲಕ್ಷ್ಮಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Direct financial assistance of ₹2,000 per month transferred directly to the bank account of the designated woman head of household in Karnataka.',
+    category: 'women_child',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      "Direct benefit transfer (DBT) of ₹2,000 deposited every month into the woman family head's bank account",
+      'Unconditional cash support for household nutrition, healthcare, and education needs',
+      'Financial independence and economic security for women across rural and urban Karnataka',
+    ],
+    documentsRequired: [
+      'Aadhaar card of the woman applicant and husband',
+      'Karnataka Ration Card (Antyodaya, BPL, or APL) with applicant listed as family head',
+      'Bank passbook or Aadhaar-seeded bank account details',
+      'Mobile number linked to Aadhaar',
+    ],
+    applyUrl: 'https://sevasindhu.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhu.karnataka.gov.in/',
+    lastVerified: '2026-11-01T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಗೃಹಲಕ್ಷ್ಮಿ ಯೋಜನೆ (Gruha Lakshmi Scheme)',
+        shortDescription:
+          'ಕರ್ನಾಟಕದ ಪ್ರತಿ ಕುಟುಂಬದ ಯಜಮಾನಿ ಮಹಿಳೆಗೆ ಪ್ರತಿ ತಿಂಗಳು ₹2,000 ನೇರ ನಗದು ಸಹಾಯ.',
+        benefits: [
+          'ಮಹಿಳಾ ಕುಟುಂಬ ಮುಖ್ಯಸ್ಥರ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಪ್ರತಿ ತಿಂಗಳು ₹2,000 ನೇರ ಜಮೆ (DBT)',
+          'ಕುಟುಂಬದ ಪೌಷ್ಟಿಕತೆ, ಆರೋಗ್ಯ ಮತ್ತು ದೈನಂದಿನ ಅಗತ್ಯಗಳಿಗೆ ಆರ್ಥಿಕ ನೆರವು',
+          'ಮಹಿಳೆಯರಿಗೆ ಆರ್ಥಿಕ ಸ್ವಾವಲಂಬನೆ ಮತ್ತು ಗೌರವಯುತ ಭದ್ರತೆ',
+        ],
+      },
+      hi: {
+        title: 'गृह लक्ष्मी योजना (Gruha Lakshmi Scheme)',
+        shortDescription:
+          'कर्नाटक की प्रत्येक पात्र परिवार की महिला मुखिया को प्रतिमाह ₹2,000 की प्रत्यक्ष नकद सहायता।',
+        benefits: [
+          'महिला मुखिया के बैंक खाते में प्रतिमाह ₹2,000 प्रत्यक्ष लाभ अंतरण (DBT)',
+          'परिवार की पोषण, शिक्षा व घरेलू जरूरतों के लिए मासिक संबल',
+          'महिलाओं के लिए सामाजिक एवं वित्तीय सशक्तिकरण',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['woman'], required: true, label: 'Designated woman head of household' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle', 'middle'], required: true, label: 'Eligible household income' },
+      { field: 'age', op: 'gte', value: 18, required: true, label: 'Adult woman (Age 18+)' },
+    ],
+  },
+  {
+    _id: 'kar-002',
+    id: 'kar-002',
+    title: 'Gruha Jyothi Scheme (ಗೃಹಜ್ಯೋತಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Zero electricity bill for up to 200 units of free power consumption per month for all residential households in Karnataka.',
+    category: 'housing',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      '100% free electricity up to 200 units per month for domestic consumers',
+      'Direct relief from monthly utility power bills for domestic tenants and homeowners',
+      'Calculated automatically based on the annual average household consumption plus 10%',
+    ],
+    documentsRequired: [
+      'Electricity consumer account ID / Meter RR Number',
+      'Aadhaar card of the consumer',
+      'Rental agreement / Tenancy proof (if residing in rented house)',
+    ],
+    applyUrl: 'https://sevasindhuplus.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhuplus.karnataka.gov.in/',
+    lastVerified: '2026-11-01T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಗೃಹಜ್ಯೋತಿ ಯೋಜನೆ (Gruha Jyothi Scheme)',
+        shortDescription:
+          'ಕರ್ನಾಟಕದ ಎಲ್ಲಾ ಗೃಹಬಳಕೆದಾರರಿಗೆ ಪ್ರತಿ ತಿಂಗಳು ಗರಿಷ್ಠ 200 ಯೂನಿಟ್‌ಗಳವರೆಗೆ ಉಚಿತ ವಿದ್ಯುತ್.',
+        benefits: [
+          'ಗೃಹಬಳಕೆಯ ವಿದ್ಯುತ್ ಸಂಪರ್ಕಗಳಿಗೆ 200 ಯೂನಿಟ್‌ಗಳವರೆಗೆ ಸಂಪೂರ್ಣ ಉಚಿತ ವಿದ್ಯುತ್',
+          'ಬಾಡಿಗೆದಾರರು ಮತ್ತು ಮನೆ ಮಾಲೀಕರಿಬ್ಬರಿಗೂ ಮಾಸಿಕ ವಿದ್ಯುತ್ ಬಿಲ್ ಹೊರೆಯಿಂದ ವಿನಾಯಿತಿ',
+          'ವಾರ್ಷಿಕ ಸರಾಸರಿ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ ಶೂನ್ಯ ಬಿಲ್ ಸೌಲಭ್ಯ',
+        ],
+      },
+      hi: {
+        title: 'गृह ज्योति योजना (Gruha Jyothi Scheme)',
+        shortDescription: 'कर्नाटक के सभी घरेलू उपभोक्ताओं को प्रति माह 200 यूनिट तक मुफ्त बिजली।',
+        benefits: [
+          'घरेलू मीटर कनेक्शनों के लिए 200 यूनिट तक शून्य बिजली बिल',
+          'किरायेदारों और मकान मालिकों दोनों के लिए बिजली बिल में पूर्ण राहत',
+          'मासिक बिजली बिलिंग में सीधे सब्सिडी कटौती',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle', 'middle', 'high'], required: true, label: 'Domestic residential consumer' },
+    ],
+  },
+  {
+    _id: 'kar-003',
+    id: 'kar-003',
+    title: 'Yuva Nidhi Scheme (ಯುವನಿಧಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Monthly unemployment financial allowance for educated youth seeking jobs — ₹3,000 for degree holders and ₹1,500 for diploma holders.',
+    category: 'employment',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      '₹3,000 per month for unemployed graduates directly transferred via DBT',
+      '₹1,500 per month for unemployed diploma holders',
+      'Allowance provided for up to 24 months or until employment is secured',
+      'Free skill development and placement training sessions',
+    ],
+    documentsRequired: [
+      'Degree or Diploma completion certificate and marksheets',
+      'Aadhaar card and Karnataka Domicile Certificate',
+      'Declaration of current unemployment status',
+      'Aadhaar-seeded bank passbook copy',
+    ],
+    applyUrl: 'https://sevasindhu.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhu.karnataka.gov.in/',
+    lastVerified: '2026-10-25T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಯುವನಿಧಿ ಯೋಜನೆ (Yuva Nidhi Scheme)',
+        shortDescription:
+          'ಉದ್ಯೋಗ ಹುಡುಕುತ್ತಿರುವ ಪದವೀಧರರಿಗೆ ₹3,000 ಹಾಗೂ ಡಿಪ್ಲೊಮಾಧರರಿಗೆ ₹1,500 ಮಾಸಿಕ ನಿರುದ್ಯೋಗ ಭತ್ಯೆ.',
+        benefits: [
+          'ನಿರುದ್ಯೋಗಿ ಪದವೀಧರರಿಗೆ ಪ್ರತಿ ತಿಂಗಳು ₹3,000 ನೇರ ಬ್ಯಾಂಕ್ ಜಮೆ',
+          'ಡಿಪ್ಲೊಮಾ ಪಡೆದ ಯುವಕರಿಗೆ ತಿಂಗಳಿಗೆ ₹1,500 ಆರ್ಥಿಕ ಬೆಂಬಲ',
+          'ಗರಿಷ್ಠ 2 ವರ್ಷಗಳವರೆಗೆ ಅಥವಾ ಉದ್ಯೋಗ ದೊರೆಯುವವರೆಗೆ ಸೌಲಭ್ಯ',
+          'ಉಚಿತ ಕೌಶಲ್ಯ ತರಬೇತಿ ಮತ್ತು ಉದ್ಯೋಗ ಮೇಳಗಳಲ್ಲಿ ಆದ್ಯತೆ',
+        ],
+      },
+      hi: {
+        title: 'युवा निधि योजना (Yuva Nidhi Scheme)',
+        shortDescription:
+          'रोजगार की तलाश कर रहे युवाओं के लिए मासिक भत्ता — स्नातकों को ₹3,000 एवं डिप्लोमाधारकों को ₹1,500।',
+        benefits: [
+          'स्नातक बेरोजगार युवाओं को ₹3,000 प्रतिमाह प्रत्यक्ष सहायता',
+          'डिप्लोमा धारकों को ₹1,500 प्रतिमाह भत्ता',
+          'अधिकतम 2 वर्ष तक या नौकरी मिलने तक मासिक वित्तीय संबल',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['student', 'general'], required: true, label: 'Educated degree or diploma holder' },
+      { field: 'age', op: 'gte', value: 20, required: true, label: 'Age 20 years or above' },
+      { field: 'age', op: 'lte', value: 30, required: true, label: 'Age 30 years or below' },
+    ],
+  },
+  {
+    _id: 'kar-004',
+    id: 'kar-004',
+    title: 'Shakti Scheme (ಶಕ್ತಿ ಯೋಜನೆ - ಉಚಿತ ಬಸ್ ಪ್ರಯಾಣ)',
+    shortDescription:
+      'Free travel for all women of Karnataka in ordinary and express state public transport buses across the state.',
+    category: 'women_child',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      '100% free bus travel in KSRTC, BMTC, NWKRTC, and KKRTC ordinary and express buses',
+      'Zero ticket charges for travel to workplace, schools, colleges, and markets',
+      'Zero paperwork — available upon presenting valid government photo ID with Karnataka address',
+    ],
+    documentsRequired: [
+      'Any Karnataka government photo ID with address (Voter ID, Aadhaar, Driving License, or Shakti Smart Card)',
+    ],
+    applyUrl: 'https://sevasindhu.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhu.karnataka.gov.in/',
+    lastVerified: '2026-11-05T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಶಕ್ತಿ ಯೋಜನೆ (Shakti Free Bus Scheme)',
+        shortDescription:
+          'ಕರ್ನಾಟಕದ ಎಲ್ಲಾ ಮಹಿಳೆಯರಿಗೆ ರಾಜ್ಯ ಸಾರಿಗೆ ಸಂಸ್ಥೆಗಳ ಬಸ್‌ಗಳಲ್ಲಿ ಸಂಪೂರ್ಣ ಉಚಿತ ಪ್ರಯಾಣ.',
+        benefits: [
+          'KSRTC, BMTC, NWKRTC, KKRTC ಸಾಮಾನ್ಯ ಹಾಗೂ ವೇಗದೂತ ಬಸ್‌ಗಳಲ್ಲಿ ಉಚಿತ ಪ್ರಯಾಣ',
+          'ಕೆಲಸ, ಶಾಲೆ, ಕಾಲೇಜು ಹಾಗೂ ಮಾರುಕಟ್ಟೆಗಳಿಗೆ ಪ್ರಯಾಣ ವೆಚ್ಚವಿಲ್ಲದೆ ಓಡಾಟ',
+          "ಕರ್ನಾಟಕದ ವಿಳಾಸವಿರುವ ಸರಕಾರಿ ಗುರುತಿನ ಚೀಟಿ ತೋರಿಸಿ 'ಶೂನ್ಯ ದರದ ಟಿಕೆಟ್' ಪಡೆಯುವ ಸೌಲಭ್ಯ",
+        ],
+      },
+      hi: {
+        title: 'शक्ति योजना (Shakti Free Bus Travel)',
+        shortDescription:
+          'कर्नाटक की सभी महिलाओं और छात्राओं के लिए राज्य परिवहन बसों में शत-प्रतिशत निःशुल्क यात्रा।',
+        benefits: [
+          'KSRTC, BMTC, NWKRTC और KKRTC की साधारण व एक्सप्रेस बसों में मुफ्त यात्रा',
+          'कार्यस्थल व शिक्षण संस्थानों तक आवागमन हेतु शून्य किराया',
+          'कर्नाटक पते वाला वैध पहचान पत्र दिखाकर शून्य-टिकट प्राप्त करने की सुविधा',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['woman', 'student', 'child'], required: true, label: 'Beneficiary is a woman or student girl child' },
+    ],
+  },
+  {
+    _id: 'kar-005',
+    id: 'kar-005',
+    title: 'Anna Bhagya Scheme (ಅನ್ನಭಾಗ್ಯ ಯೋಜನೆ)',
+    shortDescription:
+      '10 kg free food grains per person per month (or monetary cash equivalent via DBT) for BPL and Antyodaya Anna Yojana families in Karnataka.',
+    category: 'healthcare',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      '5 kg free rice plus ₹170 direct bank transfer (₹34/kg for remaining 5 kg) per person every month',
+      'Guaranteed household food and nutritional security for vulnerable families',
+      'Direct benefit transfer into the bank account of the family head',
+    ],
+    documentsRequired: [
+      'Karnataka BPL or Antyodaya Ration Card',
+      'Aadhaar card seeded with PDS card',
+      'Active bank account linked with Aadhaar',
+    ],
+    applyUrl: 'https://ahara.kar.nic.in/',
+    sourceUrl: 'https://ahara.kar.nic.in/',
+    lastVerified: '2026-10-20T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಅನ್ನಭಾಗ್ಯ ಯೋಜನೆ (Anna Bhagya Scheme)',
+        shortDescription:
+          'ಬಿಪಿಎಲ್ ಹಾಗೂ ಅಂತ್ಯೋದಯ ಕಾರ್ಡುದಾರರಿಗೆ ಪ್ರತಿ ಸದಸ್ಯನಿಗೆ ತಿಂಗಳಿಗೆ 10 ಕೆಜಿ ಉಚಿತ ಆಹಾರ ಧಾನ್ಯ / ನಗದು ನೆರವು.',
+        benefits: [
+          'ಪ್ರತಿ ಸದಸ್ಯನಿಗೆ 5 ಕೆಜಿ ಉಚಿತ ಅಕ್ಕಿ ಹಾಗೂ ಹೆಚ್ಚುವರಿ 5 ಕೆಜಿಗೆ ಪ್ರತಿ ಕೆಜಿಗೆ ₹34 ರಂತೆ ನಗದು ಜಮೆ (DBT)',
+          'ಬಡ ಕುಟುಂಬಗಳಿಗೆ ಸಂಪೂರ್ಣ ಆಹಾರ ಮತ್ತು ಪೌಷ್ಟಿಕ ಭದ್ರತೆ',
+          'ಪಡಿತರ ಅಂಗಡಿಗಳ ಮೂಲಕ ಸುಲಭ ಹಾಗೂ ನಿಯಮಿತ ವಿತರಣೆ',
+        ],
+      },
+      hi: {
+        title: 'अन्न भाग्य योजना (Anna Bhagya Scheme)',
+        shortDescription:
+          'बीपीएल और अंत्योदय परिवारों के प्रति सदस्य को प्रतिमाह 10 किलो मुफ्त खाद्यान्न अथवा नकद सहायता।',
+        benefits: [
+          '5 किलो मुफ्त चावल तथा अतिरिक्त 5 किलो के लिए ₹170 का प्रत्यक्ष बैंक अंतरण',
+          'गरीब परिवारों के लिए आवश्यक खाद्य एवं पोषण सुरक्षा',
+          'आधार लिंक बैंक खाते में सीधे मासिक भुगतान',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'BPL or low-income household' },
+    ],
+  },
+  {
+    _id: 'kar-006',
+    id: 'kar-006',
+    title: 'Sandhya Suraksha Yojana (ಸಂಧ್ಯಾ ಸುರಕ್ಷಾ ಯೋಜನೆ)',
+    shortDescription:
+      'Monthly social security pension of ₹1,200 for senior citizens aged 65 years and above from low-income families in Karnataka.',
+    category: 'senior_citizens',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      'Direct pension of ₹1,200 per month credited to bank or post office account',
+      'Free medical care in government hospitals and dispensaries',
+      'Subsidized KSRTC bus pass for elderly citizens',
+    ],
+    documentsRequired: [
+      'Age proof certificate (Voter ID, School certificate, or Medical Officer certificate)',
+      'Income certificate issued by Tahsildar (annual family income <= ₹50,000)',
+      'Domicile / Residence proof in Karnataka (minimum 3 years)',
+      'Bank account details',
+    ],
+    applyUrl: 'https://sevasindhu.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhu.karnataka.gov.in/',
+    lastVerified: '2026-11-02T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಸಂಧ್ಯಾ ಸುರಕ್ಷಾ ಯೋಜನೆ (Sandhya Suraksha Scheme)',
+        shortDescription:
+          '65 ವರ್ಷ ಮೇಲ್ಪಟ್ಟ ಬಡ ಹಿರಿಯ ನಾಗರಿಕರಿಗೆ ಮಾಸಿಕ ₹1,200 ಸಾಮಾಜಿಕ ಭದ್ರತಾ ಪಿಂಚಣಿ.',
+        benefits: [
+          'ಪ್ರತಿ ತಿಂಗಳು ₹1,200 ಪಿಂಚಣಿ ಹಣ ನೇರವಾಗಿ ಬ್ಯಾಂಕ್ ಅಥವಾ ಅಂಚೆ ಖಾತೆಗೆ ಜಮೆ',
+          'ಸರ್ಕಾರಿ ಆಸ್ಪತ್ರೆಗಳಲ್ಲಿ ಉಚಿತ ಆರೋಗ್ಯ ತಪಾಸಣೆ ಮತ್ತು ಚಿಕಿತ್ಸೆ',
+          'ಕೆಎಸ್‌ಆರ್‌ಟಿಸಿ ಬಸ್ ಪಾಸ್‌ಗಳಲ್ಲಿ ಹಿರಿಯ ನಾಗರಿಕರಿಗೆ ರಿಯಾಯಿತಿ',
+        ],
+      },
+      hi: {
+        title: 'संध्या सुरक्षा योजना (Sandhya Suraksha Yojana)',
+        shortDescription:
+          '65 वर्ष से अधिक आयु के गरीब वरिष्ठ नागरिकों के लिए ₹1,200 मासिक सामाजिक सुरक्षा पेंशन।',
+        benefits: [
+          '₹1,200 मासिक पेंशन सीधे बैंक या डाकघर खाते में',
+          'सरकारी अस्पतालों में मुफ्त प्राथमिक व द्वितीयक स्वास्थ्य सेवा',
+          'राज्य परिवहन बसों में विशेष रियायती पास सुविधा',
+        ],
+      },
+    },
+    rules: [
+      { field: 'age', op: 'gte', value: 60, required: true, label: 'Age 60 years or above' },
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'Low or lower-middle income family' },
+      { field: 'category', op: 'includesAny', value: ['senior_citizen'], required: true, label: 'Senior citizen beneficiary' },
+    ],
+  },
+  {
+    _id: 'kar-007',
+    id: 'kar-007',
+    title: 'Raitha Vidya Nidhi Scheme (ರೈತ ವಿದ್ಯಾನಿಧಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Annual scholarship assistance of ₹2,000 to ₹11,000 for children of farmers pursuing higher education and vocational courses in Karnataka.',
+    category: 'education',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      'Annual scholarship from ₹2,000 (PUC/ITI) up to ₹11,000 (Medical/Engineering/Postgraduate)',
+      "Direct transfer into student's Aadhaar-linked bank account",
+      'Covers children of all registered agricultural landholders and agricultural laborers',
+    ],
+    documentsRequired: [
+      'Student college admission confirmation & registration number',
+      'Farmer ID (FID) or RTC/Pahani document of parent',
+      'Student bank passbook with Aadhaar seeding',
+    ],
+    applyUrl: 'https://ssp.postmatric.karnataka.gov.in/',
+    sourceUrl: 'https://ssp.postmatric.karnataka.gov.in/',
+    lastVerified: '2026-10-18T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ರೈತ ವಿದ್ಯಾನಿಧಿ ಯೋಜನೆ (Raitha Vidya Nidhi)',
+        shortDescription:
+          'ರೈತರ ಮಕ್ಕಳಿಗೆ ಉನ್ನತ ಶಿಕ್ಷಣ ಮುಂದುವರಿಸಲು ವಾರ್ಷಿಕ ₹2,000 ರಿಂದ ₹11,000 ವರೆಗೆ ವಿದ್ಯಾರ್ಥಿವೇತನ.',
+        benefits: [
+          'ಪಿಯುಸಿ, ಐಟಿಐ, ಡಿಪ್ಲೊಮಾ ಹಾಗೂ ಪದವಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ₹2,000 ದಿಂದ ₹11,000 ವರೆಗೆ ವಾರ್ಷಿಕ ನೆರವು',
+          'ವಿದ್ಯಾರ್ಥಿಯ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ನೇರ ಹಣ ವರ್ಗಾವಣೆ (DBT)',
+          'ಕೃಷಿ ಕುಟುಂಬಗಳ ಶೈಕ್ಷಣಿಕ ವೆಚ್ಚ ಕಡಿಮೆ ಮಾಡಲು ಪ್ರೋತ್ಸಾಹ',
+        ],
+      },
+      hi: {
+        title: 'रैथा विद्या निधि योजना (Raitha Vidya Nidhi)',
+        shortDescription:
+          'कर्नाटक के किसान परिवारों के बच्चों के लिए ₹2,000 से ₹11,000 तक की वार्षिक छात्रवृत्ति।',
+        benefits: [
+          'उच्च शिक्षा, डिप्लोमा एवं डिग्री छात्रों को वार्षिक शिक्षण सहायता',
+          'छात्र के आधार-लिंक बैंक खाते में सीधे छात्रवृत्ति अंतरण',
+          'कृषक परिवारों पर उच्च शिक्षा के आर्थिक बोझ में राहत',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['farmer', 'student'], required: true, label: 'Child of farmer or enrolled student' },
+    ],
+  },
+  {
+    _id: 'kar-008',
+    id: 'kar-008',
+    title: 'Vidyasiri Food & Accommodation Stipend (ವಿದ್ಯಾಸಿರಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Monthly hostel and food stipend of ₹1,500 for post-matric students from backward classes studying outside their home taluk.',
+    category: 'education',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      '₹1,500 per month food and accommodation stipend for 10 academic months (Total ₹15,000/year)',
+      'Supports students who could not secure admission into government student hostels',
+      "Direct benefit credit into student's personal savings account",
+    ],
+    documentsRequired: [
+      'College enrollment certificate and fee receipt',
+      'Caste and Income certificate issued by Revenue Department',
+      'Proof of residence showing distance of more than 5 km from institution',
+      'Student bank account details',
+    ],
+    applyUrl: 'https://karepass.cgg.gov.in/',
+    sourceUrl: 'https://karepass.cgg.gov.in/',
+    lastVerified: '2026-10-30T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ವಿದ್ಯಾಸಿರಿ ಊಟ ಮತ್ತು ವಸತಿ ಸಹಾಯ (Vidyasiri Scheme)',
+        shortDescription:
+          'ಹಾಸ್ಟೆಲ್ ಸೌಲಭ್ಯ ಸಿಗದ ಗ್ರಾಮೀಣ ಹಿಂದುಳಿದ ವರ್ಗದ ಕಾಲೇಜು ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಮಾಸಿಕ ₹1,500 ಭತ್ಯೆ.',
+        benefits: [
+          'ವರ್ಷಕ್ಕೆ 10 ತಿಂಗಳುಗಳ ಕಾಲ ಪ್ರತಿ ತಿಂಗಳು ₹1,500 ಊಟ ಮತ್ತು ವಸತಿ ಭತ್ಯೆ',
+          'ಸರ್ಕಾರಿ ವಸತಿ ನಿಲಯ ಸಿಗದ ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಆರ್ಥಿಕ ನೆರವು',
+          'ವಿದ್ಯಾರ್ಥಿಯ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ನೇರ ಹಣ ಜಮೆ',
+        ],
+      },
+      hi: {
+        title: 'विद्यासिरी भोजन एवं आवास भत्ता (Vidyasiri Scheme)',
+        shortDescription:
+          'कॉलेज छात्रावास से वंचित ग्रामीण पिछड़े वर्ग के छात्रों के लिए ₹1,500 मासिक आवास व भोजन भत्ता।',
+        benefits: [
+          '10 शैक्षणिक महीनों के लिए ₹1,500 प्रति माह भोजन एवं आवास सहायता',
+          'दूरदराज के कॉलेज छात्रों के लिए उच्च शिक्षा जारी रखने में मदद',
+          'छात्र के बैंक खाते में सीधा लाभ अंतरण',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['student'], required: true, label: 'Enrolled college / diploma student' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'Family income below ₹2.5 Lakh/year' },
+      { field: 'age', op: 'lte', value: 30, required: true, label: 'Age 30 years or below' },
+    ],
+  },
+  {
+    _id: 'kar-009',
+    id: 'kar-009',
+    title: 'Arogya Karnataka / Ayushman Bharat-ArK (ಆರೋಗ್ಯ ಕರ್ನಾಟಕ)',
+    shortDescription:
+      'Universal healthcare coverage providing cashless secondary and tertiary hospitalization treatment up to ₹5 Lakh per year for BPL families.',
+    category: 'healthcare',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      'Cashless hospitalization up to ₹5,00,000 per family per year for BPL (Eligible) cardholders',
+      '30% co-payment financial concession for APL (General) cardholders across government & empaneled private hospitals',
+      'Covers 1,650+ surgical and medical procedures without out-of-pocket stress',
+    ],
+    documentsRequired: [
+      'Karnataka Ration Card (BPL or APL)',
+      'Aadhaar card of all family members',
+      'Referral from district government hospital (for private hospital procedures)',
+    ],
+    applyUrl: 'https://arogya.karnataka.gov.in/',
+    sourceUrl: 'https://arogya.karnataka.gov.in/',
+    lastVerified: '2026-11-04T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಆರೋಗ್ಯ ಕರ್ನಾಟಕ / ಆಯುಷ್ಮಾನ್ ಭಾರತ್-ಆರ್ಕ್ (Arogya Karnataka)',
+        shortDescription:
+          'ಬಿಪಿಎಲ್ ಕುಟುಂಬಗಳಿಗೆ ವರ್ಷಕ್ಕೆ ₹5 ಲಕ್ಷದವರೆಗೆ ನಗದುರಹಿತ ಆಸ್ಪತ್ರೆ ಚಿಕಿತ್ಸಾ ಸೌಲಭ್ಯ.',
+        benefits: [
+          'ಬಿಪಿಎಲ್ ಕಾರ್ಡುದಾರರಿಗೆ ವಾರ್ಷಿಕ ₹5,00,000 ವರೆಗೆ ಉಚಿತ ಹಾಗೂ ನಗದುರಹಿತ ಚಿಕಿತ್ಸೆ',
+          'ಎಪಿಎಲ್ ಕುಟುಂಬಗಳಿಗೆ ಶೇಕಡಾ 30 ರವರೆಗೆ ಚಿಕಿತ್ಸಾ ರಿಯಾಯಿತಿ',
+          '1,650 ಕ್ಕೂ ಹೆಚ್ಚು ಕಾಯಿಲೆಗಳು ಮತ್ತು ಶಸ್ತ್ರಚಿಕಿತ್ಸೆಗಳಿಗೆ ಸಂಪೂರ್ಣ ರಕ್ಷಣೆ',
+        ],
+      },
+      hi: {
+        title: 'आरोग्य कर्नाटक स्वास्थ्य योजना (Arogya Karnataka)',
+        shortDescription:
+          'बीपीएल परिवारों के लिए प्रति वर्ष ₹5 लाख तक का कैशलेस द्वितीयक एवं तृतीयक अस्पताल उपचार।',
+        benefits: [
+          'प्रति परिवार प्रति वर्ष ₹5,00,000 तक कैशलेस स्वास्थ्य बीमा सुरक्षा',
+          'एपीएल परिवारों के लिए 30% तक सरकारी सह-भुगतान रियायत',
+          '1,650 से अधिक जटिल उपचारों व सर्जरी के लिए सूचीबद्ध अस्पतालों में सुविधा',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle', 'middle'], required: true, label: 'Eligible BPL or general household' },
+    ],
+  },
+  {
+    _id: 'kar-010',
+    id: 'kar-010',
+    title: 'Ganga Kalyana Irrigation Scheme (ಗಂಗಾ ಕಲ್ಯಾಣ ಯೋಜನೆ)',
+    shortDescription:
+      'Free borewell drilling, submersible pump sets, and electrical energization for small and marginal farmers belonging to SC, ST, and OBC communities in Karnataka.',
+    category: 'agriculture',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      '100% free borewell drilling and installation of high-efficiency submersible pump set',
+      'Free electricity connection through ESCOMs for farm irrigation',
+      'Community lift irrigation systems for groups of smallholder farmers',
+    ],
+    documentsRequired: [
+      'RTC / Pahani document showing dry land agricultural holding (1 to 5 acres)',
+      'Caste and Income certificate issued by competent authority',
+      'Small / Marginal farmer certificate from agriculture department',
+    ],
+    applyUrl: 'https://kmdc.karnataka.gov.in/',
+    sourceUrl: 'https://kmdc.karnataka.gov.in/',
+    lastVerified: '2026-10-22T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಗಂಗಾ ಕಲ್ಯಾಣ ನೀರಾವರಿ ಯೋಜನೆ (Ganga Kalyana Scheme)',
+        shortDescription:
+          'ಸಣ್ಣ ಮತ್ತು ಅತಿ ಸಣ್ಣ ಹಿಂದುಳಿದ ವರ್ಗದ ರೈತರಿಗೆ ಉಚಿತ ಕೊಳವೆಬಾವಿ, ಪಂಪ್‌ಸೆಟ್ ಮತ್ತು ವಿದ್ಯುತ್ ಸಂಪರ್ಕ.',
+        benefits: [
+          'ಸಣ್ಣ ಮತ್ತು ಅತಿ ಸಣ್ಣ ರೈತರಿಗೆ ಸಂಪೂರ್ಣ ಉಚಿತ ಕೊಳವೆಬಾವಿ ಕೊರೆಯುವಿಕೆ',
+          'ಸಬ್‌ಮರ್ಸಿಬಲ್ ಪಂಪ್‌ಸೆಟ್ ಉಪಕರಣಗಳ ಉಚಿತ ವಿತರಣೆ',
+          'ಕೃಷಿ ಜಮೀನಿಗೆ ಉಚಿತ ವಿದ್ಯುದ್ದೀಕರಣ ಸಂಪರ್ಕ',
+        ],
+      },
+      hi: {
+        title: 'गंगा कल्याण सिंचाई योजना (Ganga Kalyana Scheme)',
+        shortDescription:
+          'कर्नाटक के छोटे और सीमांत किसानों के लिए मुफ्त बोरवेल, पंपसेट एवं विद्युत कनेक्शन।',
+        benefits: [
+          'खेतों में 100% मुफ्त बोरवेल खनन व सबमर्सिबल पंपसेट की स्थापना',
+          'बिजली वितरण निगमों द्वारा निःशुल्क कृषि विद्युत कनेक्शन',
+          'छोटे किसानों की शुष्क भूमि के लिए सुनिश्चित सिंचाई',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['farmer'], required: true, label: 'Small or marginal agriculturalist' },
+      { field: 'incomeRange', op: 'in', value: ['low'], required: true, label: 'Low-income / BPL farmer household' },
+    ],
+  },
+  {
+    _id: 'kar-011',
+    id: 'kar-011',
+    title: 'Manasvini Pension for Destitute Women (ಮನಸ್ವಿನಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Monthly social security pension of ₹1,200 for unmarried, separated, or deserted destitute women aged 40 years and above in Karnataka.',
+    category: 'women_child',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      "Monthly pension of ₹1,200 directly transferred into beneficiary's bank account",
+      'Livelihood dignity and social independence for vulnerable single women',
+      'Free medical screening and priority in government welfare camps',
+    ],
+    documentsRequired: [
+      'Age proof document (Age 40 or above)',
+      'Certificate of unmarried / deserted / divorced status signed by Tahsildar / Gram Panchayat',
+      'BPL card or annual income certificate below ₹1.5 Lakh',
+      'Bank passbook details',
+    ],
+    applyUrl: 'https://sevasindhu.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhu.karnataka.gov.in/',
+    lastVerified: '2026-10-28T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಮನಸ್ವಿನಿ ಯೋಜನೆ (Manasvini Scheme)',
+        shortDescription:
+          '40 ವರ್ಷ ದಾಟಿದ ಅವಿವಾಹಿತ, ವಿಚ್ಛೇದಿತ ಮತ್ತು ನಿರ್ಗತಿಕ ಮಹಿಳೆಯರಿಗೆ ಮಾಸಿಕ ₹1,200 ಪಿಂಚಣಿ.',
+        benefits: [
+          'ಪ್ರತಿ ತಿಂಗಳು ₹1,200 ಸಾಮಾಜಿಕ ಭದ್ರತಾ ಪಿಂಚಣಿ ನೇರ ಬ್ಯಾಂಕ್ ಜಮೆ',
+          'ಏಕಾಂಗಿ ಮತ್ತು ನಿರ್ಗತಿಕ ಮಹಿಳೆಯರಿಗೆ ಗೌರವಯುತ ಜೀವನ ಭದ್ರತೆ',
+          'ಸರ್ಕಾರಿ ಆಸ್ಪತ್ರೆಗಳಲ್ಲಿ ಆದ್ಯತೆಯ ಉಚಿತ ಆರೋಗ್ಯ ಸೇವೆ',
+        ],
+      },
+      hi: {
+        title: 'मनस्विनी योजना (Manasvini Scheme)',
+        shortDescription:
+          '40 वर्ष से अधिक आयु की अविवाहित, परित्यक्ता एवं बेसहारा महिलाओं के लिए ₹1,200 मासिक पेंशन।',
+        benefits: [
+          'मासिक ₹1,200 वित्तीय पेंशन सीधे बैंक खाते में',
+          'निराश्रित एवं एकल महिलाओं के लिए सामाजिक सुरक्षा कवच',
+          'सरकारी स्वास्थ्य केंद्रों पर निःशुल्क जांच एवं दवाएं',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'category', op: 'includesAny', value: ['woman'], required: true, label: 'Destitute, unmarried or deserted woman' },
+      { field: 'age', op: 'gte', value: 40, required: true, label: 'Age 40 years or above' },
+      { field: 'incomeRange', op: 'in', value: ['low'], required: true, label: 'Low income / BPL status' },
+    ],
+  },
+  {
+    _id: 'kar-012',
+    id: 'kar-012',
+    title: 'Mythri Pension for Transgender Individuals (ಮೈತ್ರಿ ಯೋಜನೆ)',
+    shortDescription:
+      'Monthly social security pension of ₹1,200 for transgender persons in Karnataka to ensure financial self-reliance and social dignity.',
+    category: 'employment',
+    level: 'state',
+    state: 'Karnataka',
+    benefits: [
+      "Monthly pension of ₹1,200 credited directly into beneficiary's bank account",
+      'Special identity recognition and access to state skill training programs',
+      'Direct coverage under state healthcare protection frameworks',
+    ],
+    documentsRequired: [
+      'Transgender identity certificate / UDID issued by competent district screening authority',
+      'Proof of residence in Karnataka (minimum 3 years)',
+      'Income certificate or BPL card',
+      'Bank account details',
+    ],
+    applyUrl: 'https://sevasindhu.karnataka.gov.in/',
+    sourceUrl: 'https://sevasindhu.karnataka.gov.in/',
+    lastVerified: '2026-10-15T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಮೈತ್ರಿ ಯೋಜನೆ (Mythri Transgender Welfare Scheme)',
+        shortDescription:
+          'ಕರ್ನಾಟಕದ ತೃತೀಯಲಿಂಗಿ ವ್ಯಕ್ತಿಗಳಿಗೆ ಮಾಸಿಕ ₹1,200 ಸಾಮಾಜಿಕ ಭದ್ರತಾ ಪಿಂಚಣಿ ಮತ್ತು ಗೌರವಧನ.',
+        benefits: [
+          'ಪ್ರತಿ ತಿಂಗಳು ₹1,200 ಪಿಂಚಣಿ ಹಣ ನೇರವಾಗಿ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಜಮೆ',
+          'ಸಾಮಾಜಿಕ ಭದ್ರತೆ ಹಾಗೂ ಸ್ವಾವಲಂಬನೆಗೆ ಆರ್ಥಿಕ ಆಸರೆ',
+          'ಕೌಶಲ್ಯ ತರಬೇತಿ ಮತ್ತು ಸ್ವಯಂ ಉದ್ಯೋಗ ಯೋಜನೆಗಳಲ್ಲಿ ವಿಶೇಷ ಆದ್ಯತೆ',
+        ],
+      },
+      hi: {
+        title: 'मैत्री योजना (Mythri Transgender Pension)',
+        shortDescription:
+          'कर्नाटक के ट्रांसजेंडर समुदाय के व्यक्तियों के लिए ₹1,200 मासिक सामाजिक सुरक्षा पेंशन।',
+        benefits: [
+          '₹1,200 प्रतिमाह प्रत्यक्ष बैंक अंतरण पेंशन',
+          'सामाजिक गरिमा एवं वित्तीय आत्मनिर्भरता में सहयोग',
+          'कौशल विकास व स्वरोजगार सहायता में प्राथमिकता',
+        ],
+      },
+    },
+    rules: [
+      { field: 'state', op: 'in', value: ['Karnataka', 'All'], required: true, label: 'Resident of Karnataka' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'Low or lower-middle income threshold' },
+      { field: 'age', op: 'gte', value: 18, required: true, label: 'Adult citizen (Age 18+)' },
+    ],
+  },
+  {
+    _id: 'cen-001',
+    id: 'cen-001',
+    title: 'PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)',
+    shortDescription:
+      'Income support of ₹6,000 per year transferred in three equal four-monthly installments to all landholding farmer families across India.',
+    category: 'agriculture',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      '₹6,000 per year direct income support transferred in 3 tranches of ₹2,000 via DBT',
+      'Helps farmers meet agricultural input costs (seeds, fertilizer, labor) ahead of harvest cycles',
+      '100% centrally sponsored with direct payment into Aadhaar-seeded bank accounts',
+    ],
+    documentsRequired: [
+      'Landholding ownership documentation (Khatauni / RTC / RoR records)',
+      'Aadhaar card of the farmer beneficiary',
+      'Active bank account linked to Aadhaar with completed e-KYC',
+    ],
+    applyUrl: 'https://pmkisan.gov.in/',
+    sourceUrl: 'https://pmkisan.gov.in/',
+    lastVerified: '2026-11-05T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಪಿಎಂ ಕಿಸಾನ್ ಸಮ್ಮಾನ್ ನಿಧಿ (PM-KISAN)',
+        shortDescription:
+          'ದೇಶದ ಎಲ್ಲಾ ಅರ್ಹ ರೈತ ಕುಟುಂಬಗಳಿಗೆ ವರ್ಷಕ್ಕೆ ₹6,000 ನೇರ ಆದಾಯ ಬೆಂಬಲ (ಪ್ರತಿ 4 ತಿಂಗಳಿಗೆ ₹2,000).',
+        benefits: [
+          'ವರ್ಷಕ್ಕೆ ₹6,000 ನೇರ ನಗದು ವರ್ಗಾವಣೆ (3 ಕಂತುಗಳಲ್ಲಿ ₹2,000)',
+          'ಬೀಜ, ಗೊಬ್ಬರ ಹಾಗೂ ಕೃಷಿ ಖರ್ಚುಗಳನ್ನು ಭರಿಸಲು ಸಮಯಕ್ಕೆ ಸರಿಯಾದ ನಗದು ಆಸರೆ',
+          'ನೇರವಾಗಿ ಆಧಾರ್ ಜೋಡಿತ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಕೇಂದ್ರ ಸರ್ಕಾರದ ಜಮೆ',
+        ],
+      },
+      hi: {
+        title: 'पीएम किसान सम्मान निधि (PM-KISAN)',
+        shortDescription:
+          'सभी पात्र भूमिधारक किसान परिवारों को प्रति वर्ष ₹6,000 की प्रत्यक्ष आय सहायता (तीन किस्तों में)।',
+        benefits: [
+          '₹6,000 प्रति वर्ष की वित्तीय सहायता सीधे बैंक खाते में (₹2,000 की 3 समान किस्तें)',
+          'बुआई और खाद-बीज की लागत में किसानों को सीधा वित्तीय संबल',
+          'शत-प्रतिशत केंद्र सरकार द्वारा वित्तपोषित पारदर्शी डीबीटी योजना',
+        ],
+      },
+    },
+    rules: [
+      { field: 'category', op: 'includesAny', value: ['farmer'], required: true, label: 'Landholding agricultural farmer' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle', 'middle'], required: true, label: 'Eligible smallholder family' },
+    ],
+  },
+  {
+    _id: 'cen-002',
+    id: 'cen-002',
+    title: 'Ayushman Bharat PM-JAY (Jan Arogya Yojana)',
+    shortDescription:
+      "The world's largest government-funded health assurance scheme providing ₹5 Lakh cashless hospitalization cover per family per year.",
+    category: 'healthcare',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      'Cashless and paperless inpatient hospitalization coverage up to ₹5,00,000 per family per year',
+      'Covers pre-existing medical conditions from day one across 27,000+ empaneled public and private hospitals',
+      'Covers up to 3 days of pre-hospitalization and 15 days of post-hospitalization diagnostics and medication',
+    ],
+    documentsRequired: [
+      'Ration Card or National Food Security Act (NFSA) entitlement',
+      'Aadhaar card or Government issued photo identity',
+      'Ayushman Golden Card (generated free at CSC / empaneled hospitals)',
+    ],
+    applyUrl: 'https://pmjay.gov.in/',
+    sourceUrl: 'https://pmjay.gov.in/',
+    lastVerified: '2026-11-06T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಪಿಎಂ-ಜೆಎವೈ (Ayushman Bharat PM-JAY)',
+        shortDescription:
+          'ಪ್ರತಿ ಅರ್ಹ ಕುಟುಂಬಕ್ಕೆ ವಾರ್ಷಿಕ ₹5 ಲಕ್ಷದವರೆಗೆ ಸಂಪೂರ್ಣ ಉಚಿತ ಹಾಗೂ ನಗದುರಹಿತ ಆಸ್ಪತ್ರೆ ಚಿಕಿತ್ಸೆ.',
+        benefits: [
+          'ಪ್ರತಿ ಕುಟುಂಬಕ್ಕೆ ಪ್ರತಿ ವರ್ಷ ₹5,00,000 ವರೆಗೆ ನಗದುರಹಿತ ಚಿಕಿತ್ಸಾ ರಕ್ಷಣೆ',
+          'ದೇಶದಾದ್ಯಂತ 27,000 ಕ್ಕೂ ಹೆಚ್ಚು ನೋಂದಾಯಿತ ಆಸ್ಪತ್ರೆಗಳಲ್ಲಿ ಚಿಕಿತ್ಸೆ ಲಭ್ಯ',
+          'ದಾಖಲಾತಿ ಮುನ್ನ ಹಾಗೂ ನಂತರದ ಔಷಧಿ ವೆಚ್ಚಗಳ ಸಂಪೂರ್ಣ ಭರಿಸುವಿಕೆ',
+        ],
+      },
+      hi: {
+        title: 'आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना (PM-JAY)',
+        shortDescription:
+          'प्रति पात्र परिवार को प्रति वर्ष ₹5 लाख तक का निःशुल्क एवं कैशलेस द्वितीयक व तृतीयक अस्पताल उपचार।',
+        benefits: [
+          'प्रति परिवार प्रति वर्ष ₹5,00,000 तक का कैशलेस स्वास्थ्य बीमा',
+          'देशभर के 27,000+ सरकारी एवं निजी सूचीबद्ध अस्पतालों में पोर्टेबल उपचार',
+          'पहले दिन से सभी पूर्व बीमारियों व सर्जरी के लिए कवरेज',
+        ],
+      },
+    },
+    rules: [
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'Low or lower-middle income bracket' },
+    ],
+  },
+  {
+    _id: 'cen-003',
+    id: 'cen-003',
+    title: 'Pradhan Mantri Awas Yojana (PMAY - Housing for All)',
+    shortDescription:
+      'Financial construction subsidy of ₹1.2 Lakh to ₹2.5 Lakh for homeless families or families living in non-pucca/kutcha houses.',
+    category: 'housing',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      'Direct grant of ₹1,20,000 (plains) to ₹1,30,000 (hilly states) in Gramin, and up to ₹2,50,000 subsidy in Urban',
+      'Additional assistance of ₹12,000 for building hygienic toilet under Swachh Bharat Mission',
+      '90 days of guaranteed wage support under MGNREGA for house construction labor',
+    ],
+    documentsRequired: [
+      'Proof of not owning a pucca house anywhere in India',
+      "Land title / patta document (preferably in female family head's name)",
+      'SECC census confirmation or BPL ration card',
+      'Bank account details',
+    ],
+    applyUrl: 'https://pmayg.nic.in/',
+    sourceUrl: 'https://pmayg.nic.in/',
+    lastVerified: '2026-10-25T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಪ್ರಧಾನ ಮಂತ್ರಿ ಆವಾಸ್ ಯೋಜನೆ (PMAY Housing Scheme)',
+        shortDescription:
+          'ಸ್ವಂತ ಪಕ್ಕಾ ಮನೆ ಇಲ್ಲದ ಬಡ ಕುಟುಂಬಗಳಿಗೆ ₹1.2 ಲಕ್ಷದಿಂದ ₹2.5 ಲಕ್ಷದವರೆಗೆ ಮನೆ ನಿರ್ಮಾಣ ಅನುದಾನ.',
+        benefits: [
+          'ಮನೆ ನಿರ್ಮಾಣಕ್ಕಾಗಿ ₹1,20,000 ರಿಂದ ₹2,50,000 ವರೆಗೆ ನೇರ ಸರ್ಕಾರಿ ಅನುದಾನ',
+          'ಶೌಚಾಲಯ ನಿರ್ಮಾಣಕ್ಕೆ ಹೆಚ್ಚುವರಿ ₹12,000 ಪ್ರೋತ್ಸಾಹಧನ',
+          'ಮನೆ ನಿರ್ಮಾಣದ ಶ್ರಮದಾನಕ್ಕೆ ನರೇಗಾ ಅಡಿಯಲ್ಲಿ 90 ದಿನಗಳ ಕೂಲಿ ಹಣ',
+        ],
+      },
+      hi: {
+        title: 'प्रधानमंत्री आवास योजना (PMAY - सबके लिए आवास)',
+        shortDescription:
+          'कच्चे घरों में रहने वाले बेघर परिवारों को पक्के मकान निर्माण हेतु ₹1.2 लाख से ₹2.5 लाख का अनुदान।',
+        benefits: [
+          'ग्रामीण क्षेत्रों में ₹1.20 लाख तथा शहरी क्षेत्रों में ब्याज सब्सिडी सहित ₹2.50 लाख तक अनुदान',
+          'स्वच्छ भारत मिशन के तहत शौचालय निर्माण के लिए अतिरिक्त ₹12,000',
+          'मनरेगा के तहत 90-95 दिनों की अकुशल मजदूरी सहायता',
+        ],
+      },
+    },
+    rules: [
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'Low or lower-middle income family' },
+      { field: 'age', op: 'gte', value: 21, required: true, label: 'Adult household applicant (Age 21+)' },
+    ],
+  },
+  {
+    _id: 'cen-004',
+    id: 'cen-004',
+    title: 'Pradhan Mantri Ujjwala Yojana 2.0 (PMUY)',
+    shortDescription:
+      'Deposit-free LPG cooking gas connection, free first cylinder refill, and stove for women from low-income households.',
+    category: 'women_child',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      '100% free deposit-free LPG connection issued in the name of the adult woman of the family',
+      'First LPG cylinder refill provided completely free of charge',
+      'Free double-burner hotplate gas stove included at installation',
+    ],
+    documentsRequired: [
+      'Ration card confirming family composition',
+      'Aadhaar card of applicant woman and adult family members',
+      'Bank account details (IFSC code and account number)',
+    ],
+    applyUrl: 'https://www.pmuy.gov.in/',
+    sourceUrl: 'https://www.pmuy.gov.in/',
+    lastVerified: '2026-10-28T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಪ್ರಧಾನ ಮಂತ್ರಿ ಉಜ್ವಲ ಯೋಜನೆ (PM Ujjwala Yojana)',
+        shortDescription:
+          'ಬಡ ಕುಟುಂಬಗಳ ಮಹಿಳೆಯರಿಗೆ ಠೇವಣಿ ರಹಿತ ಉಚಿತ ಎಲ್‌ಪಿಜಿ ಅನಿಲ ಸಂಪರ್ಕ, ಗ್ಯಾಸ್ ಒಲೆ ಮತ್ತು ಮೊದಲ ಸಿಲಿಂಡರ್.',
+        benefits: [
+          'ಮಹಿಳೆಯರ ಹೆಸರಿನಲ್ಲಿ ಸಂಪೂರ್ಣ ಉಚಿತ ಎಲ್‌ಪಿಜಿ ಅಡುಗೆ ಅನಿಲ ಸಂಪರ್ಕ',
+          'ಮೊದಲ ಸಿಲಿಂಡರ್ ಮರುಪೂರಣ (ರೀಫಿಲ್) ಉಚಿತ',
+          'ಉಚಿತ ಸ್ಟೌವ್ (ಗ್ಯಾಸ್ ಒಲೆ) ವಿತರಣೆ',
+        ],
+      },
+      hi: {
+        title: 'प्रधानमंत्री उज्ज्वला योजना 2.0 (PM Ujjwala Yojana)',
+        shortDescription:
+          'गरीब परिवारों की महिलाओं को निःशुल्क एलपीजी गैस कनेक्शन, पहला भरा सिलेंडर और गैस चूल्हा।',
+        benefits: [
+          'महिला सदस्य के नाम पर पूर्णतः सुरक्षा जमा मुक्त एलपीजी कनेक्शन',
+          'पहला गैस सिलेंडर रिफिल बिल्कुल मुफ्त',
+          'स्थापना के समय निःशुल्क हॉटप्लेट गैस चूल्हा',
+        ],
+      },
+    },
+    rules: [
+      { field: 'category', op: 'includesAny', value: ['woman'], required: true, label: 'Adult woman beneficiary' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle'], required: true, label: 'Low-income household status' },
+      { field: 'age', op: 'gte', value: 18, required: true, label: 'Age 18 years or above' },
+    ],
+  },
+  {
+    _id: 'cen-005',
+    id: 'cen-005',
+    title: 'Indira Gandhi National Old Age Pension Scheme (IGNOAPS)',
+    shortDescription:
+      'Centrally sponsored social protection monthly pension for elderly citizens aged 60 and above living below the poverty line.',
+    category: 'senior_citizens',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      "Direct central pension contributed every month into beneficiary's bank account",
+      'Higher monthly pension tier for super-seniors aged 80 years and above',
+      'Complemented by state top-up allowances for dignified elderly living',
+    ],
+    documentsRequired: [
+      'Proof of Age (Voter ID, Birth certificate, or medical age certificate 60+)',
+      'BPL Ration Card verifying below-poverty-line entitlement',
+      'Aadhaar card and bank account details',
+    ],
+    applyUrl: 'https://nsap.nic.in/',
+    sourceUrl: 'https://nsap.nic.in/',
+    lastVerified: '2026-11-01T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಇಂದಿರಾ ಗಾಂಧಿ ರಾಷ್ಟ್ರೀಯ ವೃದ್ಧಾಪ್ಯ ಪಿಂಚಣಿ ಯೋಜನೆ (IGNOAPS)',
+        shortDescription:
+          'ಬಿಪಿಎಲ್ ಕುಟುಂಬದ 60 ವರ್ಷ ಮೇಲ್ಪಟ್ಟ ಹಿರಿಯ ನಾಗರಿಕರಿಗೆ ಮಾಸಿಕ ಕೇಂದ್ರ ಸರ್ಕಾರಿ ಪಿಂಚಣಿ.',
+        benefits: [
+          'ಪ್ರತಿ ತಿಂಗಳು ಹಿರಿಯ ನಾಗರಿಕರ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ನೇರ ಪಿಂಚಣಿ ಜಮೆ',
+          '80 ವರ್ಷ ಮೇಲ್ಪಟ್ಟ ಹಿರಿಯರಿಗೆ ಹೆಚ್ಚುವರಿ ಮಾಸಿಕ ಭತ್ಯೆ',
+          'ರಾಜ್ಯ ಸರ್ಕಾರದ ಅನುದಾನದೊಂದಿಗೆ ಸಂಯೋಜಿತ ಆರ್ಥಿಕ ನೆರವು',
+        ],
+      },
+      hi: {
+        title: 'इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन योजना (IGNOAPS)',
+        shortDescription:
+          'बीपीएल श्रेणी के 60 वर्ष या उससे अधिक आयु के वरिष्ठ नागरिकों के लिए मासिक केंद्रीय पेंशन।',
+        benefits: [
+          'प्रत्येक माह बैंक या डाकघर खाते में सीधे पेंशन राशि का अंतरण',
+          '80 वर्ष से अधिक आयु के अति-वरिष्ठ नागरिकों को उच्चतर मासिक पेंशन',
+          'राज्य सरकार के अंशदान के साथ संयुक्त सामाजिक सुरक्षा',
+        ],
+      },
+    },
+    rules: [
+      { field: 'age', op: 'gte', value: 60, required: true, label: 'Age 60 years or above' },
+      { field: 'incomeRange', op: 'in', value: ['low'], required: true, label: 'BPL household status' },
+      { field: 'category', op: 'includesAny', value: ['senior_citizen'], required: true, label: 'Senior citizen applicant' },
+    ],
+  },
+  {
+    _id: 'cen-006',
+    id: 'cen-006',
+    title: 'Sukanya Samriddhi Yojana (SSY)',
+    shortDescription:
+      'High-interest government savings scheme for girl children up to age 10 with guaranteed returns and 100% tax exemption.',
+    category: 'women_child',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      'Highest government small-savings sovereign interest rate (currently 8.2% p.a. compounded yearly)',
+      'Account can be opened with as little as ₹250 per year up to maximum ₹1,50,000',
+      'Triple tax exemption (EEE) on deposit, interest earned, and maturity payout',
+      'Matures when the girl child turns 21 or gets married after age 18',
+    ],
+    documentsRequired: [
+      'Birth certificate of the girl child',
+      'Identity and address proof of the parent / legal guardian (Aadhaar / Voter ID)',
+      'Passport size photograph of child and guardian',
+    ],
+    applyUrl: 'https://www.indiapost.gov.in/',
+    sourceUrl: 'https://www.indiapost.gov.in/',
+    lastVerified: '2026-11-03T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಸುಕನ್ಯಾ ಸಮೃದ್ಧಿ ಯೋಜನೆ (Sukanya Samriddhi Yojana)',
+        shortDescription:
+          '10 ವರ್ಷದೊಳಗಿನ ಹೆಣ್ಣುಮಕ್ಕಳ ಭವಿಷ್ಯದ ಶಿಕ್ಷಣ ಮತ್ತು ವಿವಾಹಕ್ಕಾಗಿ ಗರಿಷ್ಠ ಬಡ್ಡಿದರದ ಸರ್ಕಾರಿ ಉಳಿತಾಯ ಯೋಜನೆ.',
+        benefits: [
+          'ಸರ್ಕಾರದ ಉಳಿತಾಯ ಯೋಜನೆಗಳಲ್ಲೇ ಗರಿಷ್ಠ ಬಡ್ಡಿದರ (ಶೇ. 8.2 ವಾರ್ಷಿಕ ಚಕ್ರಬಡ್ಡಿ)',
+          'ಕನಿಷ್ಠ ₹250 ರಿಂದ ಖಾತೆ ಆರಂಭಿಸುವ ಸುಲಭ ಅವಕಾಶ',
+          'ಹೆಣ್ಣುಮಗುವಿನ 21ನೇ ವಯಸ್ಸಿಗೆ ಸಂಪೂರ್ಣ ತೆರಿಗೆ ಮುಕ್ತ ಮುಕ್ತಾಯ ಮೊತ್ತ',
+        ],
+      },
+      hi: {
+        title: 'सुकन्या समृद्धि योजना (Sukanya Samriddhi Yojana)',
+        shortDescription:
+          '10 वर्ष तक की बालिकाओं के लिए उच्च ब्याज दर एवं 100% कर-मुक्त सरकारी बचत योजना।',
+        benefits: [
+          'सरकारी लघु बचत योजनाओं में उच्चतम ब्याज दर (8.2% वार्षिक चक्रवृद्धि)',
+          'मात्र ₹250 से खाता खोलने की सुविधा (अधिकतम ₹1.5 लाख प्रति वर्ष)',
+          'जमा राशि, ब्याज और परिपक्वता तीनों पर पूर्ण आयकर छूट (EEE)',
+        ],
+      },
+    },
+    rules: [
+      { field: 'category', op: 'includesAny', value: ['child', 'woman'], required: true, label: 'Girl child in family' },
+      { field: 'age', op: 'lte', value: 10, required: true, label: 'Child age 10 years or below' },
+    ],
+  },
+  {
+    _id: 'cen-007',
+    id: 'cen-007',
+    title: "PM SVANidhi (Street Vendor's AtmaNirbhar Nidhi)",
+    shortDescription:
+      'Collateral-free working capital micro-loans of ₹10,000 to ₹50,000 with 7% interest subsidy for urban and peri-urban street vendors.',
+    category: 'employment',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      'Initial collateral-free working capital loan of ₹10,000, escalatable to ₹20,000 and ₹50,000 upon timely repayment',
+      "7% annual interest subsidy credited directly to beneficiary's bank account",
+      'Monthly digital transaction cashbacks up to ₹1,200 per year',
+    ],
+    documentsRequired: [
+      'Certificate of Vending (CoV) / Identity card issued by Urban Local Body (ULB)',
+      'Aadhaar card and active mobile number',
+      'Bank account details',
+    ],
+    applyUrl: 'https://pmsvanidhi.mohua.gov.in/',
+    sourceUrl: 'https://pmsvanidhi.mohua.gov.in/',
+    lastVerified: '2026-10-31T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಪಿಎಂ ಸ್ವನಿಧಿ ಯೋಜನೆ (PM SVANidhi)',
+        shortDescription:
+          'ಬೀದಿಬದಿ ವ್ಯಾಪಾರಿಗಳಿಗೆ ₹10,000 ದಿಂದ ₹50,000 ವರೆಗೆ ಜಾಮೀನು ರಹಿತ ದುಡಿಯುವ ಬಂಡವಾಳ ಸಾಲ.',
+        benefits: [
+          'ಮೊದಲ ಹಂತದಲ್ಲಿ ₹10,000, ಸಕಾಲಿಕ ಮರುಪಾವತಿಗೆ ₹20,000 ಹಾಗೂ ₹50,000 ವರೆಗೆ ಸಾಲ',
+          'ಶೇಕಡಾ 7 ರ ಬಡ್ಡಿ ಸಬ್ಸಿಡಿ ನೇರ ಬ್ಯಾಂಕ್ ಜಮೆ',
+          'ಡಿಜಿಟಲ್ ವಹಿವಾಟುಗಳಿಗೆ ವಾರ್ಷಿಕ ₹1,200 ವರೆಗೆ ಕ್ಯಾಶ್‌ಬ್ಯಾಕ್ ಪ್ರೋತ್ಸಾಹ',
+        ],
+      },
+      hi: {
+        title: 'पीएम स्वनिधि योजना (PM SVANidhi)',
+        shortDescription:
+          'स्ट्रीट वेंडरों और रेहड़ी-पटरी वालों के लिए ₹10,000 से ₹50,000 तक का संपार्श्विक-मुक्त कार्यशील ऋण।',
+        benefits: [
+          'बिना किसी गारंटी के ₹10,000, ₹20,000 और ₹50,000 की कार्यशील पूंजी',
+          'समय पर पुनर्भुगतान पर 7% वार्षिक ब्याज सब्सिडी',
+          'डिजिटल लेन-देन करने पर प्रतिमाह कैशबैक पुरस्कार',
+        ],
+      },
+    },
+    rules: [
+      { field: 'occupation', op: 'eq', value: 'vendor', required: true, label: 'Street vendor, hawker or micro-retailer' },
+      { field: 'age', op: 'gte', value: 18, required: true, label: 'Age 18 years or above' },
+    ],
+  },
+  {
+    _id: 'cen-008',
+    id: 'cen-008',
+    title: 'Atal Pension Yojana (APY - Pension for Unorganized Sector)',
+    shortDescription:
+      'Guaranteed monthly pension of ₹1,000 to ₹5,000 for life starting from age 60 for unorganized workers who join between ages 18 and 40.',
+    category: 'senior_citizens',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      'Guaranteed monthly pension ranging from ₹1,000 up to ₹5,000 upon reaching age 60',
+      "Same pension amount continued to spouse upon subscriber's demise",
+      'Full accumulated pension corpus returned to designated nominee',
+      'Very low monthly contribution starting as low as ₹42/month (at age 18)',
+    ],
+    documentsRequired: [
+      'Savings bank account with auto-debit facility enabled',
+      'Aadhaar card of subscriber and spouse',
+      'Nominee details',
+    ],
+    applyUrl: 'https://www.npscra.nsdl.co.in/',
+    sourceUrl: 'https://www.npscra.nsdl.co.in/',
+    lastVerified: '2026-11-04T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಅಟಲ್ ಪಿಂಚಣಿ ಯೋಜನೆ (Atal Pension Yojana)',
+        shortDescription:
+          'ಅಸಂಘಟಿತ ವಲಯದ ಕಾರ್ಮಿಕರಿಗೆ 60 ವರ್ಷ ವಯಸ್ಸಿನ ನಂತರ ಖಾತರಿಪಡಿಸಿದ ಮಾಸಿಕ ₹1,000 ದಿಂದ ₹5,000 ಪಿಂಚಣಿ.',
+        benefits: [
+          '60 ವರ್ಷ ತುಂಬಿದ ನಂತರ ಜೀವಿತಾವಧಿಯವರೆಗೆ ಪ್ರತಿ ತಿಂಗಳು ₹1,000 ದಿಂದ ₹5,000 ನಿಶ್ಚಿತ ಪಿಂಚಣಿ',
+          'ಚಂದಾದಾರರ ನಿಧನದ ನಂತರ ಪತಿ/ಪತ್ನಿಗೆ ಅದೇ ಮೊತ್ತದ ಪಿಂಚಣಿ ಮುಂದುವರಿಕೆ',
+          'ವಾರಸುದಾರರಿಗೆ ಸಂಪೂರ್ಣ ಠೇವಣಿ ನಿಧಿ ವಾಪಸಾತಿ',
+        ],
+      },
+      hi: {
+        title: 'अटल पेंशन योजना (Atal Pension Yojana)',
+        shortDescription:
+          'असंगठित क्षेत्र के कामगारों के लिए 60 वर्ष की आयु से ₹1,000 से ₹5,000 की आजीवन गारंटीशुदा मासिक पेंशन।',
+        benefits: [
+          '60 वर्ष की उम्र से ₹1,000, ₹2,000, ₹3,000, ₹4,000 या ₹5,000 की निश्चित मासिक पेंशन',
+          'अभिदाता की मृत्यु के उपरांत जीवनसाथी को समान पेंशन की गारंटी',
+          'नामित व्यक्ति (नॉमिनी) को पूरी पेंशन संचित निधि की वापसी',
+        ],
+      },
+    },
+    rules: [
+      { field: 'age', op: 'gte', value: 18, required: true, label: 'Minimum age 18' },
+      { field: 'age', op: 'lte', value: 40, required: true, label: 'Maximum entry age 40' },
+    ],
+  },
+  {
+    _id: 'cen-009',
+    id: 'cen-009',
+    title: 'Pradhan Mantri Matsya Sampada Yojana (PMMSY)',
+    shortDescription:
+      'Government financial subsidies of 40% to 60% for motorized fishing vessels, biofloc aquaculture units, cold storage, and fish farming.',
+    category: 'agriculture',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      '40% government financial subsidy for general category and 60% subsidy for women and SC/ST beneficiaries',
+      'Funding for pond construction, biofloc units, ice plants, and refrigerated fish transport vans',
+      'Livelihood risk insurance coverage for fishermen and coastal workers',
+    ],
+    documentsRequired: [
+      'Fisherman identity card / proof of inland or marine fishing involvement',
+      'Land or waterbody lease/ownership documents (for aquaculture)',
+      'Aadhaar card and bank account details',
+    ],
+    applyUrl: 'https://pmmsy.dof.gov.in/',
+    sourceUrl: 'https://pmmsy.dof.gov.in/',
+    lastVerified: '2026-10-27T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಪ್ರಧಾನ ಮಂತ್ರಿ ಮತ್ಸ್ಯ ಸಂಪದ ಯೋಜನೆ (PMMSY)',
+        shortDescription:
+          'ಮೀನುಗಾರರು ಮತ್ತು ಜಲಚರ ಸಾಕಣೆದಾರರಿಗೆ ಶೇಕಡಾ 40 ರಿಂದ 60 ರವರೆಗೆ ಸರ್ಕಾರಿ ಸಹಾಯಧನ ಮತ್ತು ಸಲಕರಣೆ ನೆರವು.',
+        benefits: [
+          'ಸಾಮಾನ್ಯ ವರ್ಗಕ್ಕೆ ಶೇ. 40 ಹಾಗೂ ಮಹಿಳೆಯರು ಮತ್ತು ಎಸ್‌ಸಿ/ಎಸ್‌ಟಿ ಫಲಾನುಭವಿಗಳಿಗೆ ಶೇ. 60 ಸಬ್ಸಿಡಿ',
+          'ಬಯೋಫ್ಲಾಕ್, ಮೀನು ಮರಿ ಸಾಕಣೆ ಕೊಳಗಳು ಮತ್ತು ಶೀತಲ ವಾಹನಗಳಿಗೆ ಆರ್ಥಿಕ ನೆರವು',
+          'ಮೀನುಗಾರರಿಗೆ ವಿಶೇಷ ಜೀವ ವಿಮಾ ಸೌಲಭ್ಯ',
+        ],
+      },
+      hi: {
+        title: 'प्रधानमंत्री मत्स्य संपदा योजना (PMMSY)',
+        shortDescription:
+          'मछुआरों और मत्स्य पालकों के लिए नावों, बायोफ्लॉक इकाइयों एवं तालाब निर्माण हेतु 40% से 60% तक सब्सिडी।',
+        benefits: [
+          'सामान्य वर्ग को 40% तथा महिला व एससी/एसटी लाभार्थियों को 60% तक सरकारी अनुदान',
+          'आधुनिक मत्स्य पालन, हैचरी और कोल्ड-चेन वैन के लिए वित्तीय सहायता',
+          'पारंपरिक मछुआरों के लिए दुर्घटना बीमा सुरक्षा',
+        ],
+      },
+    },
+    rules: [
+      { field: 'category', op: 'includesAny', value: ['farmer', 'general'], required: true, label: 'Fisherman, fish farmer or agriculturalist' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle', 'middle'], required: true, label: 'Eligible small enterprise bracket' },
+    ],
+  },
+  {
+    _id: 'cen-010',
+    id: 'cen-010',
+    title: 'Pradhan Mantri Mudra Yojana (PMMY - Micro Enterprise Loans)',
+    shortDescription:
+      'Collateral-free institutional micro-credit loans up to ₹10 Lakh for small business entrepreneurs across Shishu, Kishore, and Tarun tiers.',
+    category: 'employment',
+    level: 'central',
+    state: 'All',
+    benefits: [
+      'Zero collateral or third-party guarantee needed for loans up to ₹10,00,000',
+      'Three distinct funding categories: Shishu (up to ₹50,000), Kishore (₹50k - ₹5L), and Tarun (₹5L - ₹10L)',
+      'Available across commercial banks, RRBs, small finance banks, and MFIs for manufacturing, trade, and services',
+    ],
+    documentsRequired: [
+      'Business proposal and quotation of machinery / working capital requirement',
+      'Identity and business address proof (Udyam Registration or trade license)',
+      'Bank statement for previous 6 months',
+      'Applicant passport size photographs',
+    ],
+    applyUrl: 'https://www.mudra.org.in/',
+    sourceUrl: 'https://www.mudra.org.in/',
+    lastVerified: '2026-11-06T00:00:00.000Z',
+    isSample: false,
+    translations: {
+      kn: {
+        title: 'ಪ್ರಧಾನ ಮಂತ್ರಿ ಮುದ್ರಾ ಯೋಜನೆ (PMMY Mudra Loans)',
+        shortDescription:
+          'ಸಣ್ಣ ವ್ಯಾಪಾರಿಗಳು, ನೇಕಾರರು ಮತ್ತು ಉದ್ಯಮಿಗಳಿಗೆ ₹10 ಲಕ್ಷದವರೆಗೆ ಜಾಮೀನು ರಹಿತ ಸಾಲ ಸೌಲಭ್ಯ.',
+        benefits: [
+          'ಯಾವುದೇ ಆಸ್ತಿ ಅಡಮಾನವಿಲ್ಲದೆ ₹10,00,000 ವರೆಗೆ ಸಾಲ',
+          'ಶಿಶು (₹50,000 ವರೆಗೆ), ಕಿಶೋರ್ (₹50,000 - ₹5 ಲಕ್ಷ) ಮತ್ತು ತರುಣ್ (₹5 ಲಕ್ಷ - ₹10 ಲಕ್ಷ) ವಿಭಾಗಗಳು',
+          'ಅತ್ಯಂತ ಕಡಿಮೆ ಸಂಸ್ಕರಣಾ ಶುಲ್ಕ ಮತ್ತು ಸ್ಪರ್ಧಾತ್ಮಕ ಬಡ್ಡಿದರ',
+        ],
+      },
+      hi: {
+        title: 'प्रधानमंत्री मुद्रा योजना (PMMY - मुद्रा ऋण)',
+        shortDescription:
+          'सूक्ष्म व लघु उद्यमियों के लिए बिना किसी गारंटी के ₹10 लाख तक का संस्थागत व्यापार ऋण।',
+        benefits: [
+          'बिना किसी जमानत या संपार्श्विक के ₹10,00,000 तक का व्यवसाय ऋण',
+          'तीन श्रेणियां: शिशु (₹50,000 तक), किशोर (₹5 लाख तक) एवं तरुण (₹10 लाख तक)',
+          'विनिर्माण, व्यापार एवं सेवा क्षेत्र में नए व्यवसाय शुरू करने हेतु सुलभ पूंजी',
+        ],
+      },
+    },
+    rules: [
+      { field: 'age', op: 'gte', value: 18, required: true, label: 'Adult entrepreneur (Age 18+)' },
+      { field: 'incomeRange', op: 'in', value: ['low', 'lower_middle', 'middle'], required: true, label: 'Eligible small business owner' },
+    ],
+  },
+];

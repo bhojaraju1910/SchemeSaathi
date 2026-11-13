@@ -2,16 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import EmptyState from '../components/EmptyState';
 import SampleBadge from '../components/SampleBadge';
+import { getHardcodedSchemeById } from '../services/schemeMirrorService';
+import {
+  getMirrorSavedSchemes,
+  isMirrorToken,
+  recordMirrorApplicationStatus,
+  removeMirrorSavedScheme,
+} from '../services/authMirrorService';
 import {
   Bookmark,
   Trash2,
   ExternalLink,
   CheckCircle2,
   ChevronRight,
-  Loader2,
-  Calendar,
   Building,
 } from 'lucide-react';
 
@@ -26,6 +32,7 @@ interface SavedRecord {
 
 export const Saved: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { user, token } = useAuth();
   const [savedList, setSavedList] = useState<SavedRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -33,10 +40,22 @@ export const Saved: React.FC = () => {
   const fetchSaved = async () => {
     try {
       setLoading(true);
+      if (isMirrorToken(token) && user) {
+        setSavedList(getMirrorSavedSchemes(user.id) as SavedRecord[]);
+        return;
+      }
+
       const res = await api.get('/saved');
-      setSavedList(res.data || []);
+      const records = (Array.isArray(res.data) ? res.data : []).map((item: SavedRecord) => ({
+        ...item,
+        scheme: item.scheme || getHardcodedSchemeById(item.schemeId)?.scheme,
+      }));
+      setSavedList(records);
     } catch (err) {
-      console.error('Failed to load saved schemes:', err);
+      console.error('Failed to load saved schemes, using mirror store:', err);
+      if (user) {
+        setSavedList(getMirrorSavedSchemes(user.id) as SavedRecord[]);
+      }
     } finally {
       setLoading(false);
     }
@@ -44,15 +63,18 @@ export const Saved: React.FC = () => {
 
   useEffect(() => {
     fetchSaved();
-  }, []);
+  }, [user, token]);
 
   const handleRemove = async (schemeId: string) => {
     setActionLoading(schemeId);
     try {
-      await api.delete(`/saved/${schemeId}`);
+      if (user) {
+        removeMirrorSavedScheme(user.id, schemeId);
+      }
+      if (!isMirrorToken(token)) {
+        await api.delete(`/saved/${schemeId}`).catch(() => {});
+      }
       setSavedList((prev) => prev.filter((item) => item.schemeId !== schemeId));
-    } catch (err) {
-      console.error('Failed to remove saved scheme:', err);
     } finally {
       setActionLoading(null);
     }
@@ -62,24 +84,32 @@ export const Saved: React.FC = () => {
     const nextStatus = currentStatus === 'applied' ? 'not_applied' : 'applied';
     setActionLoading(schemeId);
     try {
-      await api.post('/applications/status', { schemeId, status: nextStatus });
+      if (user) {
+        recordMirrorApplicationStatus(user.id, schemeId, nextStatus);
+      }
+      if (!isMirrorToken(token)) {
+        await api.post('/applications/status', { schemeId, status: nextStatus }).catch(() => {});
+      }
       setSavedList((prev) =>
         prev.map((item) =>
           item.schemeId === schemeId ? { ...item, status: nextStatus } : item
         )
       );
-    } catch (err) {
-      console.error('Failed to update status:', err);
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleOfficialClick = async (schemeId: string) => {
-    try {
-      await api.post('/applications/click', { schemeId, status: 'clicked' });
-    } catch (err) {
-      // non-blocking
+    if (user) {
+      recordMirrorApplicationStatus(user.id, schemeId, 'clicked');
+    }
+    if (!isMirrorToken(token)) {
+      try {
+        await api.post('/applications/click', { schemeId, status: 'clicked' });
+      } catch {
+        // non-blocking
+      }
     }
   };
 

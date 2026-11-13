@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import SampleBadge from './SampleBadge';
 import MatchBadge from './MatchBadge';
 import api from '../api/axios';
+import {
+  addMirrorSavedScheme,
+  isMirrorToken,
+  recordMirrorApplicationStatus,
+  removeMirrorSavedScheme,
+} from '../services/authMirrorService';
 import {
   Bookmark,
   ExternalLink,
@@ -52,7 +58,8 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
   onSaveToggle,
 }) => {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(isInitiallySaved);
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -80,23 +87,27 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
 
     setSaveLoading(true);
     try {
       if (isSaved) {
-        await api.delete(`/saved/${scheme._id}`);
+        removeMirrorSavedScheme(user.id, scheme._id);
+        if (!isMirrorToken(token)) {
+          await api.delete(`/saved/${scheme._id}`).catch(() => {});
+        }
         setIsSaved(false);
         onSaveToggle?.(scheme._id, false);
       } else {
-        await api.post('/saved', { schemeId: scheme._id });
+        addMirrorSavedScheme(user.id, scheme._id);
+        if (!isMirrorToken(token)) {
+          await api.post('/saved', { schemeId: scheme._id }).catch(() => {});
+        }
         setIsSaved(true);
         onSaveToggle?.(scheme._id, true);
       }
-    } catch (err) {
-      console.error('Error toggling save:', err);
     } finally {
       setSaveLoading(false);
     }
@@ -104,10 +115,13 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
 
   const handleOfficialClick = async () => {
     if (user) {
-      try {
-        await api.post('/applications/click', { schemeId: scheme._id, status: 'clicked' });
-      } catch (err) {
-        // non-blocking
+      recordMirrorApplicationStatus(user.id, scheme._id, 'clicked');
+      if (!isMirrorToken(token)) {
+        try {
+          await api.post('/applications/click', { schemeId: scheme._id, status: 'clicked' });
+        } catch {
+          // non-blocking
+        }
       }
     }
   };
