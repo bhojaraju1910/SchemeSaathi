@@ -1,5 +1,10 @@
 import { Router, Response } from 'express';
 import { SchemeModel, CriteriaModel } from '../models/index';
+import { SuggestionModel } from '../models/Suggestion';
+import {
+  ALLOWED_SUGGESTION_STATUSES,
+  SuggestionStatus,
+} from '../utils/suggestionValidation';
 import { auth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/requireRole';
 
@@ -187,6 +192,68 @@ router.put('/criteria/:schemeId', async (req: AuthRequest, res: Response): Promi
     res.status(200).json({ message: 'Eligibility criteria updated successfully', criteria: updated });
   } catch (err: any) {
     res.status(500).json({ message: err.message || 'Failed to update criteria' });
+  }
+});
+
+// Get community suggestions (admin only, paginated, newest first)
+router.get('/suggestions', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const type = typeof req.query.type === 'string' ? req.query.type : undefined;
+    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+    const page = parseInt(String(req.query.page || '1'), 10) || 1;
+    const limit = parseInt(String(req.query.limit || '20'), 10) || 20;
+
+    const result = await SuggestionModel.findPaginated({
+      type,
+      status,
+      page,
+      limit,
+    });
+
+    res.status(200).json(result);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || 'Failed to fetch suggestions' });
+  }
+});
+
+// Update suggestion status only (admin only)
+router.patch('/suggestions/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const status = String(req.body?.status || '').trim() as SuggestionStatus;
+
+    if (!ALLOWED_SUGGESTION_STATUSES.includes(status)) {
+      res.status(400).json({
+        message: 'Invalid status. Allowed values: new, planned, done, rejected.',
+      });
+      return;
+    }
+
+    const updated = await SuggestionModel.updateStatus(id, status);
+    if (!updated) {
+      res.status(404).json({ message: 'Suggestion not found' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Suggestion status updated', suggestion: updated });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || 'Failed to update suggestion status' });
+  }
+});
+
+// Delete suggestion (admin only)
+router.delete('/suggestions/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const deleted = await SuggestionModel.deleteById(id);
+    if (!deleted) {
+      res.status(404).json({ message: 'Suggestion not found' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Suggestion deleted successfully' });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || 'Failed to delete suggestion' });
   }
 });
 

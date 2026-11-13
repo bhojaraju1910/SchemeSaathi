@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export const Footer: React.FC = () => {
@@ -78,7 +79,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Principles */}
+          {/* Principles & Help */}
           <div>
             <h3 className="text-sm font-semibold text-[var(--deep-text)] mb-3">
               Public-Service Principles
@@ -89,6 +90,20 @@ export const Footer: React.FC = () => {
               <li>Clear sample data labeling</li>
               <li>Direct links to official portals</li>
             </ul>
+            <div className="pt-3 mt-3 border-t border-[var(--deep-border)] flex flex-wrap items-center gap-4 text-sm">
+              <Link
+                to="/faq"
+                className="text-[var(--saffron)] hover:underline underline-offset-2 font-semibold transition-colors duration-150"
+              >
+                {t('nav.faq')}
+              </Link>
+              <Link
+                to="/suggest"
+                className="text-[var(--saffron)] hover:underline underline-offset-2 font-semibold transition-colors duration-150"
+              >
+                {t('nav.suggest')}
+              </Link>
+            </div>
           </div>
         </div>
 

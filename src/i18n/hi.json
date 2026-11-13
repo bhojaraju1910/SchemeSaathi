@@ -14,7 +14,9 @@
     "login": "लॉग इन",
     "register": "पंजीकरण",
     "logout": "लॉग आउट",
-    "profile": "प्रोफ़ाइल"
+    "profile": "प्रोफ़ाइल",
+    "suggest": "सुझाव (Suggest)",
+    "faq": "FAQ"
   },
   "hero": {
     "title": "अपने परिवार के लिए संभावित उपयोगी सरकारी योजनाएं खोजें",
@@ -167,5 +169,60 @@
     "addLabel": "सरल भाषा विवरण",
     "addRuleBtn": "नियम जोड़ें",
     "saveSchemeBtn": "योजना और नियम सहेजें"
+  },
+  "_comment_new_keys_hi": "English fallback placeholders used below for newly added Community Suggestions & FAQ keys; ready for Hindi localization review.",
+  "suggestPage": {
+    "title": "Help Us Improve SchemeSaathi",
+    "subtitle": "Suggest a government scheme to include, request a helpful feature, or share general feedback with our team.",
+    "typeLabel": "What would you like to share?",
+    "typeScheme": "Suggest a scheme",
+    "typeFeature": "Request a feature",
+    "typeOther": "Other feedback",
+    "schemeName": "Scheme Name",
+    "schemeNamePlaceholder": "e.g. Karnataka Gruha Lakshmi or Central Scholarship",
+    "schemeLevelState": "State or Central",
+    "targetGroup": "Who is it for?",
+    "targetGroupPlaceholder": "e.g. Women heads of households, small farmers, students",
+    "schemeLink": "Official Link (Optional)",
+    "schemeLinkPlaceholder": "https://...",
+    "featureTitle": "Short Title",
+    "featureTitlePlaceholder": "e.g. Filter schemes by disability percentage",
+    "featureDetails": "What should it do?",
+    "featureDetailsPlaceholder": "Explain how this feature would help families...",
+    "otherMessage": "Message",
+    "otherMessagePlaceholder": "Share your question, correction, or feedback...",
+    "optionalContact": "Optional Contact Details",
+    "nameLabel": "Your Name (Optional)",
+    "namePlaceholder": "e.g. Ramesh",
+    "emailLabel": "Email Address (Optional — only if you want a reply)",
+    "emailPlaceholder": "you@example.com",
+    "privacyNote": "Do not enter Aadhaar, bank, phone or other sensitive details. We use your suggestion only to improve SchemeSaathi.",
+    "submitBtn": "Send Suggestion",
+    "submitting": "Sending...",
+    "successMsg": "Thank you. We read every suggestion."
+  },
+  "faqPage": {
+    "headerTitle": "SchemeSaathi Help",
+    "headerSubtitle": "Ask a question or pick one below",
+    "clearChat": "Clear chat",
+    "greeting": "Namaste! I am SchemeSaathi Help. Ask a question about how SchemeSaathi works, matching, or safety, or pick one of the common questions below.",
+    "inputPlaceholder": "Type your question here...",
+    "sendBtn": "Send",
+    "relatedHeading": "Related questions:",
+    "noMatch": "I am not sure about that yet. You can check the official portal at https://www.myscheme.gov.in/ or tell us what you want to know.",
+    "sendToTeam": "Send this question to the team"
+  },
+  "adminSuggestions": {
+    "title": "Community Suggestions",
+    "subtitle": "Review scheme suggestions, feature requests, and feedback submitted by visitors.",
+    "backToSchemes": "Back to Schemes",
+    "copyCsv": "Copy as CSV",
+    "copiedCsv": "Copied CSV!",
+    "filterType": "Filter by Type",
+    "filterStatus": "Filter by Status",
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "emptyTitle": "No Suggestions Found",
+    "emptyDesc": "No community suggestions match the selected filters yet."
   }
 }

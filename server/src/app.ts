@@ -11,6 +11,7 @@ import profileRouter from './routes/profile';
 import schemesRouter from './routes/schemes';
 import userActionsRouter from './routes/userActions';
 import adminRouter from './routes/admin';
+import suggestionsRouter from './routes/suggestions';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -70,6 +71,7 @@ export function createApp() {
   app.use('/api/auth', authRouter);
   app.use('/api/profile', profileRouter);
   app.use('/api/schemes', schemesRouter);
+  app.use('/api/suggestions', suggestionsRouter);
   app.use('/api', userActionsRouter);
   app.use('/api/admin', adminRouter);
 

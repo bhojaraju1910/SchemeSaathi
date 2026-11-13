@@ -18,6 +18,9 @@ import Saved from './pages/Saved';
 import Dashboard from './pages/Dashboard';
 import AdminSchemes from './pages/AdminSchemes';
 import AdminSchemeForm from './pages/AdminSchemeForm';
+import AdminSuggestions from './pages/AdminSuggestions';
+import Suggest from './pages/Suggest';
+import Faq from './pages/Faq';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -34,6 +37,8 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/schemes" element={<Schemes />} />
               <Route path="/schemes/:id" element={<SchemeDetails />} />
+              <Route path="/suggest" element={<Suggest />} />
+              <Route path="/faq" element={<Faq />} />
 
               {/* Protected User Routes */}
               <Route
@@ -91,6 +96,14 @@ export default function App() {
                 element={
                   <ProtectedRoute adminOnly>
                     <AdminSchemeForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/suggestions"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminSuggestions />
                   </ProtectedRoute>
                 }
               />

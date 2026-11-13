@@ -72,13 +72,22 @@ export const AdminSchemes: React.FC = () => {
           </p>
         </div>
 
-        <Link
-          to="/admin/new"
-          className="min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{t('admin.addNew')}</span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+          <Link
+            to="/admin/suggestions"
+            className="min-h-[44px] inline-flex items-center justify-center px-4 py-2.5 rounded-[6px] text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-colors duration-150"
+          >
+            Community Suggestions
+          </Link>
+
+          <Link
+            to="/admin/new"
+            className="min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{t('admin.addNew')}</span>
+          </Link>
+        </div>
       </div>
 
       {error && (

@@ -22,6 +22,8 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { to: '/schemes', label: t('nav.schemes') },
+    { to: '/faq', label: t('nav.faq') },
+    { to: '/suggest', label: t('nav.suggest') },
     ...(user
       ? [
           { to: '/recommendations', label: t('nav.recommendations') },
@@ -37,9 +39,9 @@ export const Navbar: React.FC = () => {
   return (
     <header className="bg-[var(--surface)] border-b border-[var(--border)]">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 gap-6">
+        <div className="flex items-center justify-between h-16 gap-4">
           {/* Left: Brand text with small teal mark */}
-          <div className="flex items-center gap-8 min-w-0">
+          <div className="flex items-center gap-5 lg:gap-7 min-w-0">
             <Link
               to="/"
               className="inline-flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold tracking-tight text-[var(--text-primary)] hover:text-[var(--teal)] transition-colors duration-150 whitespace-nowrap shrink-0"
@@ -67,14 +69,14 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop Nav Links */}
-            <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+            <nav className="hidden lg:flex items-center gap-4 xl:gap-5" aria-label="Main navigation">
               {navLinks.map((link) => {
                 const active = isActive(link.to);
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`py-1 text-base font-medium whitespace-nowrap shrink-0 border-b-2 transition-colors duration-150 ${
+                    className={`py-1 text-sm xl:text-base font-medium whitespace-nowrap shrink-0 border-b-2 transition-colors duration-150 ${
                       active
                         ? 'text-[var(--teal)] border-[var(--teal)]'
                         : 'text-[var(--text-muted)] border-transparent hover:text-[var(--text-primary)]'
@@ -88,7 +90,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right: Compact auth links + Language selector (Desktop) */}
-          <div className="hidden md:flex items-center gap-4 shrink-0">
+          <div className="hidden lg:flex items-center gap-4 shrink-0">
             {user ? (
               <div className="flex items-center gap-4 text-sm">
                 <Link
@@ -143,7 +145,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile: Language selector + Menu toggle */}
-          <div className="flex md:hidden items-center gap-2 shrink-0">
+          <div className="flex lg:hidden items-center gap-2 shrink-0">
             <LanguageSelector />
             <button
               type="button"
@@ -160,7 +162,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[var(--surface)] border-t border-[var(--border)] px-4 py-4 space-y-2">
+        <div className="lg:hidden bg-[var(--surface)] border-t border-[var(--border)] px-4 py-4 space-y-2">
           <Link
             to="/"
             onClick={() => setMobileMenuOpen(false)}

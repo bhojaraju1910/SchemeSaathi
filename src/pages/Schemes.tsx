@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
@@ -345,6 +345,16 @@ export const Schemes: React.FC = () => {
               ))}
             </div>
           )}
+
+          <div className="pt-2 flex items-center justify-between gap-4 text-sm text-[var(--text-muted)]">
+            <span>Missing a scheme or need an update?</span>
+            <Link
+              to="/suggest"
+              className="text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2 transition-colors duration-150"
+            >
+              Suggest a scheme
+            </Link>
+          </div>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between gap-4 pt-6 border-t border-[var(--border)]">
