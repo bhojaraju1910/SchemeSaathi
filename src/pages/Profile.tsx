@@ -9,16 +9,7 @@ import {
   isMirrorToken,
   saveMirrorProfile,
 } from '../services/authMirrorService';
-import {
-  User,
-  ShieldCheck,
-  CheckCircle2,
-  Sparkles,
-  ArrowRight,
-  Loader2,
-  AlertCircle,
-  HelpCircle,
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const INDIAN_STATES = [
   'Karnataka',
@@ -156,83 +147,93 @@ export const Profile: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#5AA9FF] animate-spin" />
-        <p className="text-sm text-[#9FB0C8]">Loading your profile...</p>
+        <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
+        <p className="text-base text-[var(--text-muted)]">Loading your profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10 sm:px-6">
-      <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-10 shadow-xl">
+    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <div className="max-w-[680px] bg-[var(--surface)] border border-[var(--border)] rounded-[6px] p-6 sm:p-8 space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#243A63]">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <User className="w-5 h-5 text-[#5AA9FF]" />
-              <h1 className="text-2xl font-bold text-[#EAF1FB] font-heading">
-                {t('profile.title')}
-              </h1>
-            </div>
-            <p className="text-xs text-[#9FB0C8]">
-              {t('profile.subtitle')}
-            </p>
-          </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5AA9FF]/10 border border-[#5AA9FF]/30 text-xs font-medium text-[#5AA9FF] self-start sm:self-center">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Zero ID Data Collected</span>
+        <div className="pb-5 border-b border-[var(--border)] space-y-2">
+          <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
+            {t('profile.title')}
+          </h1>
+          <p className="text-base text-[var(--text-muted)]">
+            {t('profile.subtitle')}
+          </p>
+          <div className="inline-block px-3 py-1.5 rounded-[6px] bg-[var(--teal-tint)] text-sm font-medium text-[var(--teal)]">
+            Zero ID data collected — we never ask for Aadhaar, bank account, or phone numbers.
           </div>
         </div>
 
         {error && (
-          <div className="mt-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-start gap-2.5 text-xs text-rose-300">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <span>{error}</span>
+          <div className="p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[6px] text-sm font-medium text-[var(--error)]" role="alert">
+            {error}
           </div>
         )}
 
         {savedSuccess && (
-          <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-emerald-300">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="font-semibold">{t('profile.savedSuccess')}</span>
-            </div>
+          <div className="p-4 bg-[var(--success-bg)] border border-[var(--success-border)] rounded-[6px] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span className="text-sm font-semibold text-[var(--success)]">
+              {t('profile.savedSuccess')}
+            </span>
             <button
+              type="button"
               onClick={() => navigate('/recommendations')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-400 text-[#0B1426] font-bold rounded-lg text-xs hover:bg-emerald-300 transition-colors cursor-pointer self-start sm:self-auto"
+              className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-sm rounded-[6px] transition-colors duration-150 cursor-pointer self-start sm:self-auto"
             >
-              <span>{t('profile.seeSchemes')}</span>
-              <ArrowRight className="w-3 h-3" />
+              {t('profile.seeSchemes')}
             </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* Age & State Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Single-column grouped form */}
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Section 1: Basic Details */}
+          <section className="space-y-4">
+            <div className="bg-[var(--surface-subtle)] border-l-4 border-[var(--teal)] px-4 py-2.5 rounded-r-[6px]">
+              <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+                1. Age & State of Residence
+              </h2>
+              <p className="text-sm text-[var(--text-muted)]">
+                Used to check age thresholds and state-specific welfare programs.
+              </p>
+            </div>
+
             <div>
-              <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+              <label htmlFor="profile-age" className="block text-sm font-semibold text-[var(--text-primary)] mb-1">
                 {t('profile.age')}
               </label>
+              <p className="text-sm text-[var(--text-muted)] mb-1.5">
+                Enter your completed age in years.
+              </p>
               <input
+                id="profile-age"
                 type="number"
                 min="0"
                 max="125"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 placeholder={t('profile.agePlaceholder')}
-                className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none transition-colors"
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+              <label htmlFor="profile-state" className="block text-sm font-semibold text-[var(--text-primary)] mb-1">
                 {t('profile.state')}
               </label>
+              <p className="text-sm text-[var(--text-muted)] mb-1.5">
+                Select the state where your family currently resides.
+              </p>
               <select
+                id="profile-state"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none transition-colors cursor-pointer"
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
               >
                 {INDIAN_STATES.map((st) => (
                   <option key={st} value={st}>
@@ -241,20 +242,20 @@ export const Profile: React.FC = () => {
                 ))}
               </select>
             </div>
-          </div>
+          </section>
 
-          {/* Household Income Range */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold text-[#EAF1FB]">
-                {t('profile.incomeRange')}
-              </label>
-              <span className="text-[11px] text-[#9FB0C8] flex items-center gap-1">
-                <HelpCircle className="w-3 h-3 text-[#5AA9FF]" />
-                Approximate bracket, no proof needed here
-              </span>
+          {/* Section 2: Household Income */}
+          <section className="space-y-3">
+            <div className="bg-[var(--surface-subtle)] border-l-4 border-[var(--saffron)] px-4 py-2.5 rounded-r-[6px]">
+              <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+                2. {t('profile.incomeRange')}
+              </h2>
+              <p className="text-sm text-[var(--text-muted)]">
+                Approximate annual household bracket only — no proof or exact figure is needed.
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+
+            <div className="space-y-2">
               {[
                 { value: 'low', label: t('profile.incomeLow') },
                 { value: 'lower_middle', label: t('profile.incomeLowerMiddle') },
@@ -263,10 +264,10 @@ export const Profile: React.FC = () => {
               ].map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-medium cursor-pointer transition-all ${
+                  className={`min-h-[44px] flex items-center gap-3 px-4 py-2.5 rounded-[6px] border text-base cursor-pointer transition-colors duration-150 ${
                     incomeRange === opt.value
-                      ? 'bg-[#5AA9FF]/15 border-[#5AA9FF] text-[#EAF1FB]'
-                      : 'bg-[#0B1426] border-[#243A63] text-[#9FB0C8] hover:border-[#5AA9FF]/40 hover:text-[#EAF1FB]'
+                      ? 'bg-[var(--teal-tint)] border-[var(--teal)] font-semibold text-[var(--text-primary)]'
+                      : 'bg-[var(--surface)] border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--teal)]'
                   }`}
                 >
                   <input
@@ -275,94 +276,109 @@ export const Profile: React.FC = () => {
                     value={opt.value}
                     checked={incomeRange === opt.value}
                     onChange={() => setIncomeRange(opt.value)}
-                    className="accent-[#5AA9FF]"
+                    className="w-4 h-4 accent-[var(--teal)]"
                   />
                   <span>{opt.label}</span>
                 </label>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Categories Checkboxes */}
-          <div>
-            <label className="block text-xs font-semibold text-[#EAF1FB] mb-2">
-              {t('profile.categoriesLabel')}
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {/* Section 3: Categories */}
+          <section className="space-y-3">
+            <div className="bg-[var(--surface-subtle)] border-l-4 border-[var(--step-3-bg)] px-4 py-2.5 rounded-r-[6px]">
+              <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+                3. {t('profile.categoriesLabel')}
+              </h2>
+              <p className="text-sm text-[var(--text-muted)]">
+                Select every group that describes you or your family members.
+              </p>
+            </div>
+
+            <div className="space-y-2">
               {CATEGORY_KEYS.map((cat) => {
                 const checked = category.includes(cat.key);
                 return (
                   <label
                     key={cat.key}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-medium cursor-pointer transition-all ${
+                    className={`min-h-[44px] flex items-center gap-3 px-4 py-2.5 rounded-[6px] border text-base cursor-pointer transition-colors duration-150 ${
                       checked
-                        ? 'bg-[#5AA9FF]/15 border-[#5AA9FF] text-[#EAF1FB]'
-                        : 'bg-[#0B1426] border-[#243A63] text-[#9FB0C8] hover:border-[#5AA9FF]/40 hover:text-[#EAF1FB]'
+                        ? 'bg-[var(--teal-tint)] border-[var(--teal)] font-semibold text-[var(--text-primary)]'
+                        : 'bg-[var(--surface)] border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--teal)]'
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => handleCategoryToggle(cat.key)}
-                      className="accent-[#5AA9FF] rounded"
+                      className="w-4 h-4 accent-[var(--teal)]"
                     />
                     <span>{t(cat.labelKey)}</span>
                   </label>
                 );
               })}
             </div>
-          </div>
+          </section>
 
-          {/* Occupation & Family Size */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Section 4: Livelihood & Household Size */}
+          <section className="space-y-4">
+            <div className="bg-[var(--surface-subtle)] border-l-4 border-[var(--teal)] px-4 py-2.5 rounded-r-[6px]">
+              <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+                4. Occupation & Family Details
+              </h2>
+              <p className="text-sm text-[var(--text-muted)]">
+                Optional details to help surface livelihood-specific schemes.
+              </p>
+            </div>
+
             <div>
-              <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+              <label htmlFor="profile-occupation" className="block text-sm font-semibold text-[var(--text-primary)] mb-1">
                 {t('profile.occupation')}
               </label>
               <input
+                id="profile-occupation"
                 type="text"
                 value={occupation}
                 onChange={(e) => setOccupation(e.target.value)}
                 placeholder={t('profile.occupationPlaceholder')}
-                className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none transition-colors"
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+              <label htmlFor="profile-family" className="block text-sm font-semibold text-[var(--text-primary)] mb-1">
                 {t('profile.familySize')}
               </label>
               <input
+                id="profile-family"
                 type="number"
                 min="1"
                 max="30"
                 value={familySize}
                 onChange={(e) => setFamilySize(e.target.value)}
                 placeholder="e.g. 4"
-                className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none transition-colors"
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)]"
               />
             </div>
-          </div>
+          </section>
 
-          {/* Save Button */}
-          <div className="pt-4 border-t border-[#243A63] flex flex-wrap items-center justify-between gap-4">
+          {/* Actions */}
+          <div className="pt-6 border-t border-[var(--border)] flex flex-wrap items-center gap-3">
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-3 bg-[#5AA9FF] hover:bg-[#5AA9FF]/90 text-[#0B1426] font-semibold text-sm rounded-xl transition-all shadow-md shadow-[#5AA9FF]/10 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="min-h-[44px] px-6 py-2.5 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-base rounded-[6px] transition-colors duration-150 inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{t('profile.saveBtn')}</span>
             </button>
 
             <button
               type="button"
               onClick={() => navigate('/recommendations')}
-              className="px-5 py-3 bg-[#0B1426] hover:bg-[#14213B] border border-[#243A63] hover:border-[#5AA9FF]/50 text-[#EAF1FB] text-sm font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+              className="min-h-[44px] px-5 py-2.5 bg-[var(--surface)] hover:border-[var(--teal)] border border-[var(--border)] text-[var(--text-primary)] text-base font-semibold rounded-[6px] transition-colors duration-150 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-[#5AA9FF]" />
-              <span>{t('profile.seeSchemes')}</span>
-              <ArrowRight className="w-4 h-4" />
+              {t('profile.seeSchemes')}
             </button>
           </div>
         </form>

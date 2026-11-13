@@ -3,15 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import { getHardcodedSchemeById } from '../services/schemeMirrorService';
-import {
-  ArrowLeft,
-  Plus,
-  Trash2,
-  AlertCircle,
-  Loader2,
-  Scale,
-  Save,
-} from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
 
 interface RuleItem {
   field: string;
@@ -38,13 +30,11 @@ export const AdminSchemeForm: React.FC = () => {
   const [sourceUrl, setSourceUrl] = useState('https://www.myscheme.gov.in/');
   const [isSample, setIsSample] = useState(true);
 
-  // Translations
   const [knTitle, setKnTitle] = useState('');
   const [knDesc, setKnDesc] = useState('');
   const [hiTitle, setHiTitle] = useState('');
   const [hiDesc, setHiDesc] = useState('');
 
-  // Rules state
   const [rules, setRules] = useState<RuleItem[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -147,7 +137,6 @@ export const AdminSchemeForm: React.FC = () => {
     setSaving(true);
     setError(null);
 
-    // Parse array values for rules
     const cleanRules = rules.map((r) => {
       let val: any = r.value;
       if (r.op === 'in' || r.op === 'includesAny') {
@@ -227,51 +216,49 @@ export const AdminSchemeForm: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#5AA9FF] animate-spin" />
-        <p className="text-sm text-[#9FB0C8]">Loading scheme builder...</p>
+        <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
+        <p className="text-base text-[var(--text-muted)]">Loading scheme builder...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Back button */}
+    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
       <div>
         <Link
           to="/admin"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[#9FB0C8] hover:text-[#5AA9FF] transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--teal)] hover:text-[var(--teal-hover)] transition-colors duration-150"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Admin Portal</span>
         </Link>
       </div>
 
-      <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-10 shadow-xl space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-[#EAF1FB] font-heading">
+      <div className="max-w-3xl bg-[var(--surface)] border border-[var(--border)] rounded-[6px] p-6 sm:p-8 space-y-6">
+        <div className="pb-4 border-b border-[var(--border)]">
+          <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
             {isEditMode ? 'Edit Scheme & Criteria Rules' : 'Create New Social Protection Scheme'}
           </h1>
-          <p className="text-xs text-[#9FB0C8] mt-1">
-            Define scheme information, official links, and configure deterministic matching rules.
+          <p className="text-base text-[var(--text-muted)] mt-1">
+            Define scheme information, official links, and configure eligibility matching rules.
           </p>
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-start gap-2.5 text-xs text-rose-300">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <span>{error}</span>
+          <div className="p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[6px] text-sm font-medium text-[var(--error)]" role="alert">
+            {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* General Scheme Information */}
+          {/* 1. Basic Information */}
           <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[#5AA9FF] border-b border-[#243A63] pb-2">
+            <h2 className="text-[18px] font-bold text-[var(--text-primary)] bg-[var(--surface-subtle)] border-l-4 border-[var(--teal)] px-4 py-2 rounded-r-[6px]">
               1. Basic Information
             </h2>
 
             <div>
-              <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+              <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                 Scheme Title *
               </label>
               <input
@@ -280,12 +267,12 @@ export const AdminSchemeForm: React.FC = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Sample Senior Citizen Social Security Pension"
                 required
-                className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none"
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+              <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                 Short Plain-Language Description *
               </label>
               <textarea
@@ -294,19 +281,19 @@ export const AdminSchemeForm: React.FC = () => {
                 onChange={(e) => setShortDescription(e.target.value)}
                 placeholder="Explain the scheme purpose in 1-2 plain sentences..."
                 required
-                className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none"
+                className="w-full px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)]"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   Category *
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none cursor-pointer"
+                  className="w-full min-h-[44px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
                 >
                   <option value="senior_citizens">Senior Citizens</option>
                   <option value="education">Education & Scholarships</option>
@@ -319,13 +306,13 @@ export const AdminSchemeForm: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   Government Level *
                 </label>
                 <select
                   value={level}
                   onChange={(e) => setLevel(e.target.value as any)}
-                  className="w-full px-3 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none cursor-pointer"
+                  className="w-full min-h-[44px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
                 >
                   <option value="central">Central Government</option>
                   <option value="state">State Government</option>
@@ -333,7 +320,7 @@ export const AdminSchemeForm: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   State / Jurisdiction
                 </label>
                 <input
@@ -341,37 +328,40 @@ export const AdminSchemeForm: React.FC = () => {
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   placeholder="e.g. Karnataka or All"
-                  className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)]"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-[#0B1426] border border-[#243A63]">
+            <label
+              htmlFor="isSampleCheck"
+              className="flex items-start gap-3 p-3.5 rounded-[6px] bg-[var(--saffron-tint)] border border-[var(--saffron-border)] cursor-pointer"
+            >
               <input
                 type="checkbox"
                 id="isSampleCheck"
                 checked={isSample}
                 onChange={(e) => setIsSample(e.target.checked)}
-                className="w-4 h-4 accent-[#5AA9FF] rounded cursor-pointer"
+                className="w-4 h-4 mt-1 accent-[var(--teal)] cursor-pointer"
               />
-              <label htmlFor="isSampleCheck" className="text-xs text-[#EAF1FB] cursor-pointer">
+              <span className="text-sm text-[var(--text-primary)]">
                 <strong>Mark as Demonstration Sample Data (isSample: true)</strong>
-                <span className="block text-[#9FB0C8] text-[11px]">
+                <span className="block text-[var(--saffron-tint-text)]">
                   Displays the &quot;Sample data&quot; badge to clearly indicate academic placeholder status.
                 </span>
-              </label>
-            </div>
+              </span>
+            </label>
           </div>
 
-          {/* Benefits & Documents Required */}
+          {/* 2. Benefits & Documents */}
           <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[#5AA9FF] border-b border-[#243A63] pb-2">
+            <h2 className="text-[18px] font-bold text-[var(--text-primary)] bg-[var(--surface-subtle)] border-l-4 border-[var(--saffron)] px-4 py-2 rounded-r-[6px]">
               2. Benefits & Documents
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   Key Benefits (one per line)
                 </label>
                 <textarea
@@ -379,12 +369,12 @@ export const AdminSchemeForm: React.FC = () => {
                   value={benefitsText}
                   onChange={(e) => setBenefitsText(e.target.value)}
                   placeholder="Direct benefit transfer of ₹1,500/month&#10;Free annual health checkup"
-                  className="w-full px-4 py-2 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   Required Documents (one per line)
                 </label>
                 <textarea
@@ -392,14 +382,14 @@ export const AdminSchemeForm: React.FC = () => {
                   value={documentsText}
                   onChange={(e) => setDocumentsText(e.target.value)}
                   placeholder="Age proof (Voter ID / Certificate)&#10;Income certificate from Tahsildar"
-                  className="w-full px-4 py-2 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   Official Application URL (outlink)
                 </label>
                 <input
@@ -407,12 +397,12 @@ export const AdminSchemeForm: React.FC = () => {
                   value={applyUrl}
                   onChange={(e) => setApplyUrl(e.target.value)}
                   placeholder="https://www.myscheme.gov.in/"
-                  className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
                   Official Source Link
                 </label>
                 <input
@@ -420,82 +410,79 @@ export const AdminSchemeForm: React.FC = () => {
                   value={sourceUrl}
                   onChange={(e) => setSourceUrl(e.target.value)}
                   placeholder="https://www.myscheme.gov.in/"
-                  className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
               </div>
             </div>
           </div>
 
-          {/* Multi-language Translations */}
+          {/* 3. Translations */}
           <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[#5AA9FF] border-b border-[#243A63] pb-2">
+            <h2 className="text-[18px] font-bold text-[var(--text-primary)] bg-[var(--surface-subtle)] border-l-4 border-[var(--step-3-bg)] px-4 py-2 rounded-r-[6px]">
               3. Kannada & Hindi Content (Optional)
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-[#0B1426] border border-[#243A63] space-y-3">
-                <p className="text-xs font-bold text-[#EAF1FB]">ಕನ್ನಡ (Kannada)</p>
+              <div className="p-4 rounded-[6px] bg-[var(--bg-page)] border border-[var(--border)] space-y-3">
+                <p className="text-sm font-bold text-[var(--text-primary)]">ಕನ್ನಡ (Kannada)</p>
                 <input
                   type="text"
                   value={knTitle}
                   onChange={(e) => setKnTitle(e.target.value)}
                   placeholder="ಯೋಜನೆಯ ಶೀರ್ಷಿಕೆ..."
-                  className="w-full px-3 py-2 bg-[#14213B] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full min-h-[44px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
                 <textarea
                   rows={2}
                   value={knDesc}
                   onChange={(e) => setKnDesc(e.target.value)}
                   placeholder="ಸಂಕ್ಷಿಪ್ತ ವಿವರಣೆ..."
-                  className="w-full px-3 py-2 bg-[#14213B] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#0B1426] border border-[#243A63] space-y-3">
-                <p className="text-xs font-bold text-[#EAF1FB]">हिन्दी (Hindi)</p>
+              <div className="p-4 rounded-[6px] bg-[var(--bg-page)] border border-[var(--border)] space-y-3">
+                <p className="text-sm font-bold text-[var(--text-primary)]">हिन्दी (Hindi)</p>
                 <input
                   type="text"
                   value={hiTitle}
                   onChange={(e) => setHiTitle(e.target.value)}
                   placeholder="योजना का नाम..."
-                  className="w-full px-3 py-2 bg-[#14213B] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full min-h-[44px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
                 <textarea
                   rows={2}
                   value={hiDesc}
                   onChange={(e) => setHiDesc(e.target.value)}
                   placeholder="संक्षिप्त विवरण..."
-                  className="w-full px-3 py-2 bg-[#14213B] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-xs text-[#EAF1FB] focus:outline-none"
+                  className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm text-[var(--text-primary)]"
                 />
               </div>
             </div>
           </div>
 
-          {/* Interactive Eligibility Rule Builder */}
+          {/* 4. Eligibility Rule Builder */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-[#243A63] pb-2">
-              <div className="flex items-center gap-2">
-                <Scale className="w-4 h-4 text-amber-400" />
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-[#5AA9FF]">
-                  4. Eligibility Rule Builder
-                </h2>
-              </div>
+            <div className="flex items-center justify-between bg-[var(--surface-subtle)] border-l-4 border-[var(--teal)] px-4 py-2 rounded-r-[6px]">
+              <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+                4. Eligibility Rule Builder
+              </h2>
               <button
                 type="button"
                 onClick={addRule}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-[#5AA9FF]/15 text-[#5AA9FF] border border-[#5AA9FF]/30 hover:bg-[#5AA9FF]/25 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                className="min-h-[40px] inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--surface)] text-[var(--teal)] border border-[var(--teal)] hover:bg-[var(--teal)] hover:text-[var(--deep-text)] rounded-[6px] text-sm font-semibold transition-colors duration-150 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Add Rule</span>
               </button>
             </div>
 
-            <p className="text-xs text-[#9FB0C8]">
+            <p className="text-sm text-[var(--text-muted)]">
               Rules are evaluated automatically when users search for potential matches. If a mandatory rule fails, the scheme is excluded.
             </p>
 
             {rules.length === 0 ? (
-              <div className="p-6 text-center border border-dashed border-[#243A63] rounded-2xl text-xs text-[#9FB0C8]">
+              <div className="p-6 text-center border border-[var(--border)] rounded-[6px] bg-[var(--bg-page)] text-sm text-[var(--text-muted)]">
                 No eligibility criteria rules added yet. Click &quot;Add Rule&quot; to configure eligibility conditions.
               </div>
             ) : (
@@ -503,17 +490,18 @@ export const AdminSchemeForm: React.FC = () => {
                 {rules.map((rule, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl bg-[#0B1426] border border-[#243A63] space-y-3"
+                    className="p-4 rounded-[6px] bg-[var(--bg-page)] border border-[var(--border)] space-y-3"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-300">
+                      <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums">
                         Rule #{idx + 1}
                       </span>
                       <button
                         type="button"
                         onClick={() => removeRule(idx)}
-                        className="text-[#9FB0C8] hover:text-rose-400 p-1 cursor-pointer"
+                        className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-[6px] text-[var(--text-muted)] hover:text-[var(--error)] cursor-pointer"
                         title="Remove Rule"
+                        aria-label="Remove Rule"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -521,13 +509,13 @@ export const AdminSchemeForm: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#9FB0C8] mb-1">
+                        <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
                           Field
                         </label>
                         <select
                           value={rule.field}
                           onChange={(e) => updateRule(idx, { field: e.target.value })}
-                          className="w-full px-2.5 py-1.5 bg-[#14213B] border border-[#243A63] rounded-lg text-xs text-[#EAF1FB] focus:outline-none"
+                          className="w-full min-h-[40px] px-2.5 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-sm text-[var(--text-primary)]"
                         >
                           <option value="age">age</option>
                           <option value="incomeRange">incomeRange</option>
@@ -538,13 +526,13 @@ export const AdminSchemeForm: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#9FB0C8] mb-1">
+                        <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
                           Operator
                         </label>
                         <select
                           value={rule.op}
                           onChange={(e) => updateRule(idx, { op: e.target.value })}
-                          className="w-full px-2.5 py-1.5 bg-[#14213B] border border-[#243A63] rounded-lg text-xs text-[#EAF1FB] focus:outline-none"
+                          className="w-full min-h-[40px] px-2.5 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-sm text-[var(--text-primary)]"
                         >
                           <option value="gte">gte (&gt;=)</option>
                           <option value="lte">lte (&lt;=)</option>
@@ -555,7 +543,7 @@ export const AdminSchemeForm: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#9FB0C8] mb-1">
+                        <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
                           Target Value
                         </label>
                         <input
@@ -563,7 +551,7 @@ export const AdminSchemeForm: React.FC = () => {
                           value={rule.value}
                           onChange={(e) => updateRule(idx, { value: e.target.value })}
                           placeholder="e.g. 60 or low, lower_middle"
-                          className="w-full px-2.5 py-1.5 bg-[#14213B] border border-[#243A63] rounded-lg text-xs text-[#EAF1FB] focus:outline-none"
+                          className="w-full min-h-[40px] px-2.5 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-sm text-[var(--text-primary)]"
                         />
                       </div>
 
@@ -573,16 +561,16 @@ export const AdminSchemeForm: React.FC = () => {
                           id={`req_${idx}`}
                           checked={rule.required}
                           onChange={(e) => updateRule(idx, { required: e.target.checked })}
-                          className="accent-[#5AA9FF] rounded cursor-pointer"
+                          className="w-4 h-4 accent-[var(--teal)] cursor-pointer"
                         />
-                        <label htmlFor={`req_${idx}`} className="text-xs text-[#EAF1FB] cursor-pointer">
+                        <label htmlFor={`req_${idx}`} className="text-sm text-[var(--text-primary)] cursor-pointer">
                           Mandatory Rule
                         </label>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#9FB0C8] mb-1">
+                      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
                         Plain-Language Explanation Label *
                       </label>
                       <input
@@ -591,7 +579,7 @@ export const AdminSchemeForm: React.FC = () => {
                         onChange={(e) => updateRule(idx, { label: e.target.value })}
                         placeholder="e.g. Age 60 years or above (shown to users in match reasons)"
                         required
-                        className="w-full px-3 py-1.5 bg-[#14213B] border border-[#243A63] rounded-lg text-xs text-[#EAF1FB] focus:outline-none"
+                        className="w-full min-h-[40px] px-3 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-sm text-[var(--text-primary)]"
                       />
                     </div>
                   </div>
@@ -600,11 +588,11 @@ export const AdminSchemeForm: React.FC = () => {
             )}
           </div>
 
-          {/* Form Actions */}
-          <div className="pt-6 border-t border-[#243A63] flex items-center justify-between gap-4">
+          {/* Actions */}
+          <div className="pt-6 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-4">
             <Link
               to="/admin"
-              className="px-5 py-2.5 rounded-xl border border-[#243A63] text-xs font-semibold text-[#9FB0C8] hover:text-[#EAF1FB] hover:bg-[#0B1426] transition-all"
+              className="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 rounded-[6px] border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--teal)] transition-colors duration-150"
             >
               Cancel
             </Link>
@@ -612,9 +600,9 @@ export const AdminSchemeForm: React.FC = () => {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-[#0B1426] bg-[#5AA9FF] hover:bg-[#5AA9FF]/90 transition-all shadow-md shadow-[#5AA9FF]/20 cursor-pointer disabled:opacity-50"
+              className="min-h-[44px] inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150 cursor-pointer disabled:opacity-50"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{isEditMode ? 'Save Scheme & Rules' : 'Create Scheme'}</span>
             </button>
           </div>

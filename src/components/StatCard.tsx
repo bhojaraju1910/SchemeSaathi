@@ -1,5 +1,6 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import CategoryIcon, { getCategoryPalette } from './CategoryIcon';
 
 interface StatCardProps {
   label: string;
@@ -10,34 +11,47 @@ interface StatCardProps {
   iconBgColor?: string;
 }
 
+function mapMetricKind(label: string): 'schemes' | 'matches' | 'saved' | 'links' {
+  const lower = label.toLowerCase();
+  if (lower.includes('match')) return 'matches';
+  if (lower.includes('saved') || lower.includes('bookmark')) return 'saved';
+  if (lower.includes('click') || lower.includes('portal') || lower.includes('application')) return 'links';
+  return 'schemes';
+}
+
 export const StatCard: React.FC<StatCardProps> = ({
   label,
   value,
-  icon: Icon,
   subtext,
-  accentColor = 'text-[#5AA9FF]',
-  iconBgColor = 'bg-[#5AA9FF]/10',
 }) => {
+  const kind = mapMetricKind(label);
+  const palette = getCategoryPalette(kind);
+
   return (
-    <div className="bg-[#14213B] border border-[#243A63] rounded-2xl p-6 transition-all hover:border-[#5AA9FF]/40 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#9FB0C8] mb-1">
-            {label}
+    <div
+      className="p-5 rounded-[6px] border border-[var(--border)] flex items-start justify-between gap-4"
+      style={{ backgroundColor: palette.bg }}
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">
+          {label}
+        </p>
+        <p className="text-[28px] sm:text-[32px] leading-tight font-bold text-[var(--text-primary)] tabular-nums">
+          {value}
+        </p>
+        {subtext && (
+          <p className="text-xs text-[var(--text-muted)] mt-1">
+            {subtext}
           </p>
-          <p className={`text-3xl font-extrabold font-heading ${accentColor}`}>
-            {value}
-          </p>
-          {subtext && (
-            <p className="text-xs text-[#9FB0C8] mt-1.5 flex items-center gap-1">
-              {subtext}
-            </p>
-          )}
-        </div>
-        <div className={`w-12 h-12 rounded-xl ${iconBgColor} flex items-center justify-center border border-[#243A63]`}>
-          <Icon className={`w-6 h-6 ${accentColor}`} />
-        </div>
+        )}
       </div>
+
+      <span
+        className="w-11 h-11 rounded-[6px] border border-[var(--border)] inline-flex items-center justify-center shrink-0"
+        style={{ backgroundColor: 'var(--surface)', color: palette.fg }}
+      >
+        <CategoryIcon kind={kind} size={22} />
+      </span>
     </div>
   );
 };

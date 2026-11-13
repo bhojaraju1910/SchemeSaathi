@@ -15,8 +15,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminO
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#5AA9FF] animate-spin" />
-        <p className="text-sm text-[#9FB0C8]">Verifying session...</p>
+        <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
+        <p className="text-base text-[var(--text-muted)]">Verifying session...</p>
       </div>
     );
   }

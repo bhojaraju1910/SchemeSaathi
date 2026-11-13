@@ -5,23 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import StatCard from '../components/StatCard';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
+import CategoryIcon, { getCategoryPalette } from '../components/CategoryIcon';
 import { HARDCODED_SCHEMES } from '../data/schemes';
 import {
   getMirrorDashboardStats,
   isMirrorToken,
 } from '../services/authMirrorService';
-import {
-  LayoutDashboard,
-  Compass,
-  Sparkles,
-  Bookmark,
-  ExternalLink,
-  SlidersHorizontal,
-  FolderOpen,
-  ArrowRight,
-  Loader2,
-  Layers,
-} from 'lucide-react';
+import { Compass, Sparkles, Bookmark, ExternalLink, Loader2 } from 'lucide-react';
 
 interface StatsResponse {
   availableSchemes: number;
@@ -83,129 +73,75 @@ export const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#5AA9FF] animate-spin" />
-        <p className="text-sm text-[#9FB0C8]">Loading dashboard metrics...</p>
+        <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
+        <p className="text-base text-[var(--text-muted)]">Loading dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      {/* Welcome Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#243A63]">
+    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-10">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 border-b border-[var(--border)]">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <LayoutDashboard className="w-6 h-6 text-[#5AA9FF]" />
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#EAF1FB] font-heading">
-              {t('dashboard.title')}
-            </h1>
-          </div>
-          <p className="text-sm text-[#9FB0C8]">
-            Welcome, <span className="text-[#EAF1FB] font-semibold">{user?.name}</span>. Here is an overview of your social-protection journey.
+          <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
+            {t('dashboard.title')}
+          </h1>
+          <p className="text-base text-[var(--text-muted)] mt-1">
+            Welcome, <span className="text-[var(--text-primary)] font-semibold">{user?.name}</span>.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            to="/profile"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-[#0B1426] bg-[#5AA9FF] hover:bg-[#5AA9FF]/90 transition-all shadow-sm"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>{t('dashboard.updateProfile')}</span>
-          </Link>
-        </div>
+        <Link
+          to="/profile"
+          className="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150 self-start sm:self-auto"
+        >
+          {t('dashboard.updateProfile')}
+        </Link>
       </div>
 
-      {/* 4 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          label={t('dashboard.statAvailable')}
-          value={stats?.availableSchemes ?? HARDCODED_SCHEMES.length}
-          icon={Compass}
-          subtext="Catalog database count"
-          accentColor="text-[#5AA9FF]"
-          iconBgColor="bg-[#5AA9FF]/10"
-        />
-        <StatCard
-          label={t('dashboard.statMatches')}
-          value={stats?.potentialMatches ?? 0}
-          icon={Sparkles}
-          subtext="Filtered by current profile"
-          accentColor="text-emerald-400"
-          iconBgColor="bg-emerald-500/10"
-        />
-        <StatCard
-          label={t('dashboard.statSaved')}
-          value={stats?.savedSchemes ?? 0}
-          icon={Bookmark}
-          subtext="In your personal shortlist"
-          accentColor="text-[#FF7BA5]"
-          iconBgColor="bg-[#FF7BA5]/10"
-        />
-        <StatCard
-          label={t('dashboard.statApplications')}
-          value={stats?.applicationLinks ?? 0}
-          icon={ExternalLink}
-          subtext="Official website redirects"
-          accentColor="text-purple-400"
-          iconBgColor="bg-purple-500/10"
-        />
-      </div>
-
-      {/* Category Navigation Strip */}
-      <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#5AA9FF]" />
-            <h2 className="text-lg font-bold text-[#EAF1FB] font-heading">
-              Explore By Focus Category
-            </h2>
-          </div>
-          <Link
-            to="/schemes"
-            className="text-xs text-[#5AA9FF] hover:underline flex items-center gap-1 font-semibold"
-          >
-            <span>All Directory</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
+      {/* Four Tinted Summary Tiles */}
+      <section aria-label="Account summary">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label={t('dashboard.statAvailable')}
+            value={stats?.availableSchemes ?? HARDCODED_SCHEMES.length}
+            icon={Compass}
+          />
+          <StatCard
+            label={t('dashboard.statMatches')}
+            value={stats?.potentialMatches ?? 0}
+            icon={Sparkles}
+          />
+          <StatCard
+            label={t('dashboard.statSaved')}
+            value={stats?.savedSchemes ?? 0}
+            icon={Bookmark}
+          />
+          <StatCard
+            label={t('dashboard.statApplications')}
+            value={stats?.applicationLinks ?? 0}
+            icon={ExternalLink}
+          />
         </div>
+      </section>
 
-        <div className="flex flex-wrap gap-2.5 pt-1">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.key}
-              to={`/schemes?category=${cat.key}`}
-              className="px-4 py-2 rounded-xl bg-[#0B1426] border border-[#243A63] hover:border-[#5AA9FF] text-xs font-medium text-[#EAF1FB] hover:text-[#5AA9FF] transition-all hover:scale-105"
-            >
-              {t(cat.labelKey)}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Top Potential Matches Section */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-[#EAF1FB] font-heading">
-              {t('dashboard.topMatches')}
-            </h2>
-            <p className="text-xs text-[#9FB0C8]">
-              High priority recommendations derived from your demographic profile.
-            </p>
-          </div>
-
+      {/* Top Potential Matches List */}
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <h2 className="text-[22px] font-bold text-[var(--text-primary)]">
+            {t('dashboard.topMatches')}
+          </h2>
           <Link
             to="/recommendations"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5AA9FF] hover:underline"
+            className="text-base font-semibold text-[var(--teal)] hover:text-[var(--teal-hover)] underline underline-offset-4 transition-colors duration-150"
           >
-            <span>View all matches</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            View all matches
           </Link>
         </div>
 
         {stats?.topMatches && stats.topMatches.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-4">
             {stats.topMatches.map((item) => (
               <SchemeCard
                 key={item.scheme._id}
@@ -217,62 +153,85 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="p-8 rounded-3xl bg-[#14213B]/50 border border-[#243A63] text-center">
-            <p className="text-sm text-[#9FB0C8] mb-4">
-              Complete your profile details to unlock personalized scheme matching.
+          <div className="p-6 rounded-[6px] bg-[var(--surface)] border border-[var(--border)] space-y-3">
+            <p className="text-base text-[var(--text-muted)]">
+              Complete your profile details to see potentially relevant schemes.
             </p>
             <Link
               to="/profile"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#5AA9FF] text-[#0B1426] font-semibold text-xs rounded-xl"
+              className="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-sm rounded-[6px] transition-colors duration-150"
             >
-              <span>Setup Profile Now</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              {t('dashboard.updateProfile')}
             </Link>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Quick Action Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
-        <Link
-          to="/profile"
-          className="p-6 bg-[#14213B] border border-[#243A63] hover:border-[#5AA9FF] rounded-2xl transition-all group block"
-        >
-          <SlidersHorizontal className="w-6 h-6 text-[#5AA9FF] mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="text-base font-bold text-[#EAF1FB] font-heading mb-1">
-            {t('dashboard.updateProfile')}
-          </h3>
-          <p className="text-xs text-[#9FB0C8]">
-            Adjust your age, family category, or state to see updated matching schemes.
-          </p>
-        </Link>
+      {/* Browse by Category & Quick Actions */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 border-t border-[var(--border)]">
+        <div className="lg:col-span-7 space-y-3">
+          <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+            Browse by category
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CATEGORIES.map((cat) => {
+              const palette = getCategoryPalette(cat.key);
+              return (
+                <Link
+                  key={cat.key}
+                  to={`/schemes?category=${cat.key}`}
+                  className="bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] rounded-[6px] p-3.5 flex items-center gap-3 transition-colors duration-150"
+                >
+                  <span
+                    className="w-10 h-10 rounded-[6px] inline-flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: palette.bg, color: palette.fg }}
+                  >
+                    <CategoryIcon kind={cat.key} size={20} />
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                    {t(cat.labelKey)}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-        <Link
-          to="/schemes"
-          className="p-6 bg-[#14213B] border border-[#243A63] hover:border-[#5AA9FF] rounded-2xl transition-all group block"
-        >
-          <Compass className="w-6 h-6 text-emerald-400 mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="text-base font-bold text-[#EAF1FB] font-heading mb-1">
-            {t('dashboard.browseCatalog')}
-          </h3>
-          <p className="text-xs text-[#9FB0C8]">
-            Explore the full database of central and state government protection programs.
-          </p>
-        </Link>
-
-        <Link
-          to="/saved"
-          className="p-6 bg-[#14213B] border border-[#243A63] hover:border-[#5AA9FF] rounded-2xl transition-all group block"
-        >
-          <FolderOpen className="w-6 h-6 text-[#FF7BA5] mb-3 group-hover:scale-110 transition-transform" />
-          <h3 className="text-base font-bold text-[#EAF1FB] font-heading mb-1">
-            {t('dashboard.viewSaved')}
-          </h3>
-          <p className="text-xs text-[#9FB0C8]">
-            Check your saved schemes, track applications, and visit official portals.
-          </p>
-        </Link>
-      </div>
+        <div className="lg:col-span-5 space-y-3">
+          <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+            {t('dashboard.quickActions')}
+          </h2>
+          <ul className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-[6px] bg-[var(--surface)] overflow-hidden">
+            <li>
+              <Link
+                to="/profile"
+                className="block px-4 py-3.5 hover:bg-[var(--bg-page)] transition-colors duration-150"
+              >
+                <p className="text-base font-semibold text-[var(--teal)]">{t('dashboard.updateProfile')}</p>
+                <p className="text-sm text-[var(--text-muted)]">Update age, income bracket, category, or state.</p>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/schemes"
+                className="block px-4 py-3.5 hover:bg-[var(--bg-page)] transition-colors duration-150"
+              >
+                <p className="text-base font-semibold text-[var(--teal)]">{t('dashboard.browseCatalog')}</p>
+                <p className="text-sm text-[var(--text-muted)]">Search all central and state welfare programs.</p>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/saved"
+                className="block px-4 py-3.5 hover:bg-[var(--bg-page)] transition-colors duration-150"
+              >
+                <p className="text-base font-semibold text-[var(--teal)]">{t('dashboard.viewSaved')}</p>
+                <p className="text-sm text-[var(--text-muted)]">Review bookmarked schemes and application status.</p>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </section>
     </div>
   );
 };

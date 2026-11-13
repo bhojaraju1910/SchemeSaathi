@@ -3,19 +3,42 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import SchemeCard, { SchemeData } from '../components/SchemeCard';
+import CategoryIcon, { getCategoryPalette } from '../components/CategoryIcon';
 import { HARDCODED_SCHEMES } from '../data/schemes';
 import api from '../api/axios';
-import {
-  Sparkles,
-  Compass,
-  ArrowRight,
-  ShieldCheck,
-  Users,
-  Lock,
-  FileCheck2,
-  ExternalLink,
-  Award,
-} from 'lucide-react';
+
+const BROWSE_CATEGORIES = [
+  {
+    key: 'women_child',
+    labelKey: 'categories.women_child',
+    summary: 'Monthly family assistance, maternal health support, and child care.',
+  },
+  {
+    key: 'senior_citizens',
+    labelKey: 'categories.senior_citizens',
+    summary: 'State old-age pensions, dignity stipends, and assisted living support.',
+  },
+  {
+    key: 'education',
+    labelKey: 'categories.education',
+    summary: 'Post-matric scholarships, hostel stipends, and youth skill allowances.',
+  },
+  {
+    key: 'agriculture',
+    labelKey: 'categories.agriculture',
+    summary: 'Direct farmer income support, crop insurance, and input subsidies.',
+  },
+  {
+    key: 'healthcare',
+    labelKey: 'categories.healthcare',
+    summary: 'Cashless hospital cover, medical treatments, and disability support.',
+  },
+  {
+    key: 'employment',
+    labelKey: 'categories.employment',
+    summary: 'Livelihood grants, artisan toolkits, and self-employment credit.',
+  },
+];
 
 export const Landing: React.FC = () => {
   const { t } = useTranslation();
@@ -51,147 +74,255 @@ export const Landing: React.FC = () => {
     { label: 'Persons with Disabilities', cat: 'healthcare' },
   ];
 
+  const steps = [
+    {
+      num: '1',
+      title: t('howItWorks.step1Title'),
+      desc: t('howItWorks.step1Desc'),
+      bgVar: 'var(--step-1-bg)',
+      textVar: 'var(--step-1-text)',
+    },
+    {
+      num: '2',
+      title: t('howItWorks.step2Title'),
+      desc: t('howItWorks.step2Desc'),
+      bgVar: 'var(--step-2-bg)',
+      textVar: 'var(--step-2-text)',
+    },
+    {
+      num: '3',
+      title: t('howItWorks.step3Title'),
+      desc: t('howItWorks.step3Desc'),
+      bgVar: 'var(--step-3-bg)',
+      textVar: 'var(--step-3-text)',
+    },
+  ];
+
   return (
-    <div className="space-y-20 pb-16">
-      {/* Hero Section */}
-      <section className="relative pt-12 md:pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#5AA9FF]/10 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div>
+      {/* 1. Deep Band Hero (two columns desktop, illustration below & compact on mobile) */}
+      <section className="hero-band-bg text-[var(--deep-text)] border-b border-[var(--deep-border)]">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 sm:py-14 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="lg:col-span-7 space-y-5">
+            <h1 className="text-[28px] sm:text-[34px] font-bold text-[var(--deep-text)] leading-tight">
+              {t('hero.title')}
+            </h1>
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#14213B] border border-[#243A63] text-xs font-semibold text-[#5AA9FF] mb-6 shadow-sm">
-          <ShieldCheck className="w-4 h-4 text-[#5AA9FF]" />
-          <span>Privacy-First Government Scheme Discovery for Indian Families</span>
-        </div>
+            <p className="text-base text-[var(--deep-muted)] leading-relaxed max-w-xl">
+              {t('hero.subtitle')}
+            </p>
 
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#EAF1FB] font-heading max-w-4xl mx-auto leading-tight">
-          {t('hero.title')}
-        </h1>
-
-        <p className="mt-6 text-base sm:text-lg text-[#9FB0C8] max-w-2xl mx-auto leading-relaxed">
-          {t('hero.subtitle')}
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            to={user ? '/recommendations' : '/profile'}
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-[#0B1426] bg-[#5AA9FF] hover:bg-[#5AA9FF]/90 shadow-lg shadow-[#5AA9FF]/20 transition-all cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>{t('hero.ctaFind')}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-
-          <Link
-            to="/schemes"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-[#EAF1FB] bg-[#14213B] hover:bg-[#14213B]/80 border border-[#243A63] hover:border-[#5AA9FF]/40 transition-all cursor-pointer"
-          >
-            <Compass className="w-4 h-4 text-[#9FB0C8]" />
-            <span>{t('hero.ctaBrowse')}</span>
-          </Link>
-        </div>
-
-        {/* Hard Rule & Privacy Note */}
-        <p className="mt-5 text-xs text-[#9FB0C8] max-w-lg mx-auto flex items-center justify-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-[#5AA9FF] shrink-0" />
-          <span>{t('hero.ruleNote')}</span>
-        </p>
-
-        {/* Target Citizen Chips */}
-        <div className="mt-10 pt-8 border-t border-[#243A63]/60 max-w-4xl mx-auto">
-          <p className="text-xs uppercase tracking-wider font-semibold text-[#9FB0C8] mb-3">
-            Tailored For Diverse Family Needs
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {targetGroups.map((group, idx) => (
+            <div className="flex flex-wrap items-center gap-5 pt-1">
               <Link
-                key={idx}
-                to={`/schemes?category=${group.cat}`}
-                className="px-3 py-1.5 rounded-xl bg-[#14213B]/80 border border-[#243A63] hover:border-[#5AA9FF]/60 text-xs text-[#EAF1FB] transition-all hover:scale-105"
+                to={user ? '/recommendations' : '/profile'}
+                className="min-h-[44px] inline-flex items-center justify-center px-6 py-2.5 rounded-[6px] font-semibold text-base bg-[var(--saffron)] hover:bg-[var(--saffron-hover)] text-[var(--saffron-text)] transition-colors duration-150"
               >
-                {group.label}
+                {t('hero.ctaFind')}
               </Link>
-            ))}
+
+              <Link
+                to="/schemes"
+                className="text-base font-semibold text-[var(--deep-text)] hover:text-[var(--deep-muted)] underline underline-offset-4 transition-colors duration-150"
+              >
+                {t('hero.ctaBrowse')}
+              </Link>
+            </div>
+
+            <p className="text-sm text-[var(--deep-muted)]">
+              {t('hero.ruleNote')}
+            </p>
+          </div>
+
+          {/* Simple HTML/CSS + inline SVG illustration: mock Potential matches card */}
+          <div className="lg:col-span-5">
+            <div
+              className="bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--deep-border)] rounded-[6px] p-4 sm:p-5 space-y-3 max-w-md lg:max-w-none"
+              aria-hidden="true"
+            >
+              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--border)]">
+                <span className="text-sm font-bold text-[var(--text-primary)]">
+                  Potential matches
+                </span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-[6px] bg-[var(--surface-subtle)] text-[var(--text-muted)]">
+                  Sample preview
+                </span>
+              </div>
+
+              {/* Row 1: High match + saved bookmark */}
+              <div className="p-3 rounded-[6px] border border-[var(--border)] bg-[var(--bg-page)] flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <CategoryIcon kind="women_child" size={20} withChip />
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--saffron-tint)] text-[var(--saffron-tint-text)] border border-[var(--saffron-border)]">
+                        High match
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">Karnataka</span>
+                    </div>
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">
+                      Gruha Lakshmi Scheme
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Matches state and household category
+                    </p>
+                  </div>
+                </div>
+
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-[6px] bg-[var(--teal)] text-[var(--deep-text)] shrink-0">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M6 4h12v16l-6-4-6 4V4z" />
+                  </svg>
+                </span>
+              </div>
+
+              {/* Row 2: Medium match */}
+              <div className="p-3 rounded-[6px] border border-[var(--border)] bg-[var(--surface)] flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <CategoryIcon kind="healthcare" size={20} withChip />
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--medium-bg)] text-[var(--medium-text)] border border-[var(--medium-border)]">
+                        Medium match
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">Central</span>
+                    </div>
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">
+                      Ayushman Bharat Health Cover
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Confirm family ration card eligibility
+                    </p>
+                  </div>
+                </div>
+
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-[6px] border border-[var(--border)] text-[var(--text-muted)] shrink-0">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M6 4h12v16l-6-4-6 4V4z" />
+                  </svg>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 3-Step How It Works */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#EAF1FB] font-heading">
+      {/* 2. How it works on a white band with coloured step circles + dotted connector */}
+      <section className="bg-[var(--surface)] border-b border-[var(--border)]">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 sm:py-12">
+          <h2 className="text-[22px] sm:text-[24px] font-bold text-[var(--text-primary)] mb-8">
             {t('howItWorks.title')}
           </h2>
-          <p className="text-sm text-[#9FB0C8] mt-2 max-w-xl mx-auto">
-            Clear, step-by-step guidance without complex paperwork jargon.
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#14213B] border border-[#243A63] rounded-2xl p-6 relative">
-            <div className="w-12 h-12 rounded-xl bg-[#5AA9FF]/10 text-[#5AA9FF] border border-[#5AA9FF]/20 flex items-center justify-center font-bold text-lg mb-4">
-              <Users className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-[#EAF1FB] font-heading mb-2">
-              {t('howItWorks.step1Title')}
-            </h3>
-            <p className="text-sm text-[#9FB0C8] leading-relaxed">
-              {t('howItWorks.step1Desc')}
-            </p>
-          </div>
-
-          <div className="bg-[#14213B] border border-[#243A63] rounded-2xl p-6 relative">
-            <div className="w-12 h-12 rounded-xl bg-[#F7B6CE]/10 text-[#FF7BA5] border border-[#FF7BA5]/20 flex items-center justify-center font-bold text-lg mb-4">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-[#EAF1FB] font-heading mb-2">
-              {t('howItWorks.step2Title')}
-            </h3>
-            <p className="text-sm text-[#9FB0C8] leading-relaxed">
-              {t('howItWorks.step2Desc')}
-            </p>
-          </div>
-
-          <div className="bg-[#14213B] border border-[#243A63] rounded-2xl p-6 relative">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-lg mb-4">
-              <FileCheck2 className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-[#EAF1FB] font-heading mb-2">
-              {t('howItWorks.step3Title')}
-            </h3>
-            <p className="text-sm text-[#9FB0C8] leading-relaxed">
-              {t('howItWorks.step3Desc')}
-            </p>
+          <div className="relative">
+            <div
+              className="hidden md:block absolute top-7 left-[16%] right-[16%] border-t-2 border-dotted border-[var(--border)]"
+              aria-hidden="true"
+            />
+            <ol className="relative grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              {steps.map((step) => (
+                <li key={step.num} className="flex md:flex-col items-start gap-4">
+                  <span
+                    className="w-14 h-14 rounded-full inline-flex items-center justify-center text-[22px] font-bold tabular-nums shrink-0 border-4 border-[var(--surface)]"
+                    style={{ backgroundColor: step.bgVar, color: step.textVar }}
+                  >
+                    {step.num}
+                  </span>
+                  <div className="space-y-1.5">
+                    <h3 className="text-[18px] font-bold text-[var(--text-primary)]">
+                      {step.title}
+                    </h3>
+                    <p className="text-base text-[var(--text-muted)] leading-relaxed">
+                      {step.desc}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
 
-      {/* Featured Sample Schemes Catalog Preview */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+      {/* 3. Browse by category band (6 colourful tiles) */}
+      <section className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 sm:py-12 space-y-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-2xl font-bold text-[#EAF1FB] font-heading">
-                Popular Welfare Schemes
-              </h2>
-            </div>
-            <p className="text-sm text-[#9FB0C8]">
+            <h2 className="text-[22px] sm:text-[24px] font-bold text-[var(--text-primary)]">
+              Browse by category
+            </h2>
+            <p className="text-base text-[var(--text-muted)] mt-1">
+              Explore welfare support grouped by household need.
+            </p>
+          </div>
+          <Link
+            to="/schemes"
+            className="text-base font-semibold text-[var(--teal)] hover:text-[var(--teal-hover)] underline underline-offset-4 transition-colors duration-150"
+          >
+            View all schemes
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {BROWSE_CATEGORIES.map((cat) => (
+            <Link
+              key={cat.key}
+              to={`/schemes?category=${cat.key}`}
+              className="bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] rounded-[6px] p-5 flex items-start gap-4 transition-colors duration-150"
+            >
+              <CategoryIcon kind={cat.key} size={24} withChip />
+              <div className="min-w-0 space-y-1">
+                <h3 className="text-[18px] font-bold text-[var(--text-primary)] leading-snug">
+                  {t(cat.labelKey)}
+                </h3>
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                  {cat.summary}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. Popular Welfare Schemes */}
+      <section className="max-w-[1100px] mx-auto px-4 sm:px-6 pb-10 sm:pb-12 space-y-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-4 pt-4 border-t border-[var(--border)]">
+          <div>
+            <h2 className="text-[22px] sm:text-[24px] font-bold text-[var(--text-primary)]">
+              Popular Welfare Schemes
+            </h2>
+            <p className="text-base text-[var(--text-muted)] mt-1">
               Flagship social protection and welfare programs across Karnataka and Central Government.
             </p>
           </div>
           <Link
             to="/schemes"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5AA9FF] hover:underline"
+            className="text-base font-semibold text-[var(--teal)] hover:text-[var(--teal-hover)] underline underline-offset-4 transition-colors duration-150"
           >
-            <span>View all schemes</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            View all schemes
           </Link>
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-72 bg-[#14213B] rounded-2xl animate-pulse border border-[#243A63]" />
+              <div key={i} className="h-64 bg-[var(--surface)] rounded-[6px] border border-[var(--border)]" />
             ))}
           </div>
         ) : (
@@ -203,27 +334,59 @@ export const Landing: React.FC = () => {
         )}
       </section>
 
-      {/* Trust & Official Portals Strip */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-xl font-bold text-[#EAF1FB] font-heading flex items-center justify-center md:justify-start gap-2">
-              <Award className="w-5 h-5 text-[#5AA9FF]" />
-              <span>Independent Guidance, Real Impact</span>
-            </h3>
-            <p className="text-sm text-[#9FB0C8] max-w-xl">
-              All schemes link out directly to designated central and state government portals like myScheme and Seva Sindhu for safe and official application processing.
-            </p>
+      {/* 5. Who is it for strip + SDG strip */}
+      <section className="bg-[var(--surface)] border-t border-[var(--border)]">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 space-y-8">
+          <div className="space-y-3">
+            <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
+              Who is it for
+            </h2>
+            <div className="flex flex-wrap items-center gap-2.5">
+              {targetGroups.map((group) => {
+                const palette = getCategoryPalette(group.cat);
+                return (
+                  <Link
+                    key={group.cat}
+                    to={`/schemes?category=${group.cat}`}
+                    className="min-h-[40px] inline-flex items-center px-3.5 py-2 rounded-[6px] text-sm font-semibold border border-[var(--border)] hover:border-[var(--teal)] transition-colors duration-150"
+                    style={{ backgroundColor: palette.bg, color: palette.fg }}
+                  >
+                    {group.label}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+
+          <div className="pt-6 border-t border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className="inline-flex items-center px-3 py-1.5 rounded-[6px] text-xs font-bold text-[var(--deep-text)]"
+                style={{ backgroundColor: 'var(--sdg-1-bg)' }}
+              >
+                SDG 1 · No Poverty
+              </span>
+              <span
+                className="inline-flex items-center px-3 py-1.5 rounded-[6px] text-xs font-bold text-[var(--deep-text)]"
+                style={{ backgroundColor: 'var(--sdg-10-bg)' }}
+              >
+                SDG 10 · Reduced Inequalities
+              </span>
+              <span
+                className="inline-flex items-center px-3 py-1.5 rounded-[6px] text-xs font-bold text-[var(--deep-text)]"
+                style={{ backgroundColor: 'var(--sdg-16-bg)' }}
+              >
+                SDG 16 · Strong Institutions
+              </span>
+            </div>
+
             <a
               href="https://www.myscheme.gov.in/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0B1426] border border-[#243A63] text-xs font-semibold text-[#EAF1FB] hover:border-[#5AA9FF] transition-all"
+              className="text-sm text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2 shrink-0 transition-colors duration-150"
             >
-              <span>Visit myScheme.gov.in</span>
-              <ExternalLink className="w-3.5 h-3.5 text-[#5AA9FF]" />
+              Visit myScheme.gov.in
             </a>
           </div>
         </div>

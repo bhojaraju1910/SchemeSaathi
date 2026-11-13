@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { Languages } from 'lucide-react';
 
 const languages = [
   { code: 'en', label: 'English', native: 'English' },
@@ -21,21 +20,22 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
   };
 
   return (
-    <div className={`relative inline-flex items-center gap-1.5 ${className}`}>
-      <Languages className="w-4 h-4 text-[#9FB0C8] pointer-events-none absolute left-2.5" />
+    <div className={`relative inline-flex items-center ${className}`}>
       <select
         value={currentLang}
         onChange={handleChange}
         aria-label="Select Application Language"
-        className="appearance-none bg-[#14213B] border border-[#243A63] text-[#EAF1FB] text-xs font-medium rounded-lg pl-8 pr-7 py-1.5 focus:outline-none focus:border-[#5AA9FF] cursor-pointer transition-colors hover:border-[#5AA9FF]/50"
+        className="appearance-none min-h-[40px] bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium rounded-[6px] pl-3 pr-8 py-1.5 cursor-pointer transition-colors duration-150 hover:border-[var(--teal)]"
       >
         {languages.map((l) => (
-          <option key={l.code} value={l.code} className="bg-[#14213B] text-[#EAF1FB]">
+          <option key={l.code} value={l.code} className="bg-[var(--surface)] text-[var(--text-primary)]">
             {l.native}
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute right-2.5 text-[#9FB0C8] text-[10px]">▼</div>
+      <span className="pointer-events-none absolute right-2.5 text-[var(--text-muted)] text-[10px]" aria-hidden="true">
+        ▼
+      </span>
     </div>
   );
 };

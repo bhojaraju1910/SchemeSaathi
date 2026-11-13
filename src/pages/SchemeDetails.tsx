@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import SampleBadge from '../components/SampleBadge';
 import EmptyState from '../components/EmptyState';
+import CategoryIcon, { getCategoryPalette } from '../components/CategoryIcon';
 import { getHardcodedSchemeById } from '../services/schemeMirrorService';
 import {
   addMirrorSavedScheme,
@@ -13,19 +14,7 @@ import {
   recordMirrorApplicationStatus,
   removeMirrorSavedScheme,
 } from '../services/authMirrorService';
-import {
-  ArrowLeft,
-  ExternalLink,
-  Bookmark,
-  Calendar,
-  Building,
-  CheckCircle2,
-  FileText,
-  ShieldAlert,
-  Loader2,
-  Scale,
-  Award,
-} from 'lucide-react';
+import { ArrowLeft, Bookmark, ExternalLink, Loader2 } from 'lucide-react';
 
 export const SchemeDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -128,18 +117,18 @@ export const SchemeDetails: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#5AA9FF] animate-spin" />
-        <p className="text-sm text-[#9FB0C8]">Loading scheme specifications...</p>
+        <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
+        <p className="text-base text-[var(--text-muted)]">Loading scheme details...</p>
       </div>
     );
   }
 
   if (error || !data || !data.scheme) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-[1100px] mx-auto px-4 py-12">
         <EmptyState
           title="Scheme Not Found"
-          description={error || "The requested scheme does not exist."}
+          description={error || 'The requested scheme does not exist.'}
           actionText="Back to Directory"
           actionLink="/schemes"
         />
@@ -160,13 +149,15 @@ export const SchemeDetails: React.FC = () => {
     ? scheme.translations[currentLang].title
     : scheme.title;
 
-  const displayDescription = hasTranslation && scheme.translations[currentLang]?.shortDescription
-    ? scheme.translations[currentLang].shortDescription
-    : scheme.shortDescription;
+  const displayDescription =
+    hasTranslation && scheme.translations[currentLang]?.shortDescription
+      ? scheme.translations[currentLang].shortDescription
+      : scheme.shortDescription;
 
-  const displayBenefits = hasTranslation && scheme.translations[currentLang]?.benefits?.length
-    ? scheme.translations[currentLang].benefits
-    : scheme.benefits;
+  const displayBenefits =
+    hasTranslation && scheme.translations[currentLang]?.benefits?.length
+      ? scheme.translations[currentLang].benefits
+      : scheme.benefits;
 
   const formattedDate = scheme.lastVerified
     ? new Date(scheme.lastVerified).toLocaleDateString(undefined, {
@@ -176,200 +167,252 @@ export const SchemeDetails: React.FC = () => {
       })
     : 'Recently';
 
+  const sourceHost = (() => {
+    try {
+      return scheme.sourceUrl ? new URL(scheme.sourceUrl).hostname : 'myscheme.gov.in';
+    } catch {
+      return 'myscheme.gov.in';
+    }
+  })();
+
+  const palette = getCategoryPalette(scheme.category);
+  const categoryLabel = String(t(`categories.${scheme.category}`, scheme.category));
+  const levelLabel =
+    scheme.level === 'central'
+      ? t('schemesPage.levelCentral')
+      : `${scheme.state || 'State'} ${t('schemesPage.levelState')}`;
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Back button */}
+    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
       <div>
         <Link
           to="/schemes"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[#9FB0C8] hover:text-[#5AA9FF] transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--teal)] hover:text-[var(--teal-hover)] transition-colors duration-150"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t('schemeDetails.back')}</span>
         </Link>
       </div>
 
-      {/* Main Scheme Hero Banner */}
-      <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Category Tinted Header Block */}
+      <section
+        className="border border-[var(--border)] rounded-[6px] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-start gap-5"
+        style={{ backgroundColor: palette.bg }}
+      >
+        <span
+          className="w-12 h-12 rounded-[6px] border border-[var(--border)] inline-flex items-center justify-center shrink-0"
+          style={{ backgroundColor: 'var(--surface)', color: palette.fg }}
+        >
+          <CategoryIcon kind={scheme.category} size={26} />
+        </span>
+
+        <div className="space-y-3 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-[#5AA9FF]/10 text-[#5AA9FF] border border-[#5AA9FF]/20">
-              {String(t(`categories.${scheme.category}`, scheme.category))}
+            <span
+              className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold border border-[var(--border)]"
+              style={{ backgroundColor: 'var(--surface)', color: palette.fg }}
+            >
+              {categoryLabel}
             </span>
-            <span className="text-xs px-3 py-1 rounded-lg bg-[#243A63]/60 text-[#9FB0C8] border border-[#243A63] flex items-center gap-1.5">
-              <Building className="w-3.5 h-3.5 text-[#9FB0C8]" />
-              {scheme.level === 'central'
-                ? t('schemesPage.levelCentral')
-                : `${scheme.state || 'State'} ${t('schemesPage.levelState')}`}
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--medium-bg)] text-[var(--medium-text)] border border-[var(--medium-border)]">
+              {levelLabel}
             </span>
             {scheme.isSample && <SampleBadge />}
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSaveToggle}
-              disabled={saveLoading}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                isSaved
-                  ? 'bg-[#FF7BA5]/15 text-[#FF7BA5] border border-[#FF7BA5]/40'
-                  : 'bg-[#0B1426] text-[#EAF1FB] border border-[#243A63] hover:border-[#5AA9FF]'
-              }`}
-            >
-              <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
-              <span>{isSaved ? t('recommendations.saved') : t('recommendations.save')}</span>
-            </button>
-
-            <a
-              href={scheme.applyUrl || 'https://www.myscheme.gov.in/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleOfficialClick}
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-[#0B1426] bg-[#5AA9FF] hover:bg-[#5AA9FF]/90 transition-all shadow-md shadow-[#5AA9FF]/15"
-            >
-              <span>{t('schemeDetails.openOfficial')}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#EAF1FB] font-heading leading-tight mb-2">
+          <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
             {displayTitle}
           </h1>
+
           {!hasTranslation && currentLang !== 'en' && (
-            <span className="text-xs text-[#9FB0C8] italic">
+            <p className="text-sm text-[var(--text-primary)] italic">
               ({t('shownInEnglish')})
-            </span>
+            </p>
           )}
+
+          <p className="text-base text-[var(--text-primary)] leading-relaxed max-w-3xl">
+            {displayDescription}
+          </p>
         </div>
+      </section>
 
-        <p className="text-base text-[#9FB0C8] leading-relaxed max-w-4xl">
-          {displayDescription}
-        </p>
-
-        {/* Verification and source meta info */}
-        <div className="pt-4 border-t border-[#243A63]/60 flex flex-wrap items-center justify-between gap-4 text-xs text-[#9FB0C8]">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#5AA9FF]" />
-            <span>{t('schemeDetails.lastVerified')}:</span>
-            <span className="text-[#EAF1FB] font-medium">{formattedDate}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span>{t('schemeDetails.officialSource')}:</span>
-            <a
-              href={scheme.sourceUrl || 'https://www.myscheme.gov.in/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#5AA9FF] hover:underline inline-flex items-center gap-1 font-medium"
-            >
-              <span>{scheme.sourceUrl ? new URL(scheme.sourceUrl).hostname : 'myscheme.gov.in'}</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid: Benefits & Documents */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Benefits Card */}
-        <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-8 space-y-4">
-          <div className="flex items-center gap-2 text-emerald-400">
-            <Award className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-[#EAF1FB] font-heading">
-              {t('schemeDetails.benefits')}
-            </h2>
-          </div>
-          <ul className="space-y-3">
-            {displayBenefits && displayBenefits.length > 0 ? (
-              displayBenefits.map((benefit: string, idx: number) => (
-                <li key={idx} className="flex items-start gap-3 text-sm text-[#EAF1FB]/90 leading-relaxed">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
-                  <span>{benefit}</span>
-                </li>
-              ))
-            ) : (
-              <li className="text-sm text-[#9FB0C8]">Detailed benefits specified on official department page.</li>
-            )}
-          </ul>
-        </div>
-
-        {/* Required Documents Card */}
-        <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-8 space-y-4">
-          <div className="flex items-center gap-2 text-[#5AA9FF]">
-            <FileText className="w-5 h-5 text-[#5AA9FF]" />
-            <h2 className="text-lg font-bold text-[#EAF1FB] font-heading">
-              {t('schemeDetails.documents')}
-            </h2>
-          </div>
-          <ul className="space-y-3">
-            {scheme.documentsRequired && scheme.documentsRequired.length > 0 ? (
-              scheme.documentsRequired.map((doc: string, idx: number) => (
-                <li key={idx} className="flex items-start gap-3 text-sm text-[#EAF1FB]/90 leading-relaxed">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5AA9FF] shrink-0 mt-2"></span>
-                  <span>{doc}</span>
-                </li>
-              ))
-            ) : (
-              <li className="text-sm text-[#9FB0C8]">Standard residence and family category proof.</li>
-            )}
-          </ul>
-        </div>
-      </div>
-
-      {/* Eligibility Rules (Plain Language) */}
-      <div className="bg-[#14213B] border border-[#243A63] rounded-3xl p-6 sm:p-8 space-y-4">
-        <div className="flex items-center gap-2 text-[#F7B6CE]">
-          <Scale className="w-5 h-5 text-[#FF7BA5]" />
-          <h2 className="text-lg font-bold text-[#EAF1FB] font-heading">
-            {t('schemeDetails.eligibilityRules')}
+      {/* Two-Column Key Facts Table with subtle zebra rows */}
+      <section className="bg-[var(--surface)] border border-[var(--border)] rounded-[6px] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-subtle)]">
+          <h2 className="text-[22px] font-bold text-[var(--text-primary)]">
+            Key Scheme Facts
           </h2>
         </div>
 
-        <p className="text-xs text-[#9FB0C8]">
+        <table className="w-full text-left border-collapse">
+          <tbody className="divide-y divide-[var(--border)] text-base">
+            <tr className="flex flex-col sm:table-row odd:bg-[var(--surface)] even:bg-[var(--bg-page)]">
+              <th scope="row" className="sm:w-1/3 px-6 pt-4 pb-1 sm:py-4 font-semibold text-[var(--text-primary)] align-top">
+                {t('schemeDetails.benefits')}
+              </th>
+              <td className="sm:w-2/3 px-6 pb-4 pt-1 sm:py-4 text-[var(--text-primary)]">
+                {displayBenefits && displayBenefits.length > 0 ? (
+                  <ul className="list-disc pl-5 space-y-1.5">
+                    {displayBenefits.map((benefit: string, idx: number) => (
+                      <li key={idx}>{benefit}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="text-[var(--text-muted)]">Detailed benefits specified on official department page.</span>
+                )}
+              </td>
+            </tr>
+
+            <tr className="flex flex-col sm:table-row odd:bg-[var(--surface)] even:bg-[var(--bg-page)]">
+              <th scope="row" className="sm:w-1/3 px-6 pt-4 pb-1 sm:py-4 font-semibold text-[var(--text-primary)] align-top">
+                {t('schemeDetails.documents')}
+              </th>
+              <td className="sm:w-2/3 px-6 pb-4 pt-1 sm:py-4 text-[var(--text-primary)]">
+                {scheme.documentsRequired && scheme.documentsRequired.length > 0 ? (
+                  <ul className="list-disc pl-5 space-y-1.5">
+                    {scheme.documentsRequired.map((doc: string, idx: number) => (
+                      <li key={idx}>{doc}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="text-[var(--text-muted)]">Standard residence and family category proof.</span>
+                )}
+              </td>
+            </tr>
+
+            <tr className="flex flex-col sm:table-row odd:bg-[var(--surface)] even:bg-[var(--bg-page)]">
+              <th scope="row" className="sm:w-1/3 px-6 pt-4 pb-1 sm:py-4 font-semibold text-[var(--text-primary)] align-top">
+                {t('schemeDetails.level')}
+              </th>
+              <td className="sm:w-2/3 px-6 pb-4 pt-1 sm:py-4 text-[var(--text-primary)]">
+                {scheme.level === 'central'
+                  ? t('schemesPage.levelCentral')
+                  : t('schemesPage.levelState')}
+              </td>
+            </tr>
+
+            <tr className="flex flex-col sm:table-row odd:bg-[var(--surface)] even:bg-[var(--bg-page)]">
+              <th scope="row" className="sm:w-1/3 px-6 pt-4 pb-1 sm:py-4 font-semibold text-[var(--text-primary)] align-top">
+                {t('schemeDetails.state')}
+              </th>
+              <td className="sm:w-2/3 px-6 pb-4 pt-1 sm:py-4 text-[var(--text-primary)]">
+                {scheme.state || 'All'}
+              </td>
+            </tr>
+
+            <tr className="flex flex-col sm:table-row odd:bg-[var(--surface)] even:bg-[var(--bg-page)]">
+              <th scope="row" className="sm:w-1/3 px-6 pt-4 pb-1 sm:py-4 font-semibold text-[var(--text-primary)] align-top">
+                {t('schemeDetails.lastVerified')}
+              </th>
+              <td className="sm:w-2/3 px-6 pb-4 pt-1 sm:py-4 text-[var(--text-primary)] tabular-nums">
+                {formattedDate}
+              </td>
+            </tr>
+
+            <tr className="flex flex-col sm:table-row odd:bg-[var(--surface)] even:bg-[var(--bg-page)]">
+              <th scope="row" className="sm:w-1/3 px-6 pt-4 pb-1 sm:py-4 font-semibold text-[var(--text-primary)] align-top">
+                {t('schemeDetails.officialSource')}
+              </th>
+              <td className="sm:w-2/3 px-6 pb-4 pt-1 sm:py-4">
+                <a
+                  href={scheme.sourceUrl || 'https://www.myscheme.gov.in/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2 inline-flex items-center gap-1 transition-colors duration-150"
+                >
+                  <span>{sourceHost}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      {/* Eligibility Criteria Section with small teal check marks */}
+      <section className="bg-[var(--surface)] border border-[var(--border)] rounded-[6px] p-6 sm:p-8 space-y-4">
+        <h2 className="text-[22px] font-bold text-[var(--text-primary)]">
+          {t('schemeDetails.eligibilityRules')}
+        </h2>
+        <p className="text-base text-[var(--text-muted)]">
           The following conditions determine whether this scheme is flagged as potentially relevant for your profile:
         </p>
 
         {criteria && criteria.rules && criteria.rules.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <ul className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
             {criteria.rules.map((rule: any, idx: number) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-2xl bg-[#0B1426] border border-[#243A63] flex items-start gap-3"
-              >
-                <div className="w-6 h-6 rounded-lg bg-[#5AA9FF]/10 text-[#5AA9FF] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                  {idx + 1}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#EAF1FB]">
-                    {rule.label || `${rule.field} ${rule.op} ${rule.value}`}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] uppercase font-bold text-[#9FB0C8] px-1.5 py-0.5 rounded bg-[#14213B] border border-[#243A63]">
-                      Field: {rule.field}
-                    </span>
-                    {rule.required !== false && (
-                      <span className="text-[10px] text-amber-300 font-semibold">
-                        Mandatory
-                      </span>
-                    )}
+              <li key={idx} className="py-3.5 flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <span
+                    className="mt-0.5 w-6 h-6 rounded-[6px] bg-[var(--teal-tint)] text-[var(--teal)] inline-flex items-center justify-center shrink-0"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12.5l4.5 4.5L19 7.5" />
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-[var(--text-primary)]">
+                      {rule.label || `${rule.field} ${rule.op} ${rule.value}`}
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Profile field: {rule.field}
+                    </p>
                   </div>
                 </div>
-              </div>
+                {rule.required !== false && (
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-[6px] bg-[var(--saffron-tint)] text-[var(--saffron-tint-text)] border border-[var(--saffron-border)] shrink-0">
+                    Mandatory
+                  </span>
+                )}
+              </li>
             ))}
-          </div>
+          </ul>
         ) : (
-          <p className="text-sm text-[#9FB0C8]">No special restrictions specified.</p>
+          <p className="text-base text-[var(--text-muted)]">No special restrictions specified.</p>
         )}
-      </div>
+      </section>
 
-      {/* Advisory Callout */}
-      <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3.5 text-xs text-amber-200">
-        <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong>Mandatory Notice:</strong> {t('schemeDetails.notice')}
-        </p>
+      {/* Prominent Saffron Official Button + Save Button */}
+      <section className="flex flex-wrap items-center gap-3">
+        <a
+          href={scheme.applyUrl || 'https://www.myscheme.gov.in/'}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleOfficialClick}
+          className="min-h-[48px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[6px] text-base font-semibold bg-[var(--saffron)] hover:bg-[var(--saffron-hover)] text-[var(--saffron-text)] transition-colors duration-150"
+        >
+          <span>{t('schemeDetails.openOfficial')}</span>
+          <ExternalLink className="w-4 h-4" />
+        </a>
+
+        <button
+          type="button"
+          onClick={handleSaveToggle}
+          disabled={saveLoading}
+          className={`min-h-[48px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[6px] text-base font-semibold border transition-colors duration-150 cursor-pointer ${
+            isSaved
+              ? 'bg-[var(--teal)] text-[var(--deep-text)] border-[var(--teal)] hover:bg-[var(--teal-hover)]'
+              : 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)]'
+          }`}
+        >
+          <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+          <span>{isSaved ? t('recommendations.saved') : t('recommendations.save')}</span>
+        </button>
+      </section>
+
+      {/* Mandatory Notice */}
+      <div className="p-4 rounded-[6px] bg-[var(--saffron-tint)] border border-[var(--saffron-border)] text-sm text-[var(--text-primary)]">
+        <strong className="text-[var(--saffron-tint-text)]">Mandatory Notice:</strong> {t('schemeDetails.notice')}
       </div>
     </div>
   );

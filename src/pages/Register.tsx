@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Eye, EyeOff, Loader2, AlertCircle, ArrowRight, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export const Register: React.FC = () => {
   const { t } = useTranslation();
@@ -42,111 +42,147 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md bg-[#14213B] border border-[#243A63] rounded-3xl p-8 sm:p-10 shadow-xl">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-[#5AA9FF]/10 text-[#5AA9FF] border border-[#5AA9FF]/20 mx-auto flex items-center justify-center mb-4">
-            <UserPlus className="w-6 h-6" />
+    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        {/* Form Card */}
+        <div className="lg:col-span-7 bg-[var(--surface)] border border-[var(--border)] rounded-[6px] p-6 sm:p-8 space-y-6">
+          <div className="space-y-1.5">
+            <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
+              {t('auth.registerTitle')}
+            </h1>
+            <p className="text-base text-[var(--text-muted)]">
+              {t('auth.registerSubtitle')}
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-[#EAF1FB] font-heading">
-            {t('auth.registerTitle')}
-          </h1>
-          <p className="text-xs text-[#9FB0C8] mt-1.5">
-            {t('auth.registerSubtitle')}
+
+          {error && (
+            <div className="p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[6px] text-sm font-medium text-[var(--error)]" role="alert">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="register-name" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+                {t('auth.name')}
+              </label>
+              <input
+                id="register-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Ramesh Kumar"
+                required
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="register-email" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+                {t('auth.email')}
+              </label>
+              <input
+                id="register-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. citizen@example.com"
+                required
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="register-password" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+                {t('auth.password')}
+              </label>
+              <div className="relative">
+                <input
+                  id="register-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  required
+                  className="w-full min-h-[44px] px-3.5 py-2.5 pr-12 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                  className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center absolute right-1 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="register-language" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+                Preferred Language for Assistance
+              </label>
+              <select
+                id="register-language"
+                value={preferredLanguage}
+                onChange={(e) => setPreferredLanguage(e.target.value as any)}
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
+              >
+                <option value="en">English</option>
+                <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full min-h-[44px] mt-2 py-2.5 px-4 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-base rounded-[6px] transition-colors duration-150 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              <span>{t('auth.registerBtn')}</span>
+            </button>
+          </form>
+
+          <p className="text-sm text-[var(--text-muted)]">
+            {t('auth.haveAccount')}{' '}
+            <Link to="/login" className="text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2">
+              {t('nav.login')}
+            </Link>
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-start gap-2.5 text-xs text-rose-300">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
-              {t('auth.name')}
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Ramesh Kumar"
-              required
-              className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] placeholder:text-[#9FB0C8]/50 focus:outline-none transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
-              {t('auth.email')}
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. citizen@example.com"
-              required
-              className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] placeholder:text-[#9FB0C8]/50 focus:outline-none transition-colors"
-            />
+        {/* Deep Band Benefits Panel */}
+        <aside className="lg:col-span-5 hero-band-bg text-[var(--deep-text)] border border-[var(--deep-border)] rounded-[6px] p-6 sm:p-8 flex flex-col justify-between gap-6">
+          <div className="space-y-4">
+            <span className="inline-block px-3 py-1 rounded-[6px] text-xs font-semibold bg-[var(--saffron)] text-[var(--saffron-text)]">
+              Free & Private
+            </span>
+            <h2 className="text-[22px] font-bold text-[var(--deep-text)] leading-snug">
+              Why create a SchemeSaathi account?
+            </h2>
+            <p className="text-sm text-[var(--deep-muted)] leading-relaxed">
+              Your account saves your basic household details so you can quickly view updated matches and track schemes you plan to apply for.
+            </p>
+            <ul className="space-y-3 pt-2 text-sm text-[var(--deep-muted)]">
+              <li className="flex items-start gap-2.5">
+                <span className="font-bold text-[var(--saffron)]">1.</span>
+                <span>Transparent High and Medium alignment indicators for every scheme.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="font-bold text-[var(--saffron)]">2.</span>
+                <span>Checklist of required documents before you visit a GramaOne or Seva Sindhu centre.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="font-bold text-[var(--saffron)]">3.</span>
+                <span>Switch freely between English, Kannada, and Hindi at any time.</span>
+              </li>
+            </ul>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
-              {t('auth.password')}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                required
-                className="w-full px-4 py-2.5 pr-10 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] placeholder:text-[#9FB0C8]/50 focus:outline-none transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9FB0C8] hover:text-[#EAF1FB] cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-[#EAF1FB] mb-1.5">
-              Preferred Language for Assistance
-            </label>
-            <select
-              value={preferredLanguage}
-              onChange={(e) => setPreferredLanguage(e.target.value as any)}
-              className="w-full px-4 py-2.5 bg-[#0B1426] border border-[#243A63] focus:border-[#5AA9FF] rounded-xl text-sm text-[#EAF1FB] focus:outline-none transition-colors cursor-pointer"
-            >
-              <option value="en">English</option>
-              <option value="kn">ಕನ್ನಡ (Kannada)</option>
-              <option value="hi">हिन्दी (Hindi)</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-2 py-3 px-4 bg-[#5AA9FF] hover:bg-[#5AA9FF]/90 text-[#0B1426] font-semibold text-sm rounded-xl transition-all shadow-md shadow-[#5AA9FF]/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{t('auth.registerBtn')}</span>}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-xs text-[#9FB0C8]">
-          {t('auth.haveAccount')}{' '}
-          <Link to="/login" className="text-[#5AA9FF] font-semibold hover:underline inline-flex items-center gap-0.5">
-            <span>{t('nav.login')}</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
-        </p>
+          <p className="text-xs text-[var(--deep-muted)] pt-4 border-t border-[var(--deep-border)]">
+            Information is for guidance only. Please confirm eligibility on the official website.
+          </p>
+        </aside>
       </div>
     </div>
   );
