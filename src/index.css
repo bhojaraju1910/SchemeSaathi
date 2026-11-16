@@ -2,97 +2,86 @@
 
 @theme {
   --font-sans: "Noto Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Bricolage Grotesque", "Noto Sans", system-ui, -apple-system, sans-serif;
+  --font-serif-accent: "Instrument Serif", Georgia, serif;
 }
 
 @layer base {
   :root {
-    /* Core light public-service palette */
-    --bg-page: #F7F8F5;
-    --surface: #FFFFFF;
-    --surface-subtle: #F1F3EE;
-    --border: #D9DED8;
-    --text-primary: #1B2733;
-    --text-muted: #5B6773;
+    /* Editorial Glow Palette */
+    --navy: #14213D;
+    --navy-2: #1C2D52;
+    --cream: #F4EDE0;
+    --paper: #FBF7EF;
+    --line: #E3D9C6;
+    --line-dark: #2C3E66;
 
-    /* Primary Civic Teal */
-    --teal: #0F6B5C;
-    --teal-hover: #0B5246;
-    --teal-tint: #DDF1EC;
+    --muted: #5A5F6B;
+    --muted-dark: #B9C1D1;
 
-    /* Deep Band (#0E2F2B) */
-    --deep-band: #0E2F2B;
-    --deep-band-end: #123B36;
-    --deep-border: #234E48;
-    --deep-text: #FFFFFF;
-    --deep-muted: #CFE3DE;
+    /* One Accent — always use --navy text on --accent fills, NEVER white */
+    --accent: #FF6B3D;
+    --accent-hover: #F25A2B;
+    --accent-ink: #B8400A;
 
-    /* Warm Accent Saffron */
-    --saffron: #F2A33A;
-    --saffron-hover: #E09128;
-    --saffron-text: #1B2733;
-    --saffron-tint: #FFF1D6;
-    --saffron-tint-text: #8A4B00;
-    --saffron-border: #E8C78A;
+    /* Match Badges & Semantic States */
+    --badge-high-bg: #FFE3D6;
+    --badge-high-text: #8F2E05;
+    --badge-medium-bg: #E9E2D2;
+    --badge-medium-text: #44546A;
 
-    /* Medium Badge & Neutral Slate */
-    --medium-bg: #E8EDF3;
-    --medium-text: #44546A;
-    --medium-border: #C8D3E0;
-
-    /* Semantic Feedback */
-    --error: #B3261E;
-    --error-bg: #FDF2F2;
-    --error-border: #F2C6C4;
     --success: #1E7B45;
-    --success-bg: #EEF8F1;
-    --success-border: #BFE2CC;
+    --success-bg: #EAF6EE;
+    --success-border: #B5DDC3;
+    --error: #B3261E;
+    --error-bg: #FDECEB;
+    --error-border: #F2BDB9;
 
-    /* Step Circle Accents */
-    --step-1-bg: #0F6B5C;
-    --step-1-text: #FFFFFF;
-    --step-2-bg: #F2A33A;
-    --step-2-text: #1B2733;
-    --step-3-bg: #A23B8C;
-    --step-3-text: #FFFFFF;
+    /* Category Icon Tints (icon only, muted; labels stay --navy) */
+    --cat-education: #5B6BB5;
+    --cat-healthcare: #C0506E;
+    --cat-housing: #A0733A;
+    --cat-employment: #2E8B7A;
+    --cat-women: #A8559A;
+    --cat-senior: #4A7BA6;
+    --cat-agriculture: #6C8F3E;
 
-    /* Category Tokens (text on soft background, all WCAG AA) */
-    --cat-education-fg: #3B4BA8;
-    --cat-education-bg: #E8EBF8;
-    --cat-healthcare-fg: #B83259;
-    --cat-healthcare-bg: #FCE8EE;
-    --cat-housing-fg: #8A5A14;
-    --cat-housing-bg: #F6EBD6;
-    --cat-employment-fg: #0F6B5C;
-    --cat-employment-bg: #DDF1EC;
-    --cat-women-fg: #A23B8C;
-    --cat-women-bg: #F7E6F3;
-    --cat-senior-fg: #2F5F8A;
-    --cat-senior-bg: #E3EEF7;
-    --cat-agriculture-fg: #4F7A28;
-    --cat-agriculture-bg: #EAF2DC;
-    --cat-all-fg: #1B2733;
-    --cat-all-bg: #E8EDF3;
+    /* SDG Flat Blocks */
+    --sdg-1: #C42B30;
+    --sdg-10: #B42362;
+    --sdg-16: #175C85;
 
-    /* Plain SDG flat blocks */
-    --sdg-1-bg: #C42B30;
-    --sdg-10-bg: #B42362;
-    --sdg-16-bg: #175C85;
+    /* Font Stacks */
+    --font-display: "Bricolage Grotesque", "Noto Sans", system-ui, -apple-system, sans-serif;
+    --font-serif-accent: "Instrument Serif", Georgia, serif;
+    --font-sans: "Noto Sans", system-ui, -apple-system, sans-serif;
+
+    /* Subtle Editorial Shadows (no glowing shadows, no backdrop-filter) */
+    --shadow-paper: 0 2px 6px rgba(20, 33, 61, 0.04), 0 10px 24px -12px rgba(20, 33, 61, 0.09);
+    --shadow-float: 0 18px 36px -14px rgba(10, 17, 34, 0.45);
   }
 
   html {
-    font-size: 16px;
+    font-size: 100%;
+    scroll-behavior: smooth;
   }
 
   body {
-    background-color: var(--bg-page);
-    color: var(--text-primary);
-    font-family: "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 16px;
+    background-color: var(--cream);
+    color: var(--navy);
+    font-family: var(--font-sans);
+    font-size: 1rem;
     line-height: 1.6;
   }
 
+  :root[lang="kn"] body,
+  :root[lang="hi"] body {
+    line-height: 1.7;
+  }
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
     color: inherit;
   }
 
@@ -101,16 +90,297 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible,
-  summary:focus-visible {
-    outline: 2px solid var(--teal);
+  summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.font-serif-accent {
+  font-family: var(--font-serif-accent);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.text-balance {
+  text-wrap: balance;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-.hero-band-bg {
-  background: linear-gradient(135deg, var(--deep-band) 0%, var(--deep-band-end) 100%);
+/* Dark Editorial Hero with Warm Coral Glow + CSS Fluted Vertical Bars */
+.hero-editorial-bg {
+  position: relative;
+  background-color: var(--navy);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(244, 237, 224, 0.035) 0px,
+      rgba(244, 237, 224, 0.035) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    radial-gradient(
+      ellipse 68% 60% at 74% 46%,
+      rgba(255, 107, 61, 0.28) 0%,
+      rgba(255, 107, 61, 0.10) 42%,
+      rgba(20, 33, 61, 0) 74%
+    );
+}
+
+.cta-editorial-bg {
+  background-color: var(--navy);
+  background-image: radial-gradient(
+    ellipse 65% 65% at 50% 100%,
+    rgba(255, 107, 61, 0.24) 0%,
+    rgba(255, 107, 61, 0.06) 48%,
+    rgba(20, 33, 61, 0) 76%
+  );
+}
+
+/* Highlight strip for non-Latin italic-accent fallback (kn / hi) */
+.accent-highlight-script {
+  background: linear-gradient(
+    to top,
+    rgba(255, 107, 61, 0.35) 35%,
+    transparent 35%
+  );
+  padding: 0 0.14em;
+  border-radius: 3px;
+}
+
+/* Outlined step numerals 01 / 02 / 03 */
+.step-outline-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--navy);
+}
+
+/* Editorial Cards & Inputs */
+.editorial-card {
+  background-color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-paper);
+}
+
+.editorial-card-dark {
+  background-color: var(--navy-2);
+  border: 1px solid var(--line-dark);
+  border-radius: 16px;
+  box-shadow: var(--shadow-float);
+}
+
+.editorial-input {
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background-color: var(--paper);
+  color: var(--navy);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.editorial-input:focus {
+  border-color: var(--navy);
+}
+
+/* Pill Buttons */
+.btn-accent-pill {
+  min-height: 48px;
+  border-radius: 999px;
+  background-color: var(--accent);
+  color: var(--navy);
+  font-weight: 700;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.btn-accent-pill:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-outline-pill {
+  min-height: 48px;
+  border-radius: 999px;
+  border: 1.5px solid var(--navy);
+  background-color: transparent;
+  color: var(--navy);
+  font-weight: 600;
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.btn-outline-pill:hover:not(:disabled) {
+  background-color: var(--navy);
+  color: var(--cream);
+}
+
+.btn-outline-dark-pill {
+  min-height: 48px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line-dark);
+  background-color: transparent;
+  color: var(--cream);
+  font-weight: 600;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.btn-outline-dark-pill:hover:not(:disabled) {
+  border-color: var(--cream);
+  background-color: var(--navy-2);
+}
+
+/* Gentle CSS Marquee */
+@keyframes editorial-marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: editorial-marquee 38s linear infinite;
+}
+
+.marquee-wrapper:hover .marquee-track,
+.marquee-wrapper:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Faint cream fluted band background */
+.cream-fluted-subtle {
+  background-color: var(--cream);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(20, 33, 61, 0.018) 0px,
+    rgba(20, 33, 61, 0.018) 1px,
+    transparent 1px,
+    transparent 44px
+  );
+}
+
+/* Subtle Card Lift on Hover-Capable Devices */
+@media (hover: hover) {
+  .editorial-card-lift {
+    transition: transform 150ms ease, border-color 150ms ease;
+  }
+  .editorial-card-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Subtle Opacity Page Reveal */
+@keyframes subtleFadeUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: subtleFadeUp 0.2s ease-out both;
+}
+
+/* Floating Hero Card Tilts (Desktop lg+ only) */
+@media (min-width: 1024px) {
+  .hero-float-a {
+    transform: rotate(-2.5deg);
+    transition: transform 200ms ease;
+  }
+  .hero-float-b {
+    transform: rotate(2deg);
+    transition: transform 200ms ease;
+  }
+  .hero-float-c {
+    transform: rotate(-1.5deg);
+    transition: transform 200ms ease;
+  }
+}
+
+@media (min-width: 1024px) and (hover: hover) {
+  .hero-float-a:hover,
+  .hero-float-b:hover,
+  .hero-float-c:hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+}
+
+/* Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-fade-up {
+    animation: none;
+  }
+  .editorial-card-lift,
+  .editorial-card-lift:hover {
+    transform: none;
+    transition: none;
+  }
+  .marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .hero-float-a,
+  .hero-float-b,
+  .hero-float-c {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Print Styles (Feature F5) */
+.print-only {
+  display: none;
+}
+
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #14213D !important;
+    font-size: 12pt !important;
+  }
+  header,
+  footer,
+  .announcement-bar,
+  .compare-tray,
+  .mobile-sticky-bar,
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .editorial-card {
+    box-shadow: none !important;
+    border-color: #cccccc !important;
+    background-color: #ffffff !important;
+  }
+  a {
+    text-decoration: underline;
+  }
 }

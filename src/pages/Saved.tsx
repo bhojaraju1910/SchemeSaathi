@@ -1,19 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useCompare } from '../context/CompareContext';
 import EmptyState from '../components/EmptyState';
 import SampleBadge from '../components/SampleBadge';
-import CategoryIcon, { getCategoryPalette } from '../components/CategoryIcon';
-import { getHardcodedSchemeById } from '../services/schemeMirrorService';
+import VerificationBadge from '../components/VerificationBadge';
+import AccentWord from '../components/AccentWord';
+import PageHero from '../components/PageHero';
+import FallbackNotice from '../components/FallbackNotice';
+import CategoryIcon, { getCategoryIconColor } from '../components/CategoryIcon';
+import { getChecklistProgress, readChecklist } from '../utils/schemeTools';
+import { loadEmergencySchemes, withTimeout } from '../utils/clientCache';
 import {
+  getMirrorCatalog,
   getMirrorSavedSchemes,
   isMirrorToken,
   recordMirrorApplicationStatus,
   removeMirrorSavedScheme,
+  setMirrorCatalog,
 } from '../services/authMirrorService';
-import { Bookmark, Trash2, ExternalLink } from 'lucide-react';
+import {
+  BookmarkIcon,
+  ExternalLinkIcon,
+  FileCheckIcon,
+  TrashIcon,
+} from '../components/Icons';
 
 interface SavedRecord {
   _id: string;
@@ -27,37 +40,85 @@ interface SavedRecord {
 export const Saved: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
+  const { registerSchemes } = useCompare();
+
   const [savedList, setSavedList] = useState<SavedRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isFallback, setIsFallback] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const fetchSaved = async () => {
+  const fetchSaved = useCallback(async () => {
+    const loadMirrorSavedWithCatalog = async () => {
+      if (!user) return;
+      let catalog = getMirrorCatalog();
+      let usedEmergency = false;
+      if (catalog.length === 0) {
+        try {
+          const res = await withTimeout(
+            (signal) => api.get('/schemes/quick-catalog', { signal }),
+            4000
+          );
+          if (Array.isArray(res.data?.schemes) && res.data.schemes.length > 0) {
+            catalog = res.data.schemes;
+            setMirrorCatalog(catalog);
+          }
+        } catch {
+          // fallback below
+        }
+      }
+      if (catalog.length === 0) {
+        catalog = await loadEmergencySchemes();
+        setMirrorCatalog(catalog);
+        usedEmergency = true;
+      }
+      const list = getMirrorSavedSchemes(user.id, catalog) as SavedRecord[];
+      setSavedList(list);
+      registerSchemes(list.map((l) => l.scheme).filter(Boolean));
+      setIsFallback(usedEmergency);
+    };
+
     try {
       setLoading(true);
-      if (isMirrorToken(token) && user) {
-        setSavedList(getMirrorSavedSchemes(user.id) as SavedRecord[]);
+      if (isMirrorToken(token)) {
+        await loadMirrorSavedWithCatalog();
         return;
       }
 
-      const res = await api.get('/saved');
-      const records = (Array.isArray(res.data) ? res.data : []).map((item: SavedRecord) => ({
-        ...item,
-        scheme: item.scheme || getHardcodedSchemeById(item.schemeId)?.scheme,
-      }));
-      setSavedList(records);
-    } catch (err) {
-      console.error('Failed to load saved schemes, using mirror store:', err);
-      if (user) {
-        setSavedList(getMirrorSavedSchemes(user.id) as SavedRecord[]);
+      const res = await withTimeout((signal) => api.get('/saved', { signal }), 4000);
+      const records: SavedRecord[] = Array.isArray(res.data) ? res.data : [];
+
+      const unresolvedIds = records
+        .filter((item) => !item.scheme && item.schemeId)
+        .map((item) => item.schemeId);
+
+      if (unresolvedIds.length > 0) {
+        const emergency = await loadEmergencySchemes();
+        const byId = new Map<string, any>();
+        for (const s of emergency) {
+          byId.set(s._id, s);
+          if (s.slug) byId.set(s.slug, s);
+        }
+        setSavedList(
+          records.map((item) => ({
+            ...item,
+            scheme: item.scheme || byId.get(item.schemeId),
+          }))
+        );
+      } else {
+        setSavedList(records);
       }
+      registerSchemes(records.map((r) => r.scheme).filter(Boolean));
+      setIsFallback(false);
+    } catch {
+      await loadMirrorSavedWithCatalog();
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, token, registerSchemes]);
 
   useEffect(() => {
     fetchSaved();
-  }, [user, token]);
+  }, [fetchSaved]);
 
   const handleRemove = async (schemeId: string) => {
     setActionLoading(schemeId);
@@ -110,160 +171,204 @@ export const Saved: React.FC = () => {
   const currentLang = i18n.language as 'en' | 'kn' | 'hi';
 
   return (
-    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 border-b border-[var(--border)]">
-        <div>
-          <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
-            {t('savedPage.title')}
-          </h1>
-          <p className="text-base text-[var(--text-muted)] mt-1">
-            {t('savedPage.subtitle')}
-          </p>
-        </div>
+    <div className="pb-12 animate-fade-up">
+      <PageHero
+        eyebrow="Shortlist & Documents"
+        title={
+          <>
+            Saved <AccentWord>Schemes</AccentWord>
+          </>
+        }
+        subtitle={t('savedPage.subtitle')}
+        actions={
+          <span className="px-4 py-2 rounded-full bg-[var(--navy-2)] border border-[var(--line-dark)] text-sm font-bold text-[var(--cream)] tabular-nums">
+            {savedList.length} Scheme{savedList.length === 1 ? '' : 's'} Saved
+          </span>
+        }
+      />
 
-        <span className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">
-          {savedList.length} Scheme{savedList.length === 1 ? '' : 's'} Saved
-        </span>
-      </div>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 -mt-10 relative z-10 space-y-6">
+        {isFallback && <FallbackNotice onRetry={fetchSaved} />}
 
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-40 bg-[var(--surface)] rounded-[6px] border border-[var(--border)]" />
-          ))}
-        </div>
-      ) : savedList.length === 0 ? (
-        <EmptyState
-          icon={Bookmark}
-          title={t('savedPage.empty')}
-          description="Browse potentially relevant schemes and click the bookmark button to save them here."
-          actionText={t('savedPage.browseNow')}
-          actionLink="/schemes"
-        />
-      ) : (
-        <div className="space-y-4">
-          {savedList.map((item) => {
-            const scheme = item.scheme;
-            if (!scheme) return null;
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="editorial-card p-6 h-40 space-y-3">
+                <div className="h-5 w-44 rounded-full bg-[var(--line)]/70" />
+                <div className="h-7 w-2/3 rounded-[10px] bg-[var(--line)]/55" />
+                <div className="h-4 w-full rounded-[8px] bg-[var(--line)]/40" />
+              </div>
+            ))}
+          </div>
+        ) : savedList.length === 0 ? (
+          <EmptyState
+            icon={BookmarkIcon}
+            title={t('savedPage.empty')}
+            description="Browse potentially relevant schemes and click the bookmark button to save them here."
+            actionText={t('savedPage.browseNow')}
+            actionLink="/schemes"
+          />
+        ) : (
+          <div className="space-y-4">
+            {savedList.map((item) => {
+              const scheme = item.scheme;
+              if (!scheme) return null;
 
-            const hasTranslation =
-              currentLang !== 'en' &&
-              scheme.translations &&
-              scheme.translations[currentLang] &&
-              Boolean(scheme.translations[currentLang]?.title);
+              const hasTranslation =
+                currentLang !== 'en' &&
+                scheme.translations &&
+                scheme.translations[currentLang] &&
+                Boolean(scheme.translations[currentLang]?.title);
 
-            const displayTitle = hasTranslation
-              ? scheme.translations[currentLang].title
-              : scheme.title;
+              const displayTitle = hasTranslation
+                ? scheme.translations[currentLang].title
+                : scheme.title;
 
-            const displayDescription =
-              hasTranslation && scheme.translations[currentLang]?.shortDescription
-                ? scheme.translations[currentLang].shortDescription
-                : scheme.shortDescription;
+              const displayDescription =
+                hasTranslation && scheme.translations[currentLang]?.shortDescription
+                  ? scheme.translations[currentLang].shortDescription
+                  : scheme.shortDescription;
 
-            const isApplied = item.status === 'applied';
-            const palette = getCategoryPalette(scheme.category);
+              const isApplied = item.status === 'applied';
+              const iconTint = getCategoryIconColor(scheme.category);
+              const docsTotal = Array.isArray(scheme.documentsRequired)
+                ? scheme.documentsRequired.length
+                : 0;
+              const docChecks = readChecklist(scheme._id, docsTotal);
+              const docProgress = getChecklistProgress(docChecks, docsTotal);
 
-            return (
-              <article
-                key={item.schemeId}
-                className="bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] rounded-[6px] p-5 sm:p-6 space-y-4 transition-colors duration-150"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4 min-w-0">
-                    <CategoryIcon kind={scheme.category} size={22} withChip />
+              return (
+                <article
+                  key={item.schemeId}
+                  className="editorial-card editorial-card-lift p-5 sm:p-6 space-y-5 hover:border-[var(--navy)] transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <CategoryIcon kind={scheme.category} size={22} withChip />
 
-                    <div className="space-y-1.5 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold"
-                          style={{ backgroundColor: palette.bg, color: palette.fg }}
-                        >
-                          {String(t(`categories.${scheme.category}`, scheme.category))}
-                        </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--medium-bg)] text-[var(--medium-text)]">
-                          {scheme.level === 'central'
-                            ? t('schemesPage.levelCentral')
-                            : `${scheme.state || 'State'}`}
-                        </span>
-                        {scheme.isSample && <SampleBadge />}
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                          <span className="font-bold text-[var(--navy)] inline-flex items-center gap-1.5">
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: iconTint }}
+                              aria-hidden="true"
+                            />
+                            <span>{String(t(`categories.${scheme.category}`, scheme.category))}</span>
+                          </span>
+                          <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                          <span className="font-medium text-[var(--muted)]">
+                            {scheme.level === 'central'
+                              ? t('schemesPage.levelCentral')
+                              : `${scheme.state || 'State'}`}
+                          </span>
+                          <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                          {scheme.isSample ? (
+                            <SampleBadge />
+                          ) : (
+                            <VerificationBadge
+                              verified={scheme.verified}
+                              lastVerified={scheme.lastVerified}
+                              isSample={scheme.isSample}
+                            />
+                          )}
+                        </div>
+
+                        <h2 className="font-display text-xl font-bold text-[var(--navy)] leading-snug">
+                          <Link
+                            to={`/schemes/${scheme._id}`}
+                            className="hover:text-[var(--accent-ink)] transition-colors"
+                          >
+                            {displayTitle}
+                          </Link>
+                        </h2>
+
+                        <p className="text-base text-[var(--muted)] leading-relaxed">
+                          {displayDescription}
+                        </p>
+
+                        {docProgress.total > 0 && (
+                          <div className="pt-2 flex flex-wrap items-center gap-3">
+                            <Link
+                              to={`/schemes/${scheme._id}`}
+                              className="inline-flex items-center gap-2 text-xs font-bold text-[var(--navy)] bg-[var(--cream)] border border-[var(--line)] px-3 py-1.5 rounded-full hover:border-[var(--navy)] transition-colors tabular-nums"
+                            >
+                              <FileCheckIcon size={14} className="text-[var(--accent-ink)]" />
+                              <span>
+                                {t('detailsExtra.checklistProgress', {
+                                  done: docProgress.done,
+                                  total: docProgress.total,
+                                })}
+                              </span>
+                            </Link>
+                          </div>
+                        )}
                       </div>
-
-                      <h2 className="text-[18px] font-bold text-[var(--text-primary)] leading-snug">
-                        <Link
-                          to={`/schemes/${scheme._id}`}
-                          className="hover:text-[var(--teal)] transition-colors duration-150"
-                        >
-                          {displayTitle}
-                        </Link>
-                      </h2>
-
-                      <p className="text-base text-[var(--text-muted)] leading-relaxed">
-                        {displayDescription}
-                      </p>
                     </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(item.schemeId)}
-                    disabled={actionLoading === item.schemeId}
-                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[6px] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--error)] hover:border-[var(--error)] transition-colors duration-150 cursor-pointer shrink-0"
-                    title={t('savedPage.remove')}
-                    aria-label={t('savedPage.remove')}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="text-[var(--text-muted)]">{t('savedPage.status')}:</span>
-                    {isApplied ? (
-                      <span className="font-semibold text-[var(--success)]">
-                        {t('savedPage.statusApplied')}
-                      </span>
-                    ) : (
-                      <span className="font-semibold text-[var(--saffron-tint-text)]">
-                        {item.status === 'clicked' ? t('savedPage.statusClicked') : t('savedPage.statusNotApplied')}
-                      </span>
-                    )}
 
                     <button
                       type="button"
-                      onClick={() => handleStatusToggle(item.schemeId, item.status)}
+                      onClick={() => handleRemove(item.schemeId)}
                       disabled={actionLoading === item.schemeId}
-                      className="min-h-[40px] px-3 py-1.5 rounded-[6px] text-sm font-semibold border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-colors duration-150 cursor-pointer"
+                      className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-full border border-[var(--line)] bg-[var(--cream)] text-[var(--muted)] hover:text-[var(--error)] hover:border-[var(--error)] transition-colors cursor-pointer shrink-0"
+                      title={t('savedPage.remove')}
+                      aria-label={t('savedPage.remove')}
                     >
-                      {isApplied ? t('savedPage.markNotApplied') : t('savedPage.markApplied')}
+                      <TrashIcon size={16} />
                     </button>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      to={`/schemes/${scheme._id}`}
-                      className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 rounded-[6px] text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-colors duration-150"
-                    >
-                      {t('recommendations.viewDetails')}
-                    </Link>
+                  <div className="pt-4 border-t border-[var(--line)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                      <span className="text-[var(--muted)]">{t('savedPage.status')}:</span>
+                      {isApplied ? (
+                        <span className="font-bold text-[var(--success)]">
+                          {t('savedPage.statusApplied')}
+                        </span>
+                      ) : (
+                        <span className="font-bold text-[var(--badge-high-text)]">
+                          {item.status === 'clicked'
+                            ? t('savedPage.statusClicked')
+                            : t('savedPage.statusNotApplied')}
+                        </span>
+                      )}
 
-                    <a
-                      href={scheme.applyUrl || 'https://www.myscheme.gov.in/'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleOfficialClick(scheme._id)}
-                      className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150"
-                    >
-                      <span>{t('recommendations.officialPage')}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                      <button
+                        type="button"
+                        onClick={() => handleStatusToggle(item.schemeId, item.status)}
+                        disabled={actionLoading === item.schemeId}
+                        className="btn-outline-pill min-h-[40px] px-4 py-1.5 text-xs cursor-pointer"
+                      >
+                        {isApplied ? t('savedPage.markNotApplied') : t('savedPage.markApplied')}
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <Link
+                        to={`/schemes/${scheme._id}`}
+                        className="btn-outline-pill min-h-[44px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm"
+                      >
+                        {t('recommendations.viewDetails')}
+                      </Link>
+
+                      <a
+                        href={scheme.applyUrl || 'https://www.myscheme.gov.in/'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleOfficialClick(scheme._id)}
+                        className="btn-accent-pill min-h-[44px] inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs sm:text-sm"
+                      >
+                        <span>{t('recommendations.officialPage')}</span>
+                        <ExternalLinkIcon size={14} />
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

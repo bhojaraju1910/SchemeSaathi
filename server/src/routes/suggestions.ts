@@ -71,7 +71,7 @@ router.post('/', suggestionLimiter, async (req: Request, res: Response): Promise
       message: 'Thank you. We read every suggestion.',
     });
   } catch (err: any) {
-    res.status(500).json({
+    res.status(err?.statusCode || 500).json({
       message: 'Unable to submit your suggestion right now. Please try again later.',
     });
   }

@@ -156,3 +156,23 @@ test('matchSchemes: sorting High before Medium', () => {
   assert.equal(results[1].scheme.title, 'Medium Scheme');
   assert.equal(results[1].match, 'Medium');
 });
+
+test('matchSchemes: empty rules always produce Medium ("Please confirm"), never High', () => {
+  const profile: UserProfile = {
+    age: 35,
+    state: 'Karnataka',
+    incomeRange: 'low',
+    category: ['general'],
+  };
+
+  const results = matchSchemes(profile, [
+    {
+      scheme: { title: 'Sparse Rule Scheme' },
+      rules: [],
+    },
+  ]);
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].match, 'Medium');
+  assert.ok(results[0].missing.length > 0);
+});

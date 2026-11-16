@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import EmptyState from '../components/EmptyState';
-import { ArrowLeft, Copy, Trash2, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import PageHero from '../components/PageHero';
+import AccentWord from '../components/AccentWord';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  LoaderIcon,
+  MessageIcon,
+  TrashIcon,
+} from '../components/Icons';
 
 interface AdminSuggestionItem {
   _id: string;
@@ -147,52 +155,49 @@ export const AdminSuggestions: React.FC = () => {
 
   const getTypeStyles = (type: AdminSuggestionItem['type']) => {
     if (type === 'scheme') {
-      return { bg: 'var(--cat-employment-bg)', fg: 'var(--cat-employment-fg)' };
+      return { bg: 'var(--success-bg)', fg: 'var(--success)' };
     }
     if (type === 'feature') {
-      return { bg: 'var(--cat-education-bg)', fg: 'var(--cat-education-fg)' };
+      return { bg: 'var(--badge-high-bg)', fg: 'var(--badge-high-text)' };
     }
-    return { bg: 'var(--medium-bg)', fg: 'var(--medium-text)' };
+    return { bg: 'var(--badge-medium-bg)', fg: 'var(--badge-medium-text)' };
   };
 
   return (
-    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      <div>
-        <Link
-          to="/admin"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--teal)] hover:text-[var(--teal-hover)] transition-colors duration-150"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('adminSuggestions.backToSchemes')}</span>
-        </Link>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 border-b border-[var(--border)]">
-        <div>
-          <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
-            {t('adminSuggestions.title')}
-          </h1>
-          <p className="text-base text-[var(--text-muted)] mt-1">
+    <div className="pb-12 animate-fade-up">
+      <PageHero
+        backTo="/admin"
+        backLabel={t('adminSuggestions.backToSchemes')}
+        eyebrow="Administrator Inbox"
+        title={
+          <>
+            Community <AccentWord>Suggestions</AccentWord>
+          </>
+        }
+        subtitle={
+          <span className="tabular-nums">
             {t('adminSuggestions.subtitle')} ({total})
-          </p>
-        </div>
+          </span>
+        }
+        actions={
+          <button
+            type="button"
+            onClick={handleCopyCsv}
+            disabled={suggestions.length === 0}
+            className="btn-outline-dark-pill min-h-[44px] px-5 py-2 inline-flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-40"
+          >
+            <CopyIcon size={16} />
+            <span>{copiedCsv ? t('adminSuggestions.copiedCsv') : t('adminSuggestions.copyCsv')}</span>
+          </button>
+        }
+      />
 
-        <button
-          type="button"
-          onClick={handleCopyCsv}
-          disabled={suggestions.length === 0}
-          className="min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2 rounded-[6px] text-sm font-semibold bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-colors duration-150 cursor-pointer disabled:opacity-40 self-start sm:self-auto"
-        >
-          <Copy className="w-4 h-4" />
-          <span>{copiedCsv ? t('adminSuggestions.copiedCsv') : t('adminSuggestions.copyCsv')}</span>
-        </button>
-      </div>
+      <div className="max-w-[1160px] mx-auto px-4 sm:px-6 -mt-10 relative z-10 space-y-6">
 
       {/* Filters */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[6px] p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="editorial-card p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="admin-sug-type" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+          <label htmlFor="admin-sug-type" className="block text-sm font-semibold text-[var(--navy)] mb-1.5">
             {t('adminSuggestions.filterType')}
           </label>
           <select
@@ -202,7 +207,7 @@ export const AdminSuggestions: React.FC = () => {
               setTypeFilter(e.target.value);
               setPage(1);
             }}
-            className="w-full min-h-[44px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
+            className="editorial-input w-full px-3.5 py-2 text-base cursor-pointer"
           >
             <option value="">{t('adminSuggestions.allTypes')}</option>
             <option value="scheme">Suggest a scheme</option>
@@ -212,7 +217,7 @@ export const AdminSuggestions: React.FC = () => {
         </div>
 
         <div>
-          <label htmlFor="admin-sug-status" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+          <label htmlFor="admin-sug-status" className="block text-sm font-semibold text-[var(--navy)] mb-1.5">
             {t('adminSuggestions.filterStatus')}
           </label>
           <select
@@ -222,7 +227,7 @@ export const AdminSuggestions: React.FC = () => {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="w-full min-h-[44px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
+            className="editorial-input w-full px-3.5 py-2 text-base cursor-pointer"
           >
             <option value="">{t('adminSuggestions.allStatuses')}</option>
             <option value="new">new</option>
@@ -235,7 +240,7 @@ export const AdminSuggestions: React.FC = () => {
 
       {error && (
         <div
-          className="p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[6px] text-sm font-medium text-[var(--error)]"
+          className="p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[12px] text-sm font-medium text-[var(--error)]"
           role="alert"
         >
           {error}
@@ -243,19 +248,20 @@ export const AdminSuggestions: React.FC = () => {
       )}
 
       {loading ? (
-        <div className="h-56 bg-[var(--surface)] rounded-[6px] border border-[var(--border)] flex items-center justify-center">
-          <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
+        <div className="h-56 editorial-card flex items-center justify-center">
+          <LoaderIcon size={28} className="text-[var(--navy)]" />
         </div>
       ) : suggestions.length === 0 ? (
         <EmptyState
+          icon={MessageIcon}
           title={t('adminSuggestions.emptyTitle')}
           description={t('adminSuggestions.emptyDesc')}
         />
       ) : (
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[6px] overflow-hidden">
+        <div className="editorial-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--surface-subtle)] border-b border-[var(--border)] text-[var(--text-primary)] font-semibold">
+              <thead className="bg-[var(--navy)] text-[var(--cream)] font-semibold">
                 <tr>
                   <th className="px-4 py-3.5">Type</th>
                   <th className="px-4 py-3.5">Title / Scheme Name</th>
@@ -266,7 +272,7 @@ export const AdminSuggestions: React.FC = () => {
                   <th className="px-4 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)] text-[var(--text-primary)]">
+              <tbody className="divide-y divide-[var(--line)] text-[var(--navy)]">
                 {suggestions.map((s) => {
                   const badgeStyle = getTypeStyles(s.type);
                   const heading =
@@ -280,11 +286,11 @@ export const AdminSuggestions: React.FC = () => {
                   return (
                     <tr
                       key={s._id}
-                      className="odd:bg-[var(--surface)] even:bg-[var(--bg-page)] align-top"
+                      className="odd:bg-[var(--paper)] even:bg-[var(--cream)] align-top"
                     >
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
                           style={{ backgroundColor: badgeStyle.bg, color: badgeStyle.fg }}
                         >
                           {getTypeLabel(s.type)}
@@ -292,11 +298,11 @@ export const AdminSuggestions: React.FC = () => {
                       </td>
 
                       <td className="px-4 py-3.5 max-w-[220px]">
-                        <p className="font-semibold text-[var(--text-primary)]">
+                        <p className="font-semibold text-[var(--navy)]">
                           {heading}
                         </p>
                         {s.schemeState && (
-                          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                          <p className="text-xs text-[var(--muted)] mt-0.5">
                             {s.schemeState}
                             {s.targetGroup ? ` · ${s.targetGroup}` : ''}
                           </p>
@@ -306,25 +312,25 @@ export const AdminSuggestions: React.FC = () => {
                             href={s.schemeLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-[var(--teal)] underline break-all block mt-0.5"
+                            className="text-xs text-[var(--accent-ink)] underline break-all block mt-0.5"
                           >
                             {s.schemeLink}
                           </a>
                         )}
                       </td>
 
-                      <td className="px-4 py-3.5 max-w-[280px] text-[var(--text-muted)]">
+                      <td className="px-4 py-3.5 max-w-[280px] text-[var(--muted)]">
                         {s.details || (s.targetGroup ? `For: ${s.targetGroup}` : '—')}
                       </td>
 
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <p className="text-[var(--text-primary)]">{s.name || 'Anonymous'}</p>
+                        <p className="text-[var(--navy)] font-medium">{s.name || 'Anonymous'}</p>
                         {s.email && (
-                          <p className="text-xs text-[var(--text-muted)]">{s.email}</p>
+                          <p className="text-xs text-[var(--muted)]">{s.email}</p>
                         )}
                       </td>
 
-                      <td className="px-4 py-3.5 text-[var(--text-muted)] tabular-nums whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-[var(--muted)] tabular-nums whitespace-nowrap">
                         {formattedDate}
                       </td>
 
@@ -339,7 +345,7 @@ export const AdminSuggestions: React.FC = () => {
                               e.target.value as AdminSuggestionItem['status']
                             )
                           }
-                          className="min-h-[38px] px-2.5 py-1 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-sm font-medium text-[var(--text-primary)] cursor-pointer"
+                          className="min-h-[40px] px-3 py-1 bg-[var(--paper)] border border-[var(--line)] focus:border-[var(--navy)] rounded-[10px] text-sm font-medium text-[var(--navy)] cursor-pointer"
                         >
                           {STATUS_OPTIONS.map((st) => (
                             <option key={st} value={st}>
@@ -356,14 +362,14 @@ export const AdminSuggestions: React.FC = () => {
                               type="button"
                               onClick={() => handleDelete(s._id)}
                               disabled={actionLoadingId === s._id}
-                              className="min-h-[36px] px-2.5 py-1 bg-[var(--error)] text-[var(--deep-text)] rounded-[6px] text-xs font-semibold cursor-pointer"
+                              className="min-h-[38px] px-3 py-1 bg-[var(--error)] text-[var(--cream)] rounded-full text-xs font-semibold cursor-pointer"
                             >
                               Confirm
                             </button>
                             <button
                               type="button"
                               onClick={() => setDeleteConfirmId(null)}
-                              className="min-h-[36px] px-2.5 py-1 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] rounded-[6px] text-xs font-semibold cursor-pointer"
+                              className="min-h-[38px] px-3 py-1 bg-[var(--paper)] border border-[var(--line)] text-[var(--navy)] rounded-full text-xs font-semibold cursor-pointer"
                             >
                               Cancel
                             </button>
@@ -372,11 +378,11 @@ export const AdminSuggestions: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setDeleteConfirmId(s._id)}
-                            className="min-h-[38px] min-w-[38px] inline-flex items-center justify-center rounded-[6px] bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--error)] hover:border-[var(--error)] transition-colors duration-150 cursor-pointer"
+                            className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-full bg-[var(--paper)] border border-[var(--line)] text-[var(--muted)] hover:text-[var(--error)] hover:border-[var(--error)] transition-colors duration-150 cursor-pointer"
                             title="Delete Suggestion"
                             aria-label="Delete Suggestion"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <TrashIcon size={16} />
                           </button>
                         )}
                       </td>
@@ -390,18 +396,18 @@ export const AdminSuggestions: React.FC = () => {
       )}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-4 pt-4 border-t border-[var(--border)]">
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-[var(--line)]">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-[6px] bg-[var(--surface)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--teal)] disabled:opacity-40 cursor-pointer"
+            className="btn-outline-pill px-5 py-2 inline-flex items-center gap-1.5 text-sm disabled:opacity-40 cursor-pointer"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeftIcon size={16} />
             <span>Previous</span>
           </button>
 
-          <span className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">
+          <span className="text-sm font-semibold text-[var(--navy)] tabular-nums">
             Page {page} of {totalPages}
           </span>
 
@@ -409,13 +415,14 @@ export const AdminSuggestions: React.FC = () => {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2 rounded-[6px] bg-[var(--surface)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--teal)] disabled:opacity-40 cursor-pointer"
+            className="btn-outline-pill px-5 py-2 inline-flex items-center gap-1.5 text-sm disabled:opacity-40 cursor-pointer"
           >
             <span>Next</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRightIcon size={16} />
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 };

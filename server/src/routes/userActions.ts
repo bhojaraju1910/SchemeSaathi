@@ -4,10 +4,10 @@ import {
   SchemeModel,
   ApplicationModel,
   ProfileModel,
-  CriteriaModel,
 } from '../models/index';
 import { auth, AuthRequest } from '../middleware/auth';
-import { matchSchemes, SchemeWithRules } from '../services/eligibilityEngine';
+import { matchSchemes } from '../services/eligibilityEngine';
+import { getCachedActiveSchemesWithRules } from '../services/schemeCache';
 
 const router = Router();
 
@@ -26,9 +26,10 @@ router.post('/saved', auth, async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
+    const resolvedId = scheme._id;
     const existing = await SavedSchemeModel.findOne({
       userId: req.user!.id,
-      schemeId,
+      schemeId: resolvedId,
     });
 
     if (existing) {
@@ -38,34 +39,45 @@ router.post('/saved', auth, async (req: AuthRequest, res: Response): Promise<voi
 
     const saved = await SavedSchemeModel.create({
       userId: req.user!.id,
-      schemeId,
+      schemeId: resolvedId,
     });
 
     res.status(201).json({ message: 'Scheme saved successfully', saved });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to save scheme' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to save scheme' });
   }
 });
 
-// Get user's saved schemes
+// Get user's saved schemes using single batch $in query (no N+1 loop)
 router.get('/saved', auth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const savedRecords = await SavedSchemeModel.find({ userId: req.user!.id });
-    const schemeList = [];
+    if (savedRecords.length === 0) {
+      res.status(200).json([]);
+      return;
+    }
 
-    for (const record of savedRecords) {
-      const scheme = await SchemeModel.findById(record.schemeId);
-      if (scheme) {
-        schemeList.push({
+    const schemes = await SchemeModel.findByIds(savedRecords.map((r) => r.schemeId));
+    const schemeByKey = new Map<string, (typeof schemes)[number]>();
+    for (const s of schemes) {
+      schemeByKey.set(s._id, s);
+      if (s.slug) schemeByKey.set(s.slug, s);
+    }
+
+    const schemeList = savedRecords
+      .map((record) => {
+        const scheme = schemeByKey.get(record.schemeId);
+        if (!scheme) return null;
+        return {
           ...record,
           scheme,
-        });
-      }
-    }
+        };
+      })
+      .filter(Boolean);
 
     res.status(200).json(schemeList);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch saved schemes' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch saved schemes' });
   }
 });
 
@@ -76,7 +88,7 @@ router.delete('/saved/:schemeId', auth, async (req: AuthRequest, res: Response):
     await SavedSchemeModel.deleteOne({ userId: req.user!.id, schemeId });
     res.status(200).json({ message: 'Scheme removed from saved list' });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to remove saved scheme' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to remove saved scheme' });
   }
 });
 
@@ -97,7 +109,7 @@ router.post('/applications/click', auth, async (req: AuthRequest, res: Response)
 
     res.status(200).json({ message: 'Application interaction recorded', record });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to record click' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to record click' });
   }
 });
 
@@ -117,32 +129,21 @@ router.post('/applications/status', auth, async (req: AuthRequest, res: Response
 
     res.status(200).json({ message: 'Application status updated', record });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to update application status' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to update application status' });
   }
 });
 
-// Dashboard stats
+// Dashboard stats (uses cached active schemes + criteria)
 router.get('/dashboard/stats', auth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const availableSchemes = await SchemeModel.countDocuments();
-    const savedSchemes = await SavedSchemeModel.countDocuments({ userId: req.user!.id });
-    const applicationLinks = await ApplicationModel.countDocuments({ userId: req.user!.id });
+    const [savedSchemes, applicationLinks, profile, schemesWithRules] = await Promise.all([
+      SavedSchemeModel.countDocuments({ userId: req.user!.id }),
+      ApplicationModel.countDocuments({ userId: req.user!.id }),
+      ProfileModel.findOne({ userId: req.user!.id }),
+      getCachedActiveSchemesWithRules(),
+    ]);
 
-    // Calculate potential matches based on profile
-    const profile = await ProfileModel.findOne({ userId: req.user!.id });
-    const allSchemes = await SchemeModel.find();
-    const allCriteria = await CriteriaModel.find();
-
-    const criteriaMap = new Map<string, any[]>();
-    for (const c of allCriteria) {
-      criteriaMap.set(c.schemeId, c.rules);
-    }
-
-    const schemesWithRules: SchemeWithRules[] = allSchemes.map((s) => ({
-      scheme: s,
-      rules: criteriaMap.get(s._id) || [],
-    }));
-
+    const availableSchemes = schemesWithRules.length;
     const matches = matchSchemes(profile, schemesWithRules);
     const potentialMatches = matches.length;
 
@@ -154,36 +155,27 @@ router.get('/dashboard/stats', auth, async (req: AuthRequest, res: Response): Pr
       topMatches: matches.slice(0, 3),
     });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch dashboard stats' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch dashboard stats' });
   }
 });
 
-// Match schemes against user profile
+// Match schemes against user profile (uses cached active schemes + criteria)
 router.post('/match', auth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const savedProfile = await ProfileModel.findOne({ userId: req.user!.id });
+    const [savedProfile, schemesWithRules] = await Promise.all([
+      ProfileModel.findOne({ userId: req.user!.id }),
+      getCachedActiveSchemesWithRules(),
+    ]);
+
     const profile = {
       ...(savedProfile || {}),
       ...(req.body || {}),
     };
 
-    const allSchemes = await SchemeModel.find();
-    const allCriteria = await CriteriaModel.find();
-
-    const criteriaMap = new Map<string, any[]>();
-    for (const c of allCriteria) {
-      criteriaMap.set(c.schemeId, c.rules);
-    }
-
-    const schemesWithRules: SchemeWithRules[] = allSchemes.map((s) => ({
-      scheme: s,
-      rules: criteriaMap.get(s._id) || [],
-    }));
-
     const matchResults = matchSchemes(profile, schemesWithRules);
     res.status(200).json(matchResults);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to evaluate scheme matches' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to evaluate scheme matches' });
   }
 });
 

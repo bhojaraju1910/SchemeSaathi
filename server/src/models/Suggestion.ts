@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { DatabaseUnavailableError, isMongoConnected } from '../config/db';
 import {
   SanitizedSuggestion,
   SuggestionStatus,
@@ -62,11 +63,13 @@ const SuggestionSchema = new Schema<ISuggestionDocument>({
   },
 });
 
+SuggestionSchema.index({ status: 1, createdAt: -1 });
+
 export const Suggestion =
   (mongoose.models.Suggestion as mongoose.Model<ISuggestionDocument>) ||
   mongoose.model<ISuggestionDocument>('Suggestion', SuggestionSchema);
 
-// In-memory store matching existing SchemeSaathi pattern when MONGODB_URI is unset
+// In-memory store matching existing SchemeSaathi pattern ONLY when MONGODB_URI is unset in development
 const inMemorySuggestions = new Map<string, ISuggestion>();
 let suggestionCounter = 100;
 
@@ -76,7 +79,11 @@ function nextSuggestionId(): string {
 }
 
 function isMongooseConnected(): boolean {
-  return mongoose.connection.readyState === 1;
+  if (isMongoConnected()) return true;
+  if (process.env.NODE_ENV === 'production') {
+    throw new DatabaseUnavailableError('Database connection unavailable in production.');
+  }
+  return false;
 }
 
 export const SuggestionModel = {

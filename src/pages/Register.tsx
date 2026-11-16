@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import AccentWord from '../components/AccentWord';
+import PageHero from '../components/PageHero';
+import { EyeIcon, EyeOffIcon, LoaderIcon } from '../components/Icons';
 
 export const Register: React.FC = () => {
   const { t } = useTranslation();
@@ -42,28 +44,41 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 sm:py-14">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        {/* Form Card */}
-        <div className="lg:col-span-7 bg-[var(--surface)] border border-[var(--border)] rounded-[6px] p-6 sm:p-8 space-y-6">
-          <div className="space-y-1.5">
-            <h1 className="text-[28px] font-bold text-[var(--text-primary)] leading-tight">
-              {t('auth.registerTitle')}
-            </h1>
-            <p className="text-base text-[var(--text-muted)]">
-              {t('auth.registerSubtitle')}
-            </p>
-          </div>
+    <div className="pb-12 animate-fade-up">
+      <PageHero
+        compact
+        eyebrow="Free Account"
+        title={
+          <>
+            Create an <AccentWord>Account</AccentWord>
+          </>
+        }
+        subtitle={t('auth.registerSubtitle')}
+      />
+
+      <div className="max-w-[1160px] mx-auto px-4 sm:px-6 -mt-10 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          {/* Form Card */}
+          <div className="lg:col-span-7 editorial-card p-6 sm:p-8 lg:p-10 space-y-6">
+            <div className="space-y-1">
+              <p className="eyebrow text-[var(--accent-ink)]">New Household Account</p>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-[var(--navy)] leading-tight">
+                {t('auth.registerTitle')}
+              </h2>
+            </div>
 
           {error && (
-            <div className="p-3.5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[6px] text-sm font-medium text-[var(--error)]" role="alert">
+            <div
+              className="p-4 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-[12px] text-sm font-semibold text-[var(--error)]"
+              role="alert"
+            >
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="register-name" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+              <label htmlFor="register-name" className="block text-sm font-bold text-[var(--navy)] mb-1.5">
                 {t('auth.name')}
               </label>
               <input
@@ -73,12 +88,12 @@ export const Register: React.FC = () => {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Ramesh Kumar"
                 required
-                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                className="editorial-input w-full px-4 py-2.5 text-base placeholder:text-[var(--muted)]"
               />
             </div>
 
             <div>
-              <label htmlFor="register-email" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+              <label htmlFor="register-email" className="block text-sm font-bold text-[var(--navy)] mb-1.5">
                 {t('auth.email')}
               </label>
               <input
@@ -88,12 +103,12 @@ export const Register: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. citizen@example.com"
                 required
-                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                className="editorial-input w-full px-4 py-2.5 text-base placeholder:text-[var(--muted)]"
               />
             </div>
 
             <div>
-              <label htmlFor="register-password" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+              <label htmlFor="register-password" className="block text-sm font-bold text-[var(--navy)] mb-1.5">
                 {t('auth.password')}
               </label>
               <div className="relative">
@@ -104,28 +119,28 @@ export const Register: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
                   required
-                  className="w-full min-h-[44px] px-3.5 py-2.5 pr-12 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                  className="editorial-input w-full px-4 py-2.5 pr-12 text-base placeholder:text-[var(--muted)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                  className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center absolute right-1 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                  className="min-h-[42px] min-w-[42px] inline-flex items-center justify-center absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--navy)] cursor-pointer rounded-full"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label htmlFor="register-language" className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+              <label htmlFor="register-language" className="block text-sm font-bold text-[var(--navy)] mb-1.5">
                 Preferred Language for Assistance
               </label>
               <select
                 id="register-language"
                 value={preferredLanguage}
-                onChange={(e) => setPreferredLanguage(e.target.value as any)}
-                className="w-full min-h-[44px] px-3.5 py-2.5 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] cursor-pointer"
+                onChange={(e) => setPreferredLanguage(e.target.value as 'en' | 'kn' | 'hi')}
+                className="editorial-input w-full px-4 py-2.5 text-base cursor-pointer"
               >
                 <option value="en">English</option>
                 <option value="kn">ಕನ್ನಡ (Kannada)</option>
@@ -136,53 +151,55 @@ export const Register: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full min-h-[44px] mt-2 py-2.5 px-4 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-base rounded-[6px] transition-colors duration-150 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="btn-accent-pill w-full mt-2 py-3 px-6 text-base inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading && <LoaderIcon size={18} />}
               <span>{t('auth.registerBtn')}</span>
             </button>
           </form>
 
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-[var(--muted)]">
             {t('auth.haveAccount')}{' '}
-            <Link to="/login" className="text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2">
+            <Link
+              to="/login"
+              className="text-[var(--accent-ink)] font-bold hover:underline underline-offset-4"
+            >
               {t('nav.login')}
             </Link>
           </p>
         </div>
 
-        {/* Deep Band Benefits Panel */}
-        <aside className="lg:col-span-5 hero-band-bg text-[var(--deep-text)] border border-[var(--deep-border)] rounded-[6px] p-6 sm:p-8 flex flex-col justify-between gap-6">
+        {/* Dark Navy Glow Panel */}
+        <aside className="lg:col-span-5 hero-editorial-bg text-[var(--cream)] border border-[var(--line-dark)] rounded-[16px] p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-6 shadow-[var(--shadow-float)]">
           <div className="space-y-4">
-            <span className="inline-block px-3 py-1 rounded-[6px] text-xs font-semibold bg-[var(--saffron)] text-[var(--saffron-text)]">
-              Free & Private
-            </span>
-            <h2 className="text-[22px] font-bold text-[var(--deep-text)] leading-snug">
-              Why create a SchemeSaathi account?
+            <p className="eyebrow text-[var(--accent)]">Free & Private</p>
+            <h2 className="font-display text-3xl font-bold text-[var(--cream)] leading-tight">
+              Why create a <AccentWord>SchemeSaathi</AccentWord> account?
             </h2>
-            <p className="text-sm text-[var(--deep-muted)] leading-relaxed">
-              Your account saves your basic household details so you can quickly view updated matches and track schemes you plan to apply for.
+            <p className="text-sm text-[var(--muted-dark)] leading-relaxed">
+              Your account stores basic non-sensitive household details so you can quickly review relevant schemes and document checklists.
             </p>
-            <ul className="space-y-3 pt-2 text-sm text-[var(--deep-muted)]">
+            <ul className="space-y-3.5 pt-4 border-t border-[var(--line-dark)] text-sm text-[var(--muted-dark)]">
               <li className="flex items-start gap-2.5">
-                <span className="font-bold text-[var(--saffron)]">1.</span>
-                <span>Transparent High and Medium alignment indicators for every scheme.</span>
+                <span className="font-display font-bold text-[var(--accent)] tabular-nums">01.</span>
+                <span>Clear High and Medium indicators with exact matching rules shown.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="font-bold text-[var(--saffron)]">2.</span>
-                <span>Checklist of required documents before you visit a GramaOne or Seva Sindhu centre.</span>
+                <span className="font-display font-bold text-[var(--accent)] tabular-nums">02.</span>
+                <span>Personal document readiness checklist saved before visiting GramaOne or Seva Sindhu.</span>
               </li>
               <li className="flex items-start gap-2.5">
-                <span className="font-bold text-[var(--saffron)]">3.</span>
+                <span className="font-display font-bold text-[var(--accent)] tabular-nums">03.</span>
                 <span>Switch freely between English, Kannada, and Hindi at any time.</span>
               </li>
             </ul>
           </div>
 
-          <p className="text-xs text-[var(--deep-muted)] pt-4 border-t border-[var(--deep-border)]">
-            Information is for guidance only. Please confirm eligibility on the official website.
+          <p className="text-xs text-[var(--muted-dark)] pt-4 border-t border-[var(--line-dark)]">
+            {t('disclaimer')}
           </p>
         </aside>
+        </div>
       </div>
     </div>
   );

@@ -154,6 +154,11 @@ export function matchSchemes(
       continue;
     }
 
+    if (rules.length === 0) {
+      hasUnknown = true;
+      missing.push('Confirm full eligibility criteria on the official government portal');
+    }
+
     const match: 'High' | 'Medium' = hasUnknown ? 'Medium' : 'High';
 
     results.push({

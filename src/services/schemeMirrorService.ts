@@ -1,4 +1,4 @@
-import { HARDCODED_SCHEMES, HardcodedScheme, SchemeRule } from '../data/schemes';
+import type { HardcodedScheme, SchemeRule } from '../data/schemes';
 
 export interface SchemeQueryFilter {
   q?: string;
@@ -43,13 +43,13 @@ export interface SchemeMatchResult {
 
 /**
  * Mirrors backend GET /api/schemes query filtering, search, and pagination
- * against the hardcoded frontend schemes array.
+ * against a provided schemes array (no eager static bundle import).
  */
 export function queryHardcodedSchemes(
   filter: SchemeQueryFilter = {},
-  sourceSchemes: HardcodedScheme[] = HARDCODED_SCHEMES
+  sourceSchemes: HardcodedScheme[] = []
 ): PaginatedSchemesResult {
-  let list = [...sourceSchemes];
+  let list = sourceSchemes.filter((s) => s.isActive !== false);
 
   if (filter.category) {
     list = list.filter((s) => s.category === filter.category);
@@ -75,7 +75,7 @@ export function queryHardcodedSchemes(
   }
 
   const pageNum = Math.max(1, Number(filter.page) || 1);
-  const limitNum = Math.max(1, Math.min(50, Number(filter.limit) || 12));
+  const limitNum = Math.max(1, Math.min(100, Number(filter.limit) || 12));
   const total = list.length;
   const totalPages = Math.ceil(total / limitNum) || 1;
   const startIndex = (pageNum - 1) * limitNum;
@@ -91,13 +91,16 @@ export function queryHardcodedSchemes(
 }
 
 /**
- * Mirrors backend GET /api/schemes/:id lookup against hardcoded frontend schemes.
+ * Mirrors backend GET /api/schemes/:id lookup against a provided schemes array.
  */
 export function getHardcodedSchemeById(
   id: string,
-  sourceSchemes: HardcodedScheme[] = HARDCODED_SCHEMES
+  sourceSchemes: HardcodedScheme[] = []
 ): SchemeDetailsResult | null {
-  const scheme = sourceSchemes.find((s) => s._id === id || s.id === id);
+  const lower = id.toLowerCase();
+  const scheme = sourceSchemes.find(
+    (s) => s._id === id || s.id === id || (s.slug && s.slug.toLowerCase() === lower)
+  );
   if (!scheme) return null;
 
   const rules = scheme.rules || [];
@@ -183,15 +186,17 @@ export function evaluateRule(
 }
 
 /**
- * Mirrors backend POST /api/match eligibility matching against hardcoded frontend schemes.
+ * Mirrors backend POST /api/match eligibility matching against a provided schemes array.
+ * Schemes with empty rules never score 'High' — always 'Medium' (Please confirm).
  */
 export function matchHardcodedSchemes(
   profile: UserProfileInput | null | undefined,
-  sourceSchemes: HardcodedScheme[] = HARDCODED_SCHEMES
+  sourceSchemes: HardcodedScheme[] = []
 ): SchemeMatchResult[] {
   const results: SchemeMatchResult[] = [];
 
   for (const scheme of sourceSchemes) {
+    if (scheme.isActive === false) continue;
     const rules = scheme.rules || [];
     let isExcluded = false;
     let hasUnknown = false;
@@ -221,6 +226,11 @@ export function matchHardcodedSchemes(
 
     if (isExcluded) {
       continue;
+    }
+
+    if (rules.length === 0) {
+      hasUnknown = true;
+      missing.push('Confirm full eligibility criteria on the official government portal');
     }
 
     const match: 'High' | 'Medium' = hasUnknown ? 'Medium' : 'High';

@@ -1,21 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRightIcon } from '../components/Icons';
 
 export const NotFound: React.FC = () => {
   return (
-    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-16 text-center space-y-4">
-      <h1 className="text-[28px] font-bold text-[var(--text-primary)]">
-        404 - Page Not Found
+    <div className="max-w-[1160px] mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center space-y-5">
+      <p className="eyebrow text-[var(--accent-ink)]">Error 404</p>
+      <h1 className="font-display text-[36px] sm:text-[44px] font-bold text-[var(--navy)] leading-tight">
+        Page Not Found
       </h1>
-      <p className="text-base text-[var(--text-muted)] max-w-md mx-auto">
+      <p className="text-base sm:text-lg text-[var(--muted)] max-w-md mx-auto">
         The welfare directory or page you requested could not be located.
       </p>
-      <div className="pt-2">
+      <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
         <Link
           to="/"
-          className="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-base rounded-[6px] transition-colors duration-150"
+          className="btn-accent-pill inline-flex items-center justify-center gap-2 px-7 py-3 text-base"
         >
-          Return to SchemeSaathi Home
+          <span>Return to SchemeSaathi Home</span>
+          <ArrowRightIcon size={17} />
+        </Link>
+        <Link
+          to="/schemes"
+          className="btn-outline-pill inline-flex items-center justify-center px-6 py-3 text-base"
+        >
+          Browse All Schemes
         </Link>
       </div>
     </div>

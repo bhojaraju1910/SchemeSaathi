@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "seed": "tsx server/seed/seed.ts",
-    "test": "tsx --test server/tests/eligibilityEngine.test.ts",
+    "test": "tsx --test server/tests/*.test.ts src/utils/*.test.ts src/services/*.test.ts",
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server.ts",

@@ -66,7 +66,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Registration failed' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Registration failed' });
   }
 });
 
@@ -107,7 +107,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Login failed' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Login failed' });
   }
 });
 
@@ -128,7 +128,7 @@ router.get('/me', auth, async (req: AuthRequest, res: Response): Promise<void> =
       preferredLanguage: user.preferredLanguage,
     });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch user' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch user' });
   }
 });
 

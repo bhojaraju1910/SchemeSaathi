@@ -22,7 +22,7 @@ router.get('/', auth, async (req: AuthRequest, res: Response): Promise<void> => 
     }
     res.status(200).json(profile);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch profile' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch profile' });
   }
 });
 
@@ -86,7 +86,7 @@ router.put('/', auth, async (req: AuthRequest, res: Response): Promise<void> => 
 
     res.status(200).json(updatedProfile);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to update profile' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to update profile' });
   }
 });
 

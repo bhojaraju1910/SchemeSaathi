@@ -12,8 +12,8 @@ export const MatchBadge: React.FC<MatchBadgeProps> = ({ match, className = '' })
   if (match === 'High') {
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-1 rounded-[6px] text-xs font-semibold bg-[var(--saffron-tint)] text-[var(--saffron-tint-text)] border border-[var(--saffron-border)] whitespace-nowrap ${className}`}
-        title="High alignment: all primary criteria match your recorded profile"
+        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[var(--badge-high-bg)] text-[var(--badge-high-text)] border border-[var(--line)] whitespace-nowrap ${className}`}
+        title="High match: recorded profile details align with primary scheme rules"
       >
         {t('recommendations.matchHigh')}
       </span>
@@ -22,8 +22,8 @@ export const MatchBadge: React.FC<MatchBadgeProps> = ({ match, className = '' })
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-[6px] text-xs font-semibold bg-[var(--medium-bg)] text-[var(--medium-text)] border border-[var(--medium-border)] whitespace-nowrap ${className}`}
-      title="Medium alignment: some criteria require manual confirmation"
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[var(--badge-medium-bg)] text-[var(--badge-medium-text)] border border-[var(--line)] whitespace-nowrap ${className}`}
+      title="Medium match: some criteria require manual confirmation"
     >
       {t('recommendations.matchMedium')}
     </span>

@@ -14,34 +14,29 @@ export type IconKind =
   | 'saved'
   | 'links';
 
-export interface CategoryPalette {
-  fg: string;
-  bg: string;
-}
-
-export function getCategoryPalette(kind: string): CategoryPalette {
+export function getCategoryIconColor(kind: string): string {
   switch (kind) {
     case 'education':
-      return { fg: 'var(--cat-education-fg)', bg: 'var(--cat-education-bg)' };
+      return 'var(--cat-education)';
     case 'healthcare':
-      return { fg: 'var(--cat-healthcare-fg)', bg: 'var(--cat-healthcare-bg)' };
+      return 'var(--cat-healthcare)';
     case 'housing':
-      return { fg: 'var(--cat-housing-fg)', bg: 'var(--cat-housing-bg)' };
+      return 'var(--cat-housing)';
     case 'employment':
     case 'matches':
-      return { fg: 'var(--cat-employment-fg)', bg: 'var(--cat-employment-bg)' };
+      return 'var(--cat-employment)';
     case 'women_child':
     case 'saved':
-      return { fg: 'var(--cat-women-fg)', bg: 'var(--cat-women-bg)' };
+      return 'var(--cat-women)';
     case 'senior_citizens':
     case 'schemes':
-      return { fg: 'var(--cat-senior-fg)', bg: 'var(--cat-senior-bg)' };
+      return 'var(--cat-senior)';
     case 'agriculture':
-      return { fg: 'var(--cat-agriculture-fg)', bg: 'var(--cat-agriculture-bg)' };
+      return 'var(--cat-agriculture)';
     case 'links':
-      return { fg: 'var(--saffron-tint-text)', bg: 'var(--saffron-tint)' };
+      return 'var(--accent-ink)';
     default:
-      return { fg: 'var(--cat-all-fg)', bg: 'var(--cat-all-bg)' };
+      return 'var(--navy)';
   }
 }
 
@@ -55,12 +50,12 @@ interface CategoryIconProps {
 
 export const CategoryIcon: React.FC<CategoryIconProps> = ({
   kind,
-  size = 24,
+  size = 22,
   withChip = false,
-  chipShape = 'square',
+  chipShape = 'round',
   className = '',
 }) => {
-  const palette = getCategoryPalette(kind);
+  const iconColor = getCategoryIconColor(kind);
 
   const renderSvg = () => {
     const common = {
@@ -179,15 +174,19 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   };
 
   if (!withChip) {
-    return <span className={`inline-flex items-center justify-center ${className}`}>{renderSvg()}</span>;
+    return (
+      <span className={`inline-flex items-center justify-center ${className}`} style={{ color: iconColor }}>
+        {renderSvg()}
+      </span>
+    );
   }
 
   return (
     <span
-      className={`inline-flex items-center justify-center w-11 h-11 shrink-0 ${
-        chipShape === 'round' ? 'rounded-full' : 'rounded-[6px]'
+      className={`inline-flex items-center justify-center w-11 h-11 shrink-0 border border-[var(--line)] bg-[var(--cream)] ${
+        chipShape === 'round' ? 'rounded-full' : 'rounded-[12px]'
       } ${className}`}
-      style={{ backgroundColor: palette.bg, color: palette.fg }}
+      style={{ color: iconColor }}
     >
       {renderSvg()}
     </span>

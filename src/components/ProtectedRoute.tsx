@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { LoaderIcon } from './Icons';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,8 +15,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminO
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-7 h-7 text-[var(--teal)] animate-spin" />
-        <p className="text-base text-[var(--text-muted)]">Verifying session...</p>
+        <LoaderIcon size={28} className="text-[var(--accent-ink)]" />
+        <p className="text-base text-[var(--muted)]">Verifying session...</p>
       </div>
     );
   }

@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FAQS, DEFAULT_SUGGESTED_FAQ_IDS, FaqItem, matchFaq } from '../data/faqs';
+import PageHero from '../components/PageHero';
+import AccentWord from '../components/AccentWord';
 
 interface ChatMessage {
   id: string;
@@ -66,7 +68,7 @@ export const Faq: React.FC = () => {
         ]);
       }
       setIsTyping(false);
-    }, 400);
+    }, 350);
   };
 
   const handlePickFaq = (faq: FaqItem) => {
@@ -112,7 +114,7 @@ export const Faq: React.FC = () => {
             href="https://www.myscheme.gov.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2"
+            className="text-[var(--accent-ink)] font-bold underline underline-offset-2"
           >
             https://www.myscheme.gov.in/
           </a>
@@ -127,10 +129,7 @@ export const Faq: React.FC = () => {
         <>
           {parts[0]}
           (
-          <Link
-            to="/suggest"
-            className="text-[var(--teal)] hover:text-[var(--teal-hover)] font-semibold underline underline-offset-2"
-          >
+          <Link to="/suggest" className="text-[var(--accent-ink)] font-bold underline underline-offset-2">
             /suggest
           </Link>
           )
@@ -143,46 +142,54 @@ export const Faq: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <div className="max-w-[720px] mx-auto bg-[var(--surface)] border border-[var(--border)] rounded-[6px] overflow-hidden flex flex-col">
-        {/* Header */}
-        <header className="bg-[var(--deep-band)] text-[var(--deep-text)] px-5 py-4 flex items-center justify-between gap-4 border-b border-[var(--deep-border)]">
-          <div className="flex items-center gap-3 min-w-0">
-            <span
-              className="w-10 h-10 rounded-full bg-[var(--saffron)] text-[var(--saffron-text)] font-bold text-lg inline-flex items-center justify-center shrink-0"
-              aria-hidden="true"
-            >
-              S
-            </span>
-            <div className="min-w-0">
-              <h1 className="text-[20px] font-bold text-[var(--deep-text)] leading-tight">
-                {t('faqPage.headerTitle')}
-              </h1>
-              <p className="text-sm text-[var(--deep-muted)]">
-                {t('faqPage.headerSubtitle')}
-              </p>
-            </div>
-          </div>
+    <div className="pb-12 animate-fade-up">
+      <PageHero
+        eyebrow="Guidance Assistant"
+        title={
+          <>
+            SchemeSaathi <AccentWord>Help</AccentWord> & FAQ
+          </>
+        }
+        subtitle={t('faqPage.headerSubtitle')}
+      />
 
-          <button
-            type="button"
-            onClick={handleClearChat}
-            className="min-h-[40px] px-3 py-1.5 rounded-[6px] text-xs font-semibold border border-[var(--deep-border)] text-[var(--deep-text)] hover:bg-[var(--deep-band-end)] transition-colors duration-150 cursor-pointer shrink-0"
-          >
-            {t('faqPage.clearChat')}
-          </button>
-        </header>
+      <div className="max-w-[1140px] mx-auto px-4 sm:px-6 -mt-10 relative z-10">
+        <div className="max-w-[760px] mx-auto editorial-card overflow-hidden flex flex-col">
+          {/* Card Header with Coral S Avatar */}
+          <header className="bg-[var(--paper)] px-5 sm:px-7 py-4 flex items-center justify-between gap-4 border-b border-[var(--line)]">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <span
+                className="w-10 h-10 rounded-full bg-[var(--accent)] text-[var(--navy)] font-display font-bold text-base inline-flex items-center justify-center shrink-0"
+                aria-hidden="true"
+              >
+                S
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-display text-lg sm:text-xl font-bold text-[var(--navy)] leading-tight">
+                  {t('faqPage.headerTitle')}
+                </h2>
+                <p className="text-xs sm:text-sm text-[var(--muted)]">
+                  Pick a question below or type in English
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleClearChat}
+              className="btn-outline-pill min-h-[40px] px-4 py-1.5 text-xs cursor-pointer shrink-0"
+            >
+              {t('faqPage.clearChat')}
+            </button>
+          </header>
 
         {/* Messages */}
-        <div
-          className="p-4 sm:p-6 space-y-5 bg-[var(--bg-page)] min-h-[360px]"
-          aria-live="polite"
-        >
+        <div className="p-4 sm:p-6 space-y-5 bg-[var(--cream)] min-h-[380px]" aria-live="polite">
           {messages.map((msg) => {
             if (msg.sender === 'user') {
               return (
                 <div key={msg.id} className="flex justify-end">
-                  <div className="max-w-[85%] rounded-[6px] px-4 py-3 bg-[var(--teal)] text-[var(--deep-text)] text-base leading-relaxed">
+                  <div className="max-w-[85%] rounded-[16px] rounded-br-[4px] px-4 py-3 bg-[var(--navy)] text-[var(--cream)] text-base leading-relaxed">
                     {msg.text}
                   </div>
                 </div>
@@ -196,14 +203,14 @@ export const Faq: React.FC = () => {
             return (
               <div key={msg.id} className="flex items-start gap-3">
                 <span
-                  className="w-8 h-8 rounded-full bg-[var(--teal)] text-[var(--deep-text)] font-bold text-sm inline-flex items-center justify-center shrink-0 mt-0.5"
+                  className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--navy)] font-display font-bold text-sm inline-flex items-center justify-center shrink-0 mt-0.5"
                   aria-hidden="true"
                 >
                   S
                 </span>
 
-                <div className="space-y-2.5 max-w-[88%] min-w-0">
-                  <div className="rounded-[6px] px-4 py-3 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-base leading-relaxed">
+                <div className="space-y-3 max-w-[88%] min-w-0">
+                  <div className="rounded-[16px] rounded-tl-[4px] px-4 py-3.5 bg-[var(--paper)] border border-[var(--line)] text-[var(--navy)] text-base leading-relaxed shadow-[var(--shadow-paper)]">
                     <p>{renderBotText(msg.text)}</p>
 
                     {msg.unmatchedQuery && (
@@ -223,7 +230,7 @@ export const Faq: React.FC = () => {
                               }
                             )
                           }
-                          className="min-h-[40px] inline-flex items-center justify-center px-4 py-2 rounded-[6px] text-sm font-semibold bg-[var(--saffron)] hover:bg-[var(--saffron-hover)] text-[var(--saffron-text)] transition-colors duration-150 cursor-pointer"
+                          className="btn-accent-pill min-h-[40px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm cursor-pointer"
                         >
                           {t('faqPage.sendToTeam')}
                         </button>
@@ -232,9 +239,9 @@ export const Faq: React.FC = () => {
                   </div>
 
                   {suggestedItems.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {msg.id !== 'greeting' && (
-                        <p className="text-xs font-semibold text-[var(--text-muted)]">
+                        <p className="text-xs font-bold text-[var(--muted)]">
                           {t('faqPage.relatedHeading')}
                         </p>
                       )}
@@ -245,7 +252,7 @@ export const Faq: React.FC = () => {
                             type="button"
                             onClick={() => handlePickFaq(faq)}
                             disabled={isTyping}
-                            className="min-h-[40px] px-3 py-1.5 rounded-[6px] text-sm font-semibold text-left bg-[var(--teal-tint)] text-[var(--teal)] border border-[var(--border)] hover:border-[var(--teal)] transition-colors duration-150 cursor-pointer disabled:opacity-50"
+                            className="min-h-[40px] px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-left bg-[var(--paper)] text-[var(--navy)] border border-[var(--line)] hover:border-[var(--navy)] transition-colors cursor-pointer disabled:opacity-50"
                           >
                             {faq.question}
                           </button>
@@ -261,12 +268,12 @@ export const Faq: React.FC = () => {
           {isTyping && (
             <div className="flex items-center gap-3">
               <span
-                className="w-8 h-8 rounded-full bg-[var(--teal)] text-[var(--deep-text)] font-bold text-sm inline-flex items-center justify-center shrink-0"
+                className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--navy)] font-display font-bold text-sm inline-flex items-center justify-center shrink-0"
                 aria-hidden="true"
               >
                 S
               </span>
-              <div className="rounded-[6px] px-4 py-2.5 bg-[var(--surface)] border border-[var(--border)] text-sm text-[var(--text-muted)]">
+              <div className="rounded-[16px] px-4 py-2.5 bg-[var(--paper)] border border-[var(--line)] text-sm text-[var(--muted)]">
                 Typing...
               </div>
             </div>
@@ -276,7 +283,7 @@ export const Faq: React.FC = () => {
         {/* Input Form */}
         <form
           onSubmit={handleSend}
-          className="p-4 bg-[var(--surface)] border-t border-[var(--border)] flex items-center gap-2.5"
+          className="p-4 sm:p-5 bg-[var(--paper)] border-t border-[var(--line)] flex items-center gap-2.5"
         >
           <label htmlFor="faq-question-input" className="sr-only">
             {t('faqPage.inputPlaceholder')}
@@ -288,16 +295,17 @@ export const Faq: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder={t('faqPage.inputPlaceholder')}
-            className="flex-1 min-w-0 min-h-[44px] px-3.5 py-2 bg-[var(--surface)] border border-[var(--border)] focus:border-[var(--teal)] rounded-[6px] text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+            className="editorial-input flex-1 min-w-0 px-4 py-2 text-base placeholder:text-[var(--muted)]"
           />
           <button
             type="submit"
             disabled={!inputText.trim() || isTyping}
-            className="min-h-[44px] px-5 py-2 bg-[var(--teal)] hover:bg-[var(--teal-hover)] text-[var(--deep-text)] font-semibold text-sm rounded-[6px] transition-colors duration-150 cursor-pointer disabled:opacity-50 shrink-0"
+            className="btn-accent-pill min-h-[48px] px-6 py-2 text-sm cursor-pointer disabled:opacity-50 shrink-0"
           >
             {t('faqPage.sendBtn')}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );

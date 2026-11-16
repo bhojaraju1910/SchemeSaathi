@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { SchemeModel, CriteriaModel } from '../models/index';
+import { SchemeModel, CriteriaModel, toSlug } from '../models/index';
 import { SuggestionModel } from '../models/Suggestion';
 import {
   ALLOWED_SUGGESTION_STATUSES,
@@ -7,6 +7,7 @@ import {
 } from '../utils/suggestionValidation';
 import { auth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/requireRole';
+import { invalidateSchemeCache } from '../services/schemeCache';
 
 const router = Router();
 
@@ -14,11 +15,13 @@ const router = Router();
 router.use(auth);
 router.use(requireRole('admin'));
 
-// Get all schemes with their criteria for admin management
+// Get all schemes (including inactive/unverified) with criteria for admin management
 router.get('/schemes', async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const schemes = await SchemeModel.find();
-    const criteria = await CriteriaModel.find();
+    const [schemes, criteria] = await Promise.all([
+      SchemeModel.find({ includeInactive: true }),
+      CriteriaModel.find(),
+    ]);
     const criteriaMap = new Map<string, any[]>();
     for (const c of criteria) {
       criteriaMap.set(c.schemeId, c.rules);
@@ -31,7 +34,7 @@ router.get('/schemes', async (_req: AuthRequest, res: Response): Promise<void> =
 
     res.status(200).json(result);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch admin schemes' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch admin schemes' });
   }
 });
 
@@ -39,6 +42,7 @@ router.get('/schemes', async (_req: AuthRequest, res: Response): Promise<void> =
 router.post('/schemes', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
+      slug,
       title,
       shortDescription,
       category,
@@ -49,7 +53,10 @@ router.post('/schemes', async (req: AuthRequest, res: Response): Promise<void> =
       applyUrl,
       sourceUrl,
       rules,
-      isSample = true,
+      isActive = true,
+      verified = false,
+      lastVerified,
+      isSample = false,
       translations,
     } = req.body;
 
@@ -58,17 +65,29 @@ router.post('/schemes', async (req: AuthRequest, res: Response): Promise<void> =
       return;
     }
 
+    const isVerified = Boolean(verified);
+    const resolvedLastVerified = isVerified
+      ? lastVerified
+        ? new Date(lastVerified)
+        : new Date()
+      : null;
+
     const scheme = await SchemeModel.create({
+      slug: slug ? String(slug).trim().toLowerCase() : toSlug(title),
       title: title.trim(),
       shortDescription: shortDescription.trim(),
       category,
       level: level || 'central',
       state: state || 'All',
       benefits: Array.isArray(benefits) ? benefits : [benefits].filter(Boolean),
-      documentsRequired: Array.isArray(documentsRequired) ? documentsRequired : [documentsRequired].filter(Boolean),
+      documentsRequired: Array.isArray(documentsRequired)
+        ? documentsRequired
+        : [documentsRequired].filter(Boolean),
       applyUrl: applyUrl || 'https://www.myscheme.gov.in/',
       sourceUrl: sourceUrl || 'https://www.myscheme.gov.in/',
-      lastVerified: new Date(),
+      isActive: isActive !== false,
+      verified: isVerified,
+      lastVerified: resolvedLastVerified,
       isSample: Boolean(isSample),
       translations: translations || {},
     });
@@ -81,9 +100,10 @@ router.post('/schemes', async (req: AuthRequest, res: Response): Promise<void> =
       );
     }
 
+    invalidateSchemeCache();
     res.status(201).json({ message: 'Scheme created successfully', scheme });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to create scheme' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to create scheme' });
   }
 });
 
@@ -92,6 +112,7 @@ router.put('/schemes/:id', async (req: AuthRequest, res: Response): Promise<void
   try {
     const { id } = req.params;
     const {
+      slug,
       title,
       shortDescription,
       category,
@@ -101,6 +122,9 @@ router.put('/schemes/:id', async (req: AuthRequest, res: Response): Promise<void
       documentsRequired,
       applyUrl,
       sourceUrl,
+      isActive,
+      verified,
+      lastVerified,
       isSample,
       translations,
       rules,
@@ -112,39 +136,52 @@ router.put('/schemes/:id', async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    const updated = await SchemeModel.findByIdAndUpdate(
-      id,
-      {
-        ...(title !== undefined && { title: title.trim() }),
-        ...(shortDescription !== undefined && { shortDescription: shortDescription.trim() }),
-        ...(category !== undefined && { category }),
-        ...(level !== undefined && { level }),
-        ...(state !== undefined && { state }),
-        ...(benefits !== undefined && { benefits: Array.isArray(benefits) ? benefits : [benefits] }),
-        ...(documentsRequired !== undefined && {
-          documentsRequired: Array.isArray(documentsRequired) ? documentsRequired : [documentsRequired],
-        }),
-        ...(applyUrl !== undefined && { applyUrl }),
-        ...(sourceUrl !== undefined && { sourceUrl }),
-        ...(isSample !== undefined && { isSample: Boolean(isSample) }),
-        ...(translations !== undefined && { translations }),
-        lastVerified: new Date(),
-      },
-      { new: true }
-    );
+    const updatePatch: Record<string, any> = {
+      ...(slug !== undefined && { slug: String(slug).trim().toLowerCase() }),
+      ...(title !== undefined && { title: title.trim() }),
+      ...(shortDescription !== undefined && { shortDescription: shortDescription.trim() }),
+      ...(category !== undefined && { category }),
+      ...(level !== undefined && { level }),
+      ...(state !== undefined && { state }),
+      ...(benefits !== undefined && { benefits: Array.isArray(benefits) ? benefits : [benefits] }),
+      ...(documentsRequired !== undefined && {
+        documentsRequired: Array.isArray(documentsRequired)
+          ? documentsRequired
+          : [documentsRequired],
+      }),
+      ...(applyUrl !== undefined && { applyUrl }),
+      ...(sourceUrl !== undefined && { sourceUrl }),
+      ...(isActive !== undefined && { isActive: Boolean(isActive) }),
+      ...(isSample !== undefined && { isSample: Boolean(isSample) }),
+      ...(translations !== undefined && { translations }),
+    };
 
-    // If rules are also provided, update criteria
+    if (verified !== undefined) {
+      const nextVerified = Boolean(verified);
+      updatePatch.verified = nextVerified;
+      updatePatch.lastVerified = nextVerified
+        ? lastVerified
+          ? new Date(lastVerified)
+          : new Date()
+        : null;
+    } else if (lastVerified !== undefined) {
+      updatePatch.lastVerified = lastVerified ? new Date(lastVerified) : null;
+    }
+
+    const updated = await SchemeModel.findByIdAndUpdate(existing._id, updatePatch, { new: true });
+
     if (rules && Array.isArray(rules)) {
       await CriteriaModel.findOneAndUpdate(
-        { schemeId: id },
+        { schemeId: existing._id },
         { rules },
         { upsert: true, new: true }
       );
     }
 
+    invalidateSchemeCache();
     res.status(200).json({ message: 'Scheme updated successfully', scheme: updated });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to update scheme' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to update scheme' });
   }
 });
 
@@ -152,17 +189,24 @@ router.put('/schemes/:id', async (req: AuthRequest, res: Response): Promise<void
 router.delete('/schemes/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const deleted = await SchemeModel.findByIdAndDelete(id);
+    const existing = await SchemeModel.findById(id);
+    if (!existing) {
+      res.status(404).json({ message: 'Scheme not found' });
+      return;
+    }
+
+    const deleted = await SchemeModel.findByIdAndDelete(existing._id);
     if (!deleted) {
       res.status(404).json({ message: 'Scheme not found' });
       return;
     }
 
-    await CriteriaModel.deleteOne({ schemeId: id });
+    await CriteriaModel.deleteOne({ schemeId: existing._id });
+    invalidateSchemeCache();
 
     res.status(200).json({ message: 'Scheme and associated criteria deleted successfully' });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to delete scheme' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to delete scheme' });
   }
 });
 
@@ -184,14 +228,15 @@ router.put('/criteria/:schemeId', async (req: AuthRequest, res: Response): Promi
     }
 
     const updated = await CriteriaModel.findOneAndUpdate(
-      { schemeId },
+      { schemeId: scheme._id },
       { rules },
       { upsert: true, new: true }
     );
 
+    invalidateSchemeCache();
     res.status(200).json({ message: 'Eligibility criteria updated successfully', criteria: updated });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to update criteria' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to update criteria' });
   }
 });
 
@@ -212,7 +257,7 @@ router.get('/suggestions', async (req: AuthRequest, res: Response): Promise<void
 
     res.status(200).json(result);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch suggestions' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch suggestions' });
   }
 });
 
@@ -237,7 +282,7 @@ router.patch('/suggestions/:id', async (req: AuthRequest, res: Response): Promis
 
     res.status(200).json({ message: 'Suggestion status updated', suggestion: updated });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to update suggestion status' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to update suggestion status' });
   }
 });
 
@@ -253,7 +298,7 @@ router.delete('/suggestions/:id', async (req: AuthRequest, res: Response): Promi
 
     res.status(200).json({ message: 'Suggestion deleted successfully' });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to delete suggestion' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to delete suggestion' });
   }
 });
 

@@ -3,39 +3,46 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 const languages = [
-  { code: 'en', label: 'English', native: 'English' },
-  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ' },
-  { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
+  { code: 'en', short: 'EN', full: 'English' },
+  { code: 'kn', short: 'ಕ', full: 'ಕನ್ನಡ (Kannada)' },
+  { code: 'hi', short: 'हि', full: 'हिन्दी (Hindi)' },
 ] as const;
 
 export const LanguageSelector: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { i18n } = useTranslation();
   const { setLanguage } = useAuth();
 
-  const currentLang = i18n.language || 'en';
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const lang = e.target.value as 'en' | 'kn' | 'hi';
-    setLanguage(lang);
-  };
+  const currentLang = (['en', 'kn', 'hi'].includes(i18n.language) ? i18n.language : 'en') as
+    | 'en'
+    | 'kn'
+    | 'hi';
 
   return (
-    <div className={`relative inline-flex items-center ${className}`}>
-      <select
-        value={currentLang}
-        onChange={handleChange}
-        aria-label="Select Application Language"
-        className="appearance-none min-h-[40px] bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium rounded-[6px] pl-3 pr-8 py-1.5 cursor-pointer transition-colors duration-150 hover:border-[var(--teal)]"
-      >
-        {languages.map((l) => (
-          <option key={l.code} value={l.code} className="bg-[var(--surface)] text-[var(--text-primary)]">
-            {l.native}
-          </option>
-        ))}
-      </select>
-      <span className="pointer-events-none absolute right-2.5 text-[var(--text-muted)] text-[10px]" aria-hidden="true">
-        ▼
-      </span>
+    <div
+      role="group"
+      aria-label="Select Application Language"
+      className={`inline-flex items-center rounded-full border border-[var(--line)] bg-[var(--paper)] p-0.5 ${className}`}
+    >
+      {languages.map((lang) => {
+        const active = currentLang === lang.code;
+        return (
+          <button
+            key={lang.code}
+            type="button"
+            onClick={() => setLanguage(lang.code)}
+            aria-label={lang.full}
+            aria-pressed={active}
+            title={lang.full}
+            className={`min-h-[36px] min-w-[36px] px-2.5 rounded-full text-xs font-bold transition-colors duration-150 cursor-pointer ${
+              active
+                ? 'bg-[var(--navy)] text-[var(--cream)]'
+                : 'text-[var(--navy)] hover:bg-[var(--cream)]'
+            }`}
+          >
+            {lang.short}
+          </button>
+        );
+      })}
     </div>
   );
 };

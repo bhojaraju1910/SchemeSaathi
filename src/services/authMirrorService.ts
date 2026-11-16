@@ -1,4 +1,4 @@
-import { HARDCODED_SCHEMES, HardcodedScheme } from '../data/schemes';
+import type { HardcodedScheme } from '../data/schemes';
 import {
   matchHardcodedSchemes,
   SchemeMatchResult,
@@ -53,6 +53,19 @@ const SAVED_KEY = 'schemesaathi_mirror_saved';
 const APPS_KEY = 'schemesaathi_mirror_apps';
 
 export const MIRROR_TOKEN_PREFIX = 'local_mirror_';
+
+// Runtime-populated catalog (from API quick-catalog or lazy emergency import). Zero eager bundle bytes.
+let mirrorCatalogCache: HardcodedScheme[] = [];
+
+export function setMirrorCatalog(schemes: HardcodedScheme[]): void {
+  if (Array.isArray(schemes) && schemes.length > 0) {
+    mirrorCatalogCache = schemes;
+  }
+}
+
+export function getMirrorCatalog(): HardcodedScheme[] {
+  return mirrorCatalogCache;
+}
 
 const DEMO_ACCOUNTS: StoredMirrorAccount[] = [
   {
@@ -111,6 +124,7 @@ function writeStorage(key: string, value: unknown): void {
 
 export function clearMirrorStateForTesting(): void {
   memoryFallback.clear();
+  mirrorCatalogCache = [];
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(ACCOUNTS_KEY);
     localStorage.removeItem(PROFILES_KEY);
@@ -237,7 +251,6 @@ export function mirrorRegister(
   registered.push(newUser);
   writeStorage(ACCOUNTS_KEY, registered);
 
-  // Initialize default profile for the newly registered user
   saveMirrorProfile(newUser.id, {
     age: null,
     incomeRange: 'low',
@@ -359,7 +372,16 @@ export function recordMirrorApplicationStatus(
   return entry;
 }
 
-export function getMirrorSavedSchemes(userId: string): MirrorSavedEntry[] {
+function findInCatalog(catalog: HardcodedScheme[], schemeId: string): HardcodedScheme | undefined {
+  return catalog.find(
+    (s) => s._id === schemeId || s.id === schemeId || (s.slug && s.slug === schemeId)
+  );
+}
+
+export function getMirrorSavedSchemes(
+  userId: string,
+  catalog: HardcodedScheme[] = mirrorCatalogCache
+): MirrorSavedEntry[] {
   const allSaved = readStorage<Record<string, MirrorSavedEntry[]>>(SAVED_KEY, {});
   const list = allSaved[userId] || [];
   const apps = getMirrorApplications(userId);
@@ -367,12 +389,17 @@ export function getMirrorSavedSchemes(userId: string): MirrorSavedEntry[] {
 
   return list.map((item) => ({
     ...item,
-    scheme: HARDCODED_SCHEMES.find((s) => s._id === item.schemeId || s.id === item.schemeId),
+    scheme: item.scheme || findInCatalog(catalog, item.schemeId),
     status: appMap.get(item.schemeId) || item.status,
   }));
 }
 
-export function addMirrorSavedScheme(userId: string, schemeId: string): MirrorSavedEntry {
+export function addMirrorSavedScheme(
+  userId: string,
+  schemeId: string,
+  catalog: HardcodedScheme[] = mirrorCatalogCache,
+  explicitScheme?: HardcodedScheme
+): MirrorSavedEntry {
   const allSaved = readStorage<Record<string, MirrorSavedEntry[]>>(SAVED_KEY, {});
   const list = allSaved[userId] || [];
   const existing = list.find((s) => s.schemeId === schemeId);
@@ -383,7 +410,7 @@ export function addMirrorSavedScheme(userId: string, schemeId: string): MirrorSa
     userId,
     schemeId,
     savedAt: new Date().toISOString(),
-    scheme: HARDCODED_SCHEMES.find((s) => s._id === schemeId || s.id === schemeId),
+    scheme: explicitScheme || findInCatalog(catalog, schemeId),
   };
   allSaved[userId] = [entry, ...list];
   writeStorage(SAVED_KEY, allSaved);
@@ -397,14 +424,17 @@ export function removeMirrorSavedScheme(userId: string, schemeId: string): void 
   writeStorage(SAVED_KEY, allSaved);
 }
 
-export function getMirrorDashboardStats(userId: string): MirrorDashboardStats {
+export function getMirrorDashboardStats(
+  userId: string,
+  catalog: HardcodedScheme[] = mirrorCatalogCache
+): MirrorDashboardStats {
   const profile = getMirrorProfile(userId);
-  const matches = matchHardcodedSchemes(profile, HARDCODED_SCHEMES);
-  const saved = getMirrorSavedSchemes(userId);
+  const matches = matchHardcodedSchemes(profile, catalog);
+  const saved = getMirrorSavedSchemes(userId, catalog);
   const apps = getMirrorApplications(userId);
 
   return {
-    availableSchemes: HARDCODED_SCHEMES.length,
+    availableSchemes: catalog.length,
     potentialMatches: matches.length,
     savedSchemes: saved.length,
     applicationLinks: apps.length,

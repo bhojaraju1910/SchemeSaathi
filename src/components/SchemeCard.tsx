@@ -2,19 +2,32 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useCompare } from '../context/CompareContext';
 import SampleBadge from './SampleBadge';
+import VerificationBadge from './VerificationBadge';
 import MatchBadge from './MatchBadge';
-import CategoryIcon, { getCategoryPalette } from './CategoryIcon';
+import CategoryIcon, { getCategoryIconColor } from './CategoryIcon';
+import ProgressRing from './ProgressRing';
+import { getRuleProgress } from '../utils/schemeTools';
 import api from '../api/axios';
 import {
   addMirrorSavedScheme,
+  getMirrorCatalog,
   isMirrorToken,
   recordMirrorApplicationStatus,
   removeMirrorSavedScheme,
 } from '../services/authMirrorService';
+import {
+  AlertCircleIcon,
+  BookmarkIcon,
+  CheckIcon,
+  ExternalLinkIcon,
+  ScaleIcon,
+} from './Icons';
 
 export interface SchemeData {
   _id: string;
+  slug?: string;
   title: string;
   shortDescription: string;
   category: string;
@@ -24,8 +37,11 @@ export interface SchemeData {
   documentsRequired: string[];
   applyUrl: string;
   sourceUrl: string;
-  lastVerified: string | Date;
+  verified?: boolean;
+  lastVerified: string | Date | null;
   isSample: boolean;
+  isActive?: boolean;
+  rules?: { label?: string }[];
   translations?: {
     kn?: { title?: string; shortDescription?: string; benefits?: string[] };
     hi?: { title?: string; shortDescription?: string; benefits?: string[] };
@@ -41,40 +57,6 @@ interface SchemeCardProps {
   onSaveToggle?: (schemeId: string, saved: boolean) => void;
 }
 
-const BookmarkSvg: React.FC<{ filled?: boolean }> = ({ filled = false }) => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill={filled ? 'currentColor' : 'none'}
-    stroke="currentColor"
-    strokeWidth="1.75"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M6 4h12v16l-6-4-6 4V4z" />
-  </svg>
-);
-
-const ExternalSvg: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.75"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M14 4h6v6" />
-    <path d="M10 14L20 4" />
-    <path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6" />
-  </svg>
-);
-
 export const SchemeCard: React.FC<SchemeCardProps> = ({
   scheme,
   match,
@@ -85,10 +67,12 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
+  const { isCompared, toggleCompare } = useCompare();
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(isInitiallySaved);
   const [saveLoading, setSaveLoading] = useState(false);
 
+  const compared = isCompared(scheme._id);
   const currentLang = i18n.language as 'en' | 'kn' | 'hi';
   const hasTranslation =
     currentLang !== 'en' &&
@@ -128,7 +112,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
         setIsSaved(false);
         onSaveToggle?.(scheme._id, false);
       } else {
-        addMirrorSavedScheme(user.id, scheme._id);
+        addMirrorSavedScheme(user.id, scheme._id, getMirrorCatalog(), scheme as any);
         if (!isMirrorToken(token)) {
           await api.post('/saved', { schemeId: scheme._id }).catch(() => {});
         }
@@ -167,107 +151,139 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
       ? t('schemesPage.levelCentral')
       : `${scheme.state || 'State'} ${t('schemesPage.levelState')}`;
 
-  const palette = getCategoryPalette(scheme.category);
+  const iconTint = getCategoryIconColor(scheme.category);
 
-  // Recommendation list row layout (when match prop is provided)
+  // Recommendation row layout (with ProgressRing + rules reasons/missing + Compare button)
   if (match) {
     const oneLineSummary = reasons[0] || displayDescription;
+    const ruleProgress = getRuleProgress(
+      scheme._id,
+      reasons.length,
+      missing.length,
+      scheme.rules?.length
+    );
 
     return (
-      <article className="bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] rounded-[6px] p-5 sm:p-6 space-y-4 transition-colors duration-150">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+      <article className="editorial-card editorial-card-lift p-5 sm:p-7 space-y-5 hover:border-[var(--navy)] transition-colors duration-200">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
           <div className="flex items-start gap-4 min-w-0">
             <CategoryIcon kind={scheme.category} size={22} withChip />
 
             <div className="space-y-2 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs">
                 <MatchBadge match={match} />
-                <span
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold"
-                  style={{ backgroundColor: palette.bg, color: palette.fg }}
-                >
-                  {categoryLabel}
+                <span className="font-bold text-[var(--navy)] inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: iconTint }} aria-hidden="true" />
+                  <span>{categoryLabel}</span>
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--medium-bg)] text-[var(--medium-text)]">
-                  {levelLabel}
-                </span>
-                {scheme.isSample && <SampleBadge />}
+                <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                <span className="font-medium text-[var(--muted)]">{levelLabel}</span>
+                {scheme.isSample ? (
+                  <>
+                    <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                    <SampleBadge />
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                    <VerificationBadge
+                      verified={scheme.verified}
+                      lastVerified={scheme.lastVerified}
+                      isSample={scheme.isSample}
+                    />
+                  </>
+                )}
               </div>
 
-              <h3 className="text-[18px] font-bold text-[var(--text-primary)] leading-snug">
+              <h3 className="font-display text-xl sm:text-2xl font-bold text-[var(--navy)] leading-snug">
                 <Link
                   to={`/schemes/${scheme._id}`}
-                  className="hover:text-[var(--teal)] transition-colors duration-150"
+                  className="hover:text-[var(--accent-ink)] transition-colors"
                 >
                   {displayTitle}
                 </Link>
               </h3>
 
               {!hasTranslation && currentLang !== 'en' && (
-                <p className="text-xs text-[var(--text-muted)] italic">
-                  ({t('shownInEnglish')})
-                </p>
+                <p className="text-xs text-[var(--muted)] italic">({t('shownInEnglish')})</p>
               )}
 
-              <p className="text-base text-[var(--text-muted)] leading-relaxed">
+              <p className="text-base text-[var(--muted)] leading-relaxed max-w-2xl">
                 {oneLineSummary}
               </p>
-
-              {formattedDate && (
-                <p className="text-xs text-[var(--text-muted)] tabular-nums">
-                  {t('schemeDetails.lastVerified')}: {formattedDate}
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <Link
-              to={`/schemes/${scheme._id}`}
-              className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 rounded-[6px] text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-colors duration-150 whitespace-nowrap"
-            >
-              {t('recommendations.viewDetails')}
-            </Link>
+          <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-4 shrink-0">
+            <ProgressRing
+              passed={ruleProgress.passed}
+              total={ruleProgress.total}
+              label="rules passed"
+            />
 
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saveLoading}
-              aria-label={isSaved ? t('recommendations.saved') : t('recommendations.save')}
-              className={`min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[6px] text-sm font-semibold border transition-colors duration-150 cursor-pointer whitespace-nowrap ${
-                isSaved
-                  ? 'bg-[var(--teal)] text-[var(--deep-text)] border-[var(--teal)] hover:bg-[var(--teal-hover)]'
-                  : 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)]'
-              }`}
-            >
-              <BookmarkSvg filled={isSaved} />
-              <span>{isSaved ? t('recommendations.saved') : t('recommendations.save')}</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => toggleCompare(scheme)}
+                aria-pressed={compared}
+                className={`min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer whitespace-nowrap ${
+                  compared
+                    ? 'bg-[var(--navy)] text-[var(--cream)] border-[var(--navy)]'
+                    : 'bg-[var(--cream)] text-[var(--navy)] border-[var(--line)] hover:border-[var(--navy)]'
+                }`}
+              >
+                <ScaleIcon size={15} />
+                <span>{compared ? t('comparePage.addedCompare') : t('comparePage.addCompare')}</span>
+              </button>
 
-            <a
-              href={scheme.applyUrl || 'https://www.myscheme.gov.in/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleOfficialClick}
-              className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150 whitespace-nowrap"
-            >
-              <span>{t('recommendations.officialPage')}</span>
-              <ExternalSvg />
-            </a>
+              <Link
+                to={`/schemes/${scheme._id}`}
+                className="btn-outline-pill min-h-[44px] px-4 py-2 inline-flex items-center justify-center text-xs font-bold whitespace-nowrap"
+              >
+                {t('recommendations.viewDetails')}
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saveLoading}
+                aria-label={isSaved ? t('recommendations.saved') : t('recommendations.save')}
+                className={`min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer whitespace-nowrap ${
+                  isSaved
+                    ? 'bg-[var(--badge-high-bg)] text-[var(--badge-high-text)] border-[var(--accent)]'
+                    : 'bg-[var(--paper)] text-[var(--navy)] border-[var(--line)] hover:border-[var(--navy)]'
+                }`}
+              >
+                <BookmarkIcon size={15} filled={isSaved} />
+                <span>{isSaved ? t('recommendations.saved') : t('recommendations.save')}</span>
+              </button>
+
+              <a
+                href={scheme.applyUrl || 'https://www.myscheme.gov.in/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleOfficialClick}
+                className="btn-accent-pill min-h-[44px] px-5 py-2 inline-flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap"
+              >
+                <span>{t('recommendations.officialPage')}</span>
+                <ExternalLinkIcon size={14} />
+              </a>
+            </div>
           </div>
         </div>
 
         {(reasons.length > 0 || (match === 'Medium' && missing.length > 0)) && (
-          <div className="pt-4 border-t border-[var(--border)] grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="pt-5 border-t border-[var(--line)] grid grid-cols-1 md:grid-cols-2 gap-4">
             {reasons.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+              <div className="bg-[var(--success-bg)] border border-[var(--success-border)] rounded-[12px] p-4">
+                <p className="text-sm font-bold text-[var(--success)] mb-2">
                   {t('recommendations.whyRelevant')}
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-[var(--success)]">
+                <ul className="space-y-1.5 text-sm text-[var(--navy)]">
                   {reasons.map((r, i) => (
-                    <li key={i}>
-                      <span className="text-[var(--text-primary)]">{r}</span>
+                    <li key={i} className="flex items-start gap-2">
+                      <CheckIcon size={16} className="text-[var(--success)] mt-0.5" />
+                      <span>{r}</span>
                     </li>
                   ))}
                 </ul>
@@ -275,14 +291,15 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
             )}
 
             {match === 'Medium' && missing.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-[var(--saffron-tint-text)] mb-1.5">
+              <div className="bg-[var(--badge-high-bg)] border border-[var(--line)] rounded-[12px] p-4">
+                <p className="text-sm font-bold text-[var(--badge-high-text)] mb-2">
                   {t('recommendations.pleaseConfirm')}
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-[var(--saffron-tint-text)]">
+                <ul className="space-y-1.5 text-sm text-[var(--navy)]">
                   {missing.map((m, i) => (
-                    <li key={i}>
-                      <span className="text-[var(--text-primary)]">{m}</span>
+                    <li key={i} className="flex items-start gap-2">
+                      <AlertCircleIcon size={16} className="text-[var(--badge-high-text)] mt-0.5" />
+                      <span>{m}</span>
                     </li>
                   ))}
                 </ul>
@@ -294,25 +311,36 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
     );
   }
 
-  // Flat bordered card / catalog row layout (Landing Popular Schemes & Catalog)
+  // Catalog / Landing Editorial Scheme Card
   return (
-    <article className="bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] rounded-[6px] p-5 sm:p-6 flex flex-col justify-between gap-4 transition-colors duration-150">
+    <article className="editorial-card editorial-card-lift p-5 sm:p-6 flex flex-col justify-between gap-5 hover:border-[var(--navy)] transition-colors duration-200">
       <div className="flex items-start gap-4">
         <CategoryIcon kind={scheme.category} size={22} withChip />
 
-        <div className="flex-1 min-w-0 space-y-2.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold"
-                style={{ backgroundColor: palette.bg, color: palette.fg }}
-              >
-                {categoryLabel}
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs pt-0.5">
+              <span className="font-bold text-[var(--navy)] inline-flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: iconTint }} aria-hidden="true" />
+                <span>{categoryLabel}</span>
               </span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--medium-bg)] text-[var(--medium-text)]">
-                {levelLabel}
-              </span>
-              {scheme.isSample && <SampleBadge />}
+              <span className="text-[var(--line)]" aria-hidden="true">·</span>
+              <span className="font-medium text-[var(--muted)]">{levelLabel}</span>
+              {scheme.isSample ? (
+                <>
+                  <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                  <SampleBadge />
+                </>
+              ) : (
+                <>
+                  <span className="text-[var(--line)]" aria-hidden="true">·</span>
+                  <VerificationBadge
+                    verified={scheme.verified}
+                    lastVerified={scheme.lastVerified}
+                    isSample={scheme.isSample}
+                  />
+                </>
+              )}
             </div>
 
             <button
@@ -321,55 +349,74 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
               disabled={saveLoading}
               aria-label={isSaved ? t('recommendations.saved') : t('recommendations.save')}
               title={isSaved ? t('recommendations.saved') : t('recommendations.save')}
-              className={`min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-[6px] border transition-colors duration-150 cursor-pointer shrink-0 ${
+              className={`min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-full border transition-colors cursor-pointer shrink-0 ${
                 isSaved
-                  ? 'bg-[var(--teal)] text-[var(--deep-text)] border-[var(--teal)] hover:bg-[var(--teal-hover)]'
-                  : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)]'
+                  ? 'bg-[var(--badge-high-bg)] text-[var(--badge-high-text)] border-[var(--accent)]'
+                  : 'bg-[var(--cream)] text-[var(--muted)] border-[var(--line)] hover:border-[var(--navy)] hover:text-[var(--navy)]'
               }`}
             >
-              <BookmarkSvg filled={isSaved} />
+              <BookmarkIcon size={16} filled={isSaved} />
             </button>
           </div>
 
-          <h3 className="text-[18px] font-bold text-[var(--text-primary)] leading-snug">
+          <h3 className="font-display text-lg sm:text-xl font-bold text-[var(--navy)] leading-snug">
             <Link
               to={`/schemes/${scheme._id}`}
-              className="hover:text-[var(--teal)] transition-colors duration-150"
+              className="hover:text-[var(--accent-ink)] transition-colors"
             >
               {displayTitle}
             </Link>
           </h3>
 
           {!hasTranslation && currentLang !== 'en' && (
-            <p className="text-xs text-[var(--text-muted)] italic">
-              ({t('shownInEnglish')})
-            </p>
+            <p className="text-xs text-[var(--muted)] italic">({t('shownInEnglish')})</p>
           )}
 
-          <p className="text-base text-[var(--text-muted)] leading-relaxed">
+          <p className="text-sm sm:text-base text-[var(--muted)] leading-relaxed">
             {displayDescription}
           </p>
 
           {displayBenefits && displayBenefits.length > 0 && (
-            <p className="text-sm text-[var(--text-primary)] pt-0.5">
-              <span className="font-semibold">{t('schemeDetails.benefits')}: </span>
+            <p className="text-sm text-[var(--navy)] pt-1 leading-relaxed">
+              <span className="font-bold text-[var(--accent-ink)]">{t('schemeDetails.benefits')}: </span>
               {displayBenefits[0]}
             </p>
           )}
         </div>
       </div>
 
-      <div className="pt-4 border-t border-[var(--border)] space-y-3">
-        {formattedDate && (
-          <p className="text-sm text-[var(--text-muted)] tabular-nums">
-            {t('schemeDetails.lastVerified')}: <span className="font-medium text-[var(--text-primary)]">{formattedDate}</span>
-          </p>
-        )}
+      <div className="pt-4 border-t border-[var(--line)] space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          {formattedDate ? (
+            <p className="text-xs text-[var(--muted)] tabular-nums">
+              {t('schemeDetails.lastVerified')}:{' '}
+              <span className="font-semibold text-[var(--navy)]">{formattedDate}</span>
+            </p>
+          ) : (
+            <p className="text-xs text-[var(--muted)]">
+              {t('badges.confirmPortal', 'Confirm details on official portal')}
+            </p>
+          )}
 
-        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggleCompare(scheme)}
+            aria-pressed={compared}
+            className={`min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+              compared
+                ? 'bg-[var(--navy)] text-[var(--cream)] border-[var(--navy)]'
+                : 'bg-[var(--cream)] text-[var(--navy)] border-[var(--line)] hover:border-[var(--navy)]'
+            }`}
+          >
+            <ScaleIcon size={14} />
+            <span>{compared ? t('comparePage.addedCompare') : t('comparePage.addCompare')}</span>
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
           <Link
             to={`/schemes/${scheme._id}`}
-            className="flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center px-4 py-2 rounded-[6px] text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-colors duration-150 whitespace-nowrap"
+            className="btn-outline-pill flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm whitespace-nowrap"
           >
             {t('recommendations.viewDetails')}
           </Link>
@@ -379,10 +426,10 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleOfficialClick}
-            className="flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[6px] text-sm font-semibold text-[var(--deep-text)] bg-[var(--teal)] hover:bg-[var(--teal-hover)] transition-colors duration-150 whitespace-nowrap"
+            className="btn-accent-pill flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm whitespace-nowrap"
           >
             <span>{t('recommendations.officialPage')}</span>
-            <ExternalSvg />
+            <ExternalLinkIcon size={14} />
           </a>
         </div>
       </div>

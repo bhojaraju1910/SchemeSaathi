@@ -16,7 +16,8 @@
     "logout": "लॉग आउट",
     "profile": "प्रोफ़ाइल",
     "suggest": "सुझाव (Suggest)",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "compare": "तुलना (Compare)"
   },
   "hero": {
     "title": "अपने परिवार के लिए संभावित उपयोगी सरकारी योजनाएं खोजें",
@@ -114,7 +115,9 @@
     "statAvailable": "उपलब्ध योजनाएं",
     "statMatches": "संभावित अनुकूल योजनाएं",
     "statSaved": "सहेजी गई योजनाएं",
+    "statDocsReady": "Documents Ready",
     "statApplications": "आधिकारिक लिंक क्लिक",
+    "nextStepTitle": "Next best step",
     "topMatches": "आपके लिए शीर्ष संभावित योजनाएं",
     "quickActions": "त्वरित कार्य",
     "updateProfile": "प्रोफ़ाइल अपडेट करें",
@@ -224,5 +227,87 @@
     "allStatuses": "All Statuses",
     "emptyTitle": "No Suggestions Found",
     "emptyDesc": "No community suggestions match the selected filters yet."
+  },
+  "_comment_editorial_keys_hi": "English fallback strings below are added for newly added Compare, Quick Check, Checklist, Share/Print, Listen, and Text Size features; ready for Hindi localization review.",
+  "announcement": "Guidance only · Always verify on official portals · English · ಕನ್ನಡ · हिन्दी",
+  "textSize": {
+    "label": "Text size",
+    "small": "Default text size",
+    "medium": "Medium text size",
+    "large": "Large text size"
+  },
+  "quickCheck": {
+    "eyebrow": "Interactive Check",
+    "title": "See what may fit in one minute",
+    "subtitle": "Enter a few basic details below to see potentially relevant schemes right now — no sign-up needed.",
+    "ageLabel": "Your age",
+    "agePlaceholder": "e.g. 62",
+    "stateLabel": "State / UT",
+    "incomeLabel": "Annual household income",
+    "categoryLabel": "Household groups (optional)",
+    "resultCount": "{{count}} schemes may be relevant",
+    "highBreakdown": "{{high}} High · {{medium}} Medium",
+    "ctaSave": "See all and save them",
+    "viewScheme": "View"
+  },
+  "comparePage": {
+    "title": "Compare Welfare Schemes",
+    "subtitle": "Side-by-side look at benefits, documents, eligibility rules, and official links for up to 3 schemes.",
+    "trayLabel": "Compare ({{count}})",
+    "compareNow": "Open comparison",
+    "clearAll": "Clear",
+    "addCompare": "Compare",
+    "addedCompare": "Comparing",
+    "limitReached": "You can compare up to 3 schemes at a time. Remove one first.",
+    "emptyTitle": "No schemes selected for comparison",
+    "emptyDesc": "Tap the Compare button on any scheme card (up to 3 schemes) to view benefits and required documents side by side.",
+    "browseSchemes": "Browse Schemes",
+    "rowBenefits": "Key Benefits",
+    "rowDocuments": "Documents Required",
+    "rowLevel": "Government Level",
+    "rowState": "State / Region",
+    "rowCategory": "Category",
+    "rowRules": "Eligibility Summary",
+    "rowVerified": "Last Verified",
+    "rowOfficial": "Official Website",
+    "removeBtn": "Remove"
+  },
+  "detailsExtra": {
+    "checklistProgress": "{{done}} of {{total}} ready",
+    "checklistHint": "Tick documents you already have ready. Saved on this device.",
+    "shareWhatsapp": "Share on WhatsApp",
+    "printPdf": "Print / Save PDF",
+    "listenBtn": "Listen",
+    "stopListenBtn": "Stop",
+    "listenUnsupported": "Voice reading is not available on this browser or language.",
+    "keyFactsTitle": "Key Facts at a Glance"
+  },
+  "profileExtra": {
+    "sec1Title": "1. About you",
+    "sec2Title": "2. Where you live",
+    "sec3Title": "3. Your situation",
+    "livePreviewTitle": "Live match preview",
+    "livePreviewNotice": "Preview. Save your profile to see full results.",
+    "livePreviewEmpty": "Fill in age, state, or categories to preview matches."
+  },
+  "fallback": {
+    "savedCopyBanner": "Showing a saved copy. Some details may be outdated.",
+    "retryLive": "Retry live data"
+  },
+  "badges": {
+    "verifyOfficial": "Verify on official site",
+    "verifiedOn": "Verified on",
+    "verified": "Verified",
+    "confirmPortal": "Confirm details on official portal"
+  },
+  "footer": {
+    "cursorEffects": "Cursor effects",
+    "cursorOn": "On",
+    "cursorOff": "Off"
+  },
+  "dashboardExtra": {
+    "profileStrength": "Profile strength",
+    "strengthCount": "{{done}} of {{total}} completed",
+    "completeNow": "Complete profile for sharper matches"
   }
 }

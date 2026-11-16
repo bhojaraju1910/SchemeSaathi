@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { HARDCODED_SCHEMES } from '../data/schemes';
 import {
   clearMirrorStateForTesting,
   getMirrorDashboardStats,
@@ -13,6 +14,7 @@ import {
   addMirrorSavedScheme,
   removeMirrorSavedScheme,
   saveMirrorProfile,
+  setMirrorCatalog,
 } from './authMirrorService';
 
 test('mirrorLogin authenticates Demo User and Admin User and rejects invalid passwords', () => {
@@ -61,6 +63,7 @@ test('mirrorRegister creates account, enforces duplicate/validation checks, and 
 
 test('mirror saved schemes, application status, and dashboard stats work for Demo User', () => {
   clearMirrorStateForTesting();
+  setMirrorCatalog(HARDCODED_SCHEMES);
 
   const demoProfile = getMirrorProfile('user_demo');
   assert.equal(demoProfile.age, 62);
@@ -75,7 +78,7 @@ test('mirror saved schemes, application status, and dashboard stats work for Dem
   assert.equal(saved[0].status, 'applied');
 
   const stats = getMirrorDashboardStats('user_demo');
-  assert.equal(stats.availableSchemes, 22);
+  assert.equal(stats.availableSchemes, 60);
   assert.equal(stats.savedSchemes, 1);
   assert.equal(stats.applicationLinks, 1);
   assert.ok(stats.potentialMatches >= 2);

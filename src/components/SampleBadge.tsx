@@ -11,7 +11,7 @@ export const SampleBadge: React.FC<SampleBadgeProps> = ({ className = '', showIc
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-xs font-semibold bg-[var(--saffron-tint)] text-[var(--saffron-tint-text)] border border-[var(--saffron-border)] ${className}`}
+      className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-[var(--badge-high-bg)] text-[var(--badge-high-text)] border border-[var(--line)] whitespace-nowrap ${className}`}
       title="This is verified synthetic demonstration data for academic and evaluation purposes."
     >
       {t('sampleBadge')}

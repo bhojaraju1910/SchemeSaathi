@@ -5,7 +5,8 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-import { connectDB } from './config/db';
+import { connectDB, getStorageMode } from './config/db';
+import { SchemeModel } from './models/index';
 import authRouter from './routes/auth';
 import profileRouter from './routes/profile';
 import schemesRouter from './routes/schemes';
@@ -48,11 +49,30 @@ export function createApp() {
   app.use(morgan('dev'));
   app.use(express.json());
 
-  // Ensure DB and seed data are ready on serverless cold starts
+  // Ensure DB connection is ready on serverless cold starts
   app.use('/api', async (_req, _res, next) => {
     try {
       await ensureDBReady();
       next();
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Health & storage verification endpoint
+  app.get('/api/health', async (_req, res, next) => {
+    try {
+      const storageMode = getStorageMode();
+      const [schemeCount, verifiedCount] = await Promise.all([
+        SchemeModel.countDocuments(),
+        SchemeModel.countVerified(),
+      ]);
+      res.status(200).json({
+        storageMode,
+        schemeCount,
+        verifiedCount,
+        uptime: Math.round(process.uptime()),
+      });
     } catch (err) {
       next(err);
     }

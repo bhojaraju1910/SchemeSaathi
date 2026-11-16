@@ -1,11 +1,17 @@
 import { Router, Request, Response } from 'express';
 import { SchemeModel, CriteriaModel, ProfileModel } from '../models/index';
 import { auth, AuthRequest } from '../middleware/auth';
-import { matchSchemes, SchemeWithRules } from '../services/eligibilityEngine';
+import { matchSchemes } from '../services/eligibilityEngine';
+import {
+  getCachedActiveSchemesWithRules,
+  getCachedCatalogMeta,
+} from '../services/schemeCache';
 
 const router = Router();
 
-// Public list with filters and search
+const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600';
+
+// Public list with server-side pagination, projection, and search
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const { q, category, state, level, page = '1', limit = '12' } = req.query;
@@ -19,26 +25,60 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     if (state && state !== 'All') filter.state = state;
     if (level && level !== 'All') filter.level = level;
 
-    const allMatched = await SchemeModel.find(filter);
-    const total = allMatched.length;
-    const totalPages = Math.ceil(total / limitNum) || 1;
-
-    const startIndex = (pageNum - 1) * limitNum;
-    const paginatedSchemes = allMatched.slice(startIndex, startIndex + limitNum);
-
-    res.status(200).json({
-      schemes: paginatedSchemes,
-      total,
+    const result = await SchemeModel.findPaginated({
+      filter,
       page: pageNum,
-      totalPages,
       limit: limitNum,
     });
+
+    res.set('Cache-Control', PUBLIC_CACHE_HEADER);
+    res.status(200).json(result);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch schemes' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch schemes' });
   }
 });
 
-// Single scheme details with plain-language criteria
+// Lightweight cached category & level counts for Landing & filters
+router.get('/meta', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const meta = await getCachedCatalogMeta();
+    res.set('Cache-Control', PUBLIC_CACHE_HEADER);
+    res.status(200).json(meta);
+  } catch (err: any) {
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch scheme metadata' });
+  }
+});
+
+// Lightweight cached active schemes + rules for instant client Quick Check & Live Preview
+router.get('/quick-catalog', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const items = await getCachedActiveSchemesWithRules();
+    const compact = items.map(({ scheme, rules }) => ({
+      _id: scheme._id,
+      slug: scheme.slug,
+      title: scheme.title,
+      shortDescription: scheme.shortDescription,
+      category: scheme.category,
+      level: scheme.level,
+      state: scheme.state,
+      benefits: scheme.benefits,
+      documentsRequired: scheme.documentsRequired,
+      applyUrl: scheme.applyUrl,
+      sourceUrl: scheme.sourceUrl,
+      verified: Boolean(scheme.verified),
+      lastVerified: scheme.lastVerified,
+      isSample: Boolean(scheme.isSample),
+      translations: scheme.translations,
+      rules,
+    }));
+    res.set('Cache-Control', PUBLIC_CACHE_HEADER);
+    res.status(200).json({ schemes: compact, total: compact.length });
+  } catch (err: any) {
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to load quick catalog' });
+  }
+});
+
+// Single scheme details (by ObjectId or slug) with plain-language criteria
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const scheme = await SchemeModel.findById(req.params.id);
@@ -50,6 +90,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
     const criteria = await CriteriaModel.findOne({ schemeId: scheme._id });
     const rules = criteria ? criteria.rules : [];
 
+    res.set('Cache-Control', PUBLIC_CACHE_HEADER);
     res.status(200).json({
       scheme,
       criteria: {
@@ -58,39 +99,25 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to fetch scheme details' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch scheme details' });
   }
 });
 
-// Match schemes against user profile
+// Match schemes against user profile using 5-minute cached active catalog
 router.post('/match', auth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    // Look up saved user profile, or merge with body override
     const savedProfile = await ProfileModel.findOne({ userId: req.user!.id });
     const profile = {
       ...(savedProfile || {}),
       ...(req.body || {}),
     };
 
-    // Fetch all schemes
-    const allSchemes = await SchemeModel.find();
-    const allCriteria = await CriteriaModel.find();
-
-    const criteriaMap = new Map<string, any[]>();
-    for (const c of allCriteria) {
-      criteriaMap.set(c.schemeId, c.rules);
-    }
-
-    const schemesWithRules: SchemeWithRules[] = allSchemes.map((s) => ({
-      scheme: s,
-      rules: criteriaMap.get(s._id) || [],
-    }));
-
+    const schemesWithRules = await getCachedActiveSchemesWithRules();
     const matchResults = matchSchemes(profile, schemesWithRules);
 
     res.status(200).json(matchResults);
   } catch (err: any) {
-    res.status(500).json({ message: err.message || 'Failed to evaluate scheme matches' });
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to evaluate scheme matches' });
   }
 });
 
