@@ -221,15 +221,15 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
               label="rules passed"
             />
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
               <button
                 type="button"
                 onClick={() => toggleCompare(scheme)}
                 aria-pressed={compared}
-                className={`min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer whitespace-nowrap ${
+                className={`btn-card-3d-subtle min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer whitespace-nowrap ${
                   compared
-                    ? 'bg-[var(--navy)] text-[var(--cream)] border-[var(--navy)]'
-                    : 'bg-[var(--cream)] text-[var(--navy)] border-[var(--line)] hover:border-[var(--navy)]'
+                    ? 'bg-[var(--navy)] text-[var(--cream)]'
+                    : 'bg-[var(--cream)] text-[var(--navy)]'
                 }`}
               >
                 <ScaleIcon size={15} />
@@ -238,7 +238,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
 
               <Link
                 to={`/schemes/${scheme._id}`}
-                className="btn-outline-pill min-h-[44px] px-4 py-2 inline-flex items-center justify-center text-xs font-bold whitespace-nowrap"
+                className="btn-card-3d-outline min-h-[44px] px-4 py-2 inline-flex items-center justify-center text-xs font-bold whitespace-nowrap"
               >
                 {t('recommendations.viewDetails')}
               </Link>
@@ -248,10 +248,10 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
                 onClick={handleSave}
                 disabled={saveLoading}
                 aria-label={isSaved ? t('recommendations.saved') : t('recommendations.save')}
-                className={`min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer whitespace-nowrap ${
+                className={`btn-card-3d-subtle min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold cursor-pointer whitespace-nowrap ${
                   isSaved
-                    ? 'bg-[var(--badge-high-bg)] text-[var(--badge-high-text)] border-[var(--accent)]'
-                    : 'bg-[var(--paper)] text-[var(--navy)] border-[var(--line)] hover:border-[var(--navy)]'
+                    ? 'bg-[var(--badge-high-bg)] text-[var(--badge-high-text)]'
+                    : 'bg-[var(--paper)] text-[var(--navy)]'
                 }`}
               >
                 <BookmarkIcon size={15} filled={isSaved} />
@@ -263,7 +263,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleOfficialClick}
-                className="btn-accent-pill min-h-[44px] px-5 py-2 inline-flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap"
+                className="btn-card-3d-accent min-h-[44px] px-5 py-2 inline-flex items-center justify-center gap-1.5 text-xs font-bold whitespace-nowrap"
               >
                 <span>{t('recommendations.officialPage')}</span>
                 <ExternalLinkIcon size={14} />
@@ -349,10 +349,10 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
               disabled={saveLoading}
               aria-label={isSaved ? t('recommendations.saved') : t('recommendations.save')}
               title={isSaved ? t('recommendations.saved') : t('recommendations.save')}
-              className={`min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-full border transition-colors cursor-pointer shrink-0 ${
+              className={`btn-card-3d-subtle min-h-[40px] min-w-[40px] inline-flex items-center justify-center cursor-pointer shrink-0 ${
                 isSaved
-                  ? 'bg-[var(--badge-high-bg)] text-[var(--badge-high-text)] border-[var(--accent)]'
-                  : 'bg-[var(--cream)] text-[var(--muted)] border-[var(--line)] hover:border-[var(--navy)] hover:text-[var(--navy)]'
+                  ? 'bg-[var(--badge-high-bg)] text-[var(--badge-high-text)]'
+                  : 'bg-[var(--paper)] text-[var(--navy)]'
               }`}
             >
               <BookmarkIcon size={16} filled={isSaved} />
@@ -402,10 +402,10 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
             type="button"
             onClick={() => toggleCompare(scheme)}
             aria-pressed={compared}
-            className={`min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+            className={`btn-card-3d-subtle min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold cursor-pointer ${
               compared
-                ? 'bg-[var(--navy)] text-[var(--cream)] border-[var(--navy)]'
-                : 'bg-[var(--cream)] text-[var(--navy)] border-[var(--line)] hover:border-[var(--navy)]'
+                ? 'bg-[var(--navy)] text-[var(--cream)]'
+                : 'bg-[var(--paper)] text-[var(--navy)]'
             }`}
           >
             <ScaleIcon size={14} />
@@ -413,10 +413,10 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-3 pt-0.5">
           <Link
             to={`/schemes/${scheme._id}`}
-            className="btn-outline-pill flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm whitespace-nowrap"
+            className="btn-card-3d-outline flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm whitespace-nowrap"
           >
             {t('recommendations.viewDetails')}
           </Link>
@@ -426,7 +426,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleOfficialClick}
-            className="btn-accent-pill flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm whitespace-nowrap"
+            className="btn-card-3d-accent flex-1 min-w-[120px] min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm whitespace-nowrap"
           >
             <span>{t('recommendations.officialPage')}</span>
             <ExternalLinkIcon size={14} />

@@ -260,19 +260,19 @@ export const Compare: React.FC = () => {
                     </th>
                     {compareSchemes.map((s) => (
                       <td key={s._id} className="p-4 sm:p-5 border-r last:border-r-0 border-[var(--line)] align-top">
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-3">
                           <a
                             href={s.applyUrl || 'https://www.myscheme.gov.in/'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn-accent-pill min-h-[44px] px-4 inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+                            className="btn-card-3d-accent min-h-[44px] px-4 inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm"
                           >
                             <span>{t('recommendations.officialPage')}</span>
                             <ExternalLinkIcon size={14} />
                           </a>
                           <Link
                             to={`/schemes/${s._id}`}
-                            className="btn-outline-pill min-h-[44px] px-4 inline-flex items-center justify-center text-xs sm:text-sm"
+                            className="btn-card-3d-outline min-h-[44px] px-4 inline-flex items-center justify-center text-xs sm:text-sm"
                           >
                             {t('recommendations.viewDetails')}
                           </Link>

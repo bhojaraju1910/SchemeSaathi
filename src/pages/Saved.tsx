@@ -337,16 +337,16 @@ export const Saved: React.FC = () => {
                         type="button"
                         onClick={() => handleStatusToggle(item.schemeId, item.status)}
                         disabled={actionLoading === item.schemeId}
-                        className="btn-outline-pill min-h-[40px] px-4 py-1.5 text-xs cursor-pointer"
+                        className="btn-card-3d-subtle bg-[var(--paper)] text-[var(--navy)] min-h-[40px] px-4 py-1.5 text-xs font-bold cursor-pointer"
                       >
                         {isApplied ? t('savedPage.markNotApplied') : t('savedPage.markApplied')}
                       </button>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-3">
                       <Link
                         to={`/schemes/${scheme._id}`}
-                        className="btn-outline-pill min-h-[44px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm"
+                        className="btn-card-3d-outline min-h-[44px] inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm"
                       >
                         {t('recommendations.viewDetails')}
                       </Link>
@@ -356,7 +356,7 @@ export const Saved: React.FC = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => handleOfficialClick(scheme._id)}
-                        className="btn-accent-pill min-h-[44px] inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs sm:text-sm"
+                        className="btn-card-3d-accent min-h-[44px] inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs sm:text-sm"
                       >
                         <span>{t('recommendations.officialPage')}</span>
                         <ExternalLinkIcon size={14} />

@@ -252,7 +252,7 @@ export const Dashboard: React.FC = () => {
 
               <Link
                 to={nextStep.ctaTo}
-                className="btn-accent-pill px-6 py-2.5 text-sm inline-flex items-center justify-center gap-2 shrink-0 self-start md:self-center"
+                className="btn-card-3d-accent px-6 py-2.5 text-sm inline-flex items-center justify-center gap-2 shrink-0 self-start md:self-center"
               >
                 <span>{nextStep.ctaLabel}</span>
                 <ArrowRightIcon size={16} />
@@ -294,7 +294,7 @@ export const Dashboard: React.FC = () => {
 
               <Link
                 to="/profile"
-                className="btn-outline-pill px-5 py-2.5 text-sm inline-flex items-center justify-center shrink-0"
+                className="btn-card-3d-outline px-5 py-2.5 text-sm inline-flex items-center justify-center shrink-0"
               >
                 {t('dashboard.updateProfile')}
               </Link>
@@ -334,7 +334,7 @@ export const Dashboard: React.FC = () => {
                   </p>
                   <Link
                     to="/profile"
-                    className="btn-accent-pill px-6 py-2.5 text-sm inline-flex items-center justify-center"
+                    className="btn-card-3d-accent px-6 py-2.5 text-sm inline-flex items-center justify-center"
                   >
                     {t('dashboard.updateProfile')}
                   </Link>
