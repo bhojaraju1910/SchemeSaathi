@@ -1,13 +1,13 @@
-import { Router, Response } from 'express';
-import { SchemeModel, CriteriaModel, UserModel, toSlug } from '../models/index';
-import { SuggestionModel } from '../models/Suggestion';
+import { Router, type Response } from 'express';
+import { SchemeModel, CriteriaModel, UserModel, toSlug } from '../models/index.ts';
+import { SuggestionModel } from '../models/Suggestion.ts';
 import {
   ALLOWED_SUGGESTION_STATUSES,
-  SuggestionStatus,
-} from '../utils/suggestionValidation';
-import { auth, AuthRequest } from '../middleware/auth';
-import { requireRole } from '../middleware/requireRole';
-import { invalidateSchemeCache } from '../services/schemeCache';
+  type SuggestionStatus,
+} from '../utils/suggestionValidation.ts';
+import { auth, type AuthRequest } from '../middleware/auth.ts';
+import { requireRole } from '../middleware/requireRole.ts';
+import { invalidateSchemeCache } from '../services/schemeCache.ts';
 
 const router = Router();
 

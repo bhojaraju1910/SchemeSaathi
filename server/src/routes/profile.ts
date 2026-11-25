@@ -1,6 +1,6 @@
-import { Router, Response } from 'express';
-import { ProfileModel, UserModel } from '../models/index';
-import { auth, AuthRequest } from '../middleware/auth';
+import { Router, type Response } from 'express';
+import { ProfileModel, UserModel } from '../models/index.ts';
+import { auth, type AuthRequest } from '../middleware/auth.ts';
 
 const router = Router();
 

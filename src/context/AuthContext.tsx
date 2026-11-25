@@ -99,6 +99,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     verifyAuth();
   }, [token]);
 
+  const formatApiUnavailableMessage = (err: any, fallbackAction: string) => {
+    if (err?.response?.data?.message) {
+      return String(err.response.data.message);
+    }
+    if (
+      err?.message === 'NON_JSON_HTML_RESPONSE' ||
+      (typeof err?.response?.data === 'string' && err.response.data.trim().startsWith('<'))
+    ) {
+      return `The /api backend route is not responding with JSON. ${fallbackAction}`;
+    }
+    if (err?.response?.status) {
+      return `Server database error (HTTP ${err.response.status}). ${fallbackAction}`;
+    }
+    return `Unable to reach the server database. ${fallbackAction}`;
+  };
+
   const login = async (email: string, password: string) => {
     try {
       const res = await api.post('/auth/login', { email, password });
@@ -110,10 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       persistSession(newToken, newUser);
     } catch (err: any) {
       if (isApiUnavailableError(err)) {
-        throw new Error(
-          err?.response?.data?.message ||
-            'Unable to reach the server database. Please check your connection and try again.'
-        );
+        throw new Error(formatApiUnavailableMessage(err, 'Please check your connection and try again.'));
       }
       throw err;
     }
@@ -146,8 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       if (isApiUnavailableError(err)) {
         throw new Error(
-          err?.response?.data?.message ||
-            'Unable to reach the server database. Your account was not saved—please try again.'
+          formatApiUnavailableMessage(err, 'Your account was not saved—please try again.')
         );
       }
       throw err;

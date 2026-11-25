@@ -1,10 +1,10 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { DatabaseUnavailableError, isMongoConnected } from '../config/db';
-import {
+import mongoose, { Schema, type Document } from 'mongoose';
+import { DatabaseUnavailableError, isMongoConnected } from '../config/db.ts';
+import type {
   SanitizedSuggestion,
   SuggestionStatus,
   SuggestionType,
-} from '../utils/suggestionValidation';
+} from '../utils/suggestionValidation.ts';
 
 export interface ISuggestion {
   _id: string;

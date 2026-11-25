@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 
-import { createApp, ensureDBReady } from './server/src/app';
+import { createApp, ensureDBReady } from './server/src/app.ts';
 
 dotenv.config();
 
@@ -15,7 +15,11 @@ const app = createApp();
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
-  await ensureDBReady();
+  try {
+    await ensureDBReady();
+  } catch (err: any) {
+    console.error('[SchemeSaathi Initial DB Connect Warning]', err?.message || err);
+  }
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -28,7 +32,7 @@ async function startServer() {
   } else {
     const distPath = path.resolve(__dirname, 'dist');
     app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
+    app.get(/^(?!\/api(?:\/|$)).*/, (_req, res) => {
       res.sendFile(path.resolve(distPath, 'index.html'));
     });
   }

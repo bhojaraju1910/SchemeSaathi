@@ -1,11 +1,11 @@
-import { Router, Request, Response } from 'express';
-import { SchemeModel, CriteriaModel, ProfileModel } from '../models/index';
-import { auth, AuthRequest } from '../middleware/auth';
-import { matchSchemes } from '../services/eligibilityEngine';
+import { Router, type Request, type Response } from 'express';
+import { SchemeModel, CriteriaModel, ProfileModel } from '../models/index.ts';
+import { auth, type AuthRequest } from '../middleware/auth.ts';
+import { matchSchemes } from '../services/eligibilityEngine.ts';
 import {
   getCachedActiveSchemesWithRules,
   getCachedCatalogMeta,
-} from '../services/schemeCache';
+} from '../services/schemeCache.ts';
 
 const router = Router();
 

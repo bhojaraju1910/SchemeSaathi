@@ -1,13 +1,13 @@
-import { Router, Response } from 'express';
+import { Router, type Response } from 'express';
 import {
   SavedSchemeModel,
   SchemeModel,
   ApplicationModel,
   ProfileModel,
-} from '../models/index';
-import { auth, AuthRequest } from '../middleware/auth';
-import { matchSchemes } from '../services/eligibilityEngine';
-import { getCachedActiveSchemesWithRules } from '../services/schemeCache';
+} from '../models/index.ts';
+import { auth, type AuthRequest } from '../middleware/auth.ts';
+import { matchSchemes } from '../services/eligibilityEngine.ts';
+import { getCachedActiveSchemesWithRules } from '../services/schemeCache.ts';
 
 const router = Router();
 

@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { UserModel } from '../models/index';
-import { getJwtSecret } from '../utils/jwt';
+import { UserModel } from '../models/index.ts';
+import { getJwtSecret } from '../utils/jwt.ts';
 
 export interface AuthRequest extends Request {
   user?: {

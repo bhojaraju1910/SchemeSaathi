@@ -1,10 +1,10 @@
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
-import { SuggestionModel } from '../models/Suggestion';
-import { validateAndSanitizeSuggestion } from '../utils/suggestionValidation';
-import { rateLimitKeyGenerator } from '../utils/rateLimitKey';
-import { getJwtSecret } from '../utils/jwt';
+import { SuggestionModel } from '../models/Suggestion.ts';
+import { validateAndSanitizeSuggestion } from '../utils/suggestionValidation.ts';
+import { rateLimitKeyGenerator } from '../utils/rateLimitKey.ts';
+import { getJwtSecret } from '../utils/jwt.ts';
 
 const router = Router();
 

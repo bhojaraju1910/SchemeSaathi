@@ -5,22 +5,22 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-import { connectDB, getStorageMode, isMongoConnected } from './config/db';
+import { connectDB, getStorageMode, isMongoConnected } from './config/db.ts';
 import {
   SchemeModel,
   SchemeMongoModel,
   UserMongoModel,
   upsertSeedData,
-} from './models/index';
-import { invalidateSchemeCache } from './services/schemeCache';
-import authRouter from './routes/auth';
-import profileRouter from './routes/profile';
-import schemesRouter from './routes/schemes';
-import userActionsRouter from './routes/userActions';
-import adminRouter from './routes/admin';
-import suggestionsRouter from './routes/suggestions';
-import { errorHandler } from './middleware/errorHandler';
-import { rateLimitKeyGenerator } from './utils/rateLimitKey';
+} from './models/index.ts';
+import { invalidateSchemeCache } from './services/schemeCache.ts';
+import authRouter from './routes/auth.ts';
+import profileRouter from './routes/profile.ts';
+import schemesRouter from './routes/schemes.ts';
+import userActionsRouter from './routes/userActions.ts';
+import adminRouter from './routes/admin.ts';
+import suggestionsRouter from './routes/suggestions.ts';
+import { errorHandler } from './middleware/errorHandler.ts';
+import { rateLimitKeyGenerator } from './utils/rateLimitKey.ts';
 
 dotenv.config();
 
@@ -80,9 +80,36 @@ export function createApp() {
     })
   );
 
+  const configuredOrigins = new Set(
+    [
+      process.env.CLIENT_URL,
+      process.env.APP_URL,
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ]
+      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+      .map((v) => v.trim().replace(/\/+$/, ''))
+  );
+
   app.use(
     cors({
-      origin: process.env.CLIENT_URL || true,
+      origin: (origin, callback) => {
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        const cleanOrigin = origin.trim().replace(/\/+$/, '');
+        if (
+          configuredOrigins.has(cleanOrigin) ||
+          /^https:\/\/ais-(dev|pre)-[a-z0-9-]+\.[a-z0-9-]+\.run\.app$/i.test(cleanOrigin) ||
+          /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(cleanOrigin)
+        ) {
+          callback(null, true);
+          return;
+        }
+        callback(null, false);
+      },
       credentials: true,
     })
   );

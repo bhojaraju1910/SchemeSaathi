@@ -1,5 +1,5 @@
-import { CriteriaModel, IScheme, SchemeModel } from '../models/index';
-import type { Rule, SchemeWithRules } from './eligibilityEngine';
+import { CriteriaModel, type IScheme, SchemeModel } from '../models/index.ts';
+import type { Rule, SchemeWithRules } from './eligibilityEngine.ts';
 
 const CACHE_TTL_MS = 5 * 1000; // 5 seconds (burst deduplication; reflects direct DB edits promptly)
 

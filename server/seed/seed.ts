@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { connectDB } from '../src/config/db';
-import { upsertSeedData } from '../src/models/index';
+import { connectDB } from '../src/config/db.ts';
+import { upsertSeedData } from '../src/models/index.ts';
 
 dotenv.config();
 

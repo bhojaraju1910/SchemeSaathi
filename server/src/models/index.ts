@@ -1,8 +1,8 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, type Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
-import { DatabaseUnavailableError, isMongoConnected } from '../config/db';
+import { DatabaseUnavailableError, isMongoConnected } from '../config/db.ts';
 
 export type SchemeCategory =
   | 'education'

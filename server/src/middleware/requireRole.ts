@@ -1,5 +1,5 @@
-import { Response, NextFunction } from 'express';
-import { AuthRequest } from './auth';
+import type { Response, NextFunction } from 'express';
+import type { AuthRequest } from './auth.ts';
 
 export function requireRole(role: 'admin' | 'user') {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
