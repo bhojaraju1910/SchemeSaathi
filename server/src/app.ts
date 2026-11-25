@@ -5,8 +5,14 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-import { connectDB, getStorageMode } from './config/db';
-import { SchemeModel } from './models/index';
+import { connectDB, getStorageMode, isMongoConnected } from './config/db';
+import {
+  SchemeModel,
+  SchemeMongoModel,
+  UserMongoModel,
+  upsertSeedData,
+} from './models/index';
+import { invalidateSchemeCache } from './services/schemeCache';
 import authRouter from './routes/auth';
 import profileRouter from './routes/profile';
 import schemesRouter from './routes/schemes';
@@ -14,23 +20,58 @@ import userActionsRouter from './routes/userActions';
 import adminRouter from './routes/admin';
 import suggestionsRouter from './routes/suggestions';
 import { errorHandler } from './middleware/errorHandler';
+import { rateLimitKeyGenerator } from './utils/rateLimitKey';
 
 dotenv.config();
 
 let dbReadyPromise: Promise<void> | null = null;
+let bootstrapSeedPromise: Promise<void> | null = null;
+
+async function bootstrapMongoIfEmpty(): Promise<void> {
+  if (!isMongoConnected()) return;
+  const [schemeCount, userCount] = await Promise.all([
+    SchemeMongoModel.estimatedDocumentCount(),
+    UserMongoModel.estimatedDocumentCount(),
+  ]);
+  if (schemeCount === 0 && userCount === 0) {
+    console.log(
+      '[SchemeSaathi] Connected MongoDB is empty; seeding initial schemes, rules, and accounts...'
+    );
+    const summary = await upsertSeedData();
+    invalidateSchemeCache();
+    console.log(
+      `[SchemeSaathi] MongoDB initial seed complete: ${summary.schemesUpserted} schemes, ${summary.criteriaUpserted} criteria, ${summary.demoAccountsInserted} accounts.`
+    );
+  }
+}
 
 export function ensureDBReady(): Promise<void> {
   if (!dbReadyPromise) {
-    dbReadyPromise = connectDB().catch((err) => {
-      dbReadyPromise = null;
-      throw err;
-    });
+    dbReadyPromise = connectDB()
+      .then(async () => {
+        if (isMongoConnected() && !bootstrapSeedPromise) {
+          bootstrapSeedPromise = bootstrapMongoIfEmpty().catch((err) => {
+            bootstrapSeedPromise = null;
+            console.error('[SchemeSaathi] MongoDB auto-bootstrap seed failed:', err?.message || err);
+          });
+        }
+        if (bootstrapSeedPromise) {
+          await bootstrapSeedPromise;
+        }
+      })
+      .catch((err) => {
+        dbReadyPromise = null;
+        throw err;
+      });
   }
   return dbReadyPromise;
 }
 
 export function createApp() {
   const app = express();
+
+  // Trust immediate reverse proxy hop (e.g., Cloud Run / Vercel) for accurate req.ip
+  app.set('trust proxy', 1);
 
   app.use(
     helmet({
@@ -84,6 +125,7 @@ export function createApp() {
     message: { message: 'Too many requests from this IP, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: rateLimitKeyGenerator,
   });
 
   app.use('/api/auth', authLimiter);

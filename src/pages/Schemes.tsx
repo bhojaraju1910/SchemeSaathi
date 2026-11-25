@@ -140,14 +140,7 @@ export const Schemes: React.FC = () => {
         4000
       );
 
-      const hasFilters = Boolean(
-        queryParam ||
-          categoryParam ||
-          (stateParam && stateParam !== 'All') ||
-          (levelParam && levelParam !== 'All')
-      );
-
-      if (Array.isArray(res.data?.schemes) && (res.data.total > 0 || hasFilters)) {
+      if (Array.isArray(res.data?.schemes)) {
         const payload: CachedPagePayload = {
           schemes: res.data.schemes,
           total: res.data.total || 0,

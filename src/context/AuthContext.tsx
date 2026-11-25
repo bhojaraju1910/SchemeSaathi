@@ -4,7 +4,6 @@ import i18n from '../i18n';
 import {
   getMirrorUserById,
   getUserIdFromMirrorToken,
-  hasMirrorAccount,
   isApiUnavailableError,
   isMirrorToken,
   mirrorLogin,
@@ -71,6 +70,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (isMirrorToken(token)) {
+        try {
+          const healthRes = await api.get('/health');
+          if (healthRes.data?.storageMode === 'mongodb') {
+            logout();
+            setLoading(false);
+            return;
+          }
+        } catch {
+          // Backend unreachable; keep offline mirror session
+        }
+
         const userId = getUserIdFromMirrorToken(token);
         const mirrorUser = getMirrorUserById(userId) || user;
         if (mirrorUser) {
@@ -102,14 +112,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const savedRaw = localStorage.getItem('schemesaathi_user');
         const savedUser: User | null = savedRaw ? JSON.parse(savedRaw) : null;
 
-        // Preserve session if backend is unreachable OR serverless lambda cold-started for a known mirror user
-        if (
-          isApiUnavailableError(err) ||
-          (savedUser && (hasMirrorAccount(savedUser.email) || getMirrorUserById(savedUser.id)))
-        ) {
-          if (savedUser) {
-            setUser(savedUser);
-          }
+        if (isApiUnavailableError(err) && savedUser) {
+          setUser(savedUser);
         } else {
           console.warn('Session expired or invalid token');
           logout();
@@ -131,11 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       syncMirrorUser(newUser, password);
       persistSession(newToken, newUser);
     } catch (err: any) {
-      const shouldFallback =
-        isApiUnavailableError(err) ||
-        (err?.response?.status === 401 && hasMirrorAccount(email));
-
-      if (shouldFallback) {
+      if (isApiUnavailableError(err)) {
         const mirrorResult = mirrorLogin(email, password);
         persistSession(mirrorResult.token, mirrorResult.user);
         return;

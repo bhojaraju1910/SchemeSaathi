@@ -128,7 +128,7 @@ export const Landing: React.FC = () => {
         (signal) => api.get('/schemes/quick-catalog', { signal }),
         4000
       );
-      if (Array.isArray(res.data?.schemes) && res.data.schemes.length > 0) {
+      if (Array.isArray(res.data?.schemes)) {
         const liveSchemes = res.data.schemes as SchemeData[];
         setCatalog(liveSchemes);
         setMirrorCatalog(liveSchemes as any);
@@ -137,7 +137,6 @@ export const Landing: React.FC = () => {
         setIsFallback(false);
         return;
       }
-      // Unseeded empty database -> fall back cleanly to lazy saved copy
       const emergency = (await loadEmergencySchemes()) as unknown as SchemeData[];
       setCatalog(emergency);
       setMirrorCatalog(emergency as any);

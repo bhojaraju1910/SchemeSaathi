@@ -413,52 +413,78 @@ export async function upsertSeedData(
   let demoAccountsInserted = 0;
 
   if (isMongoConnected()) {
-    for (const item of items) {
+    const normalizedItems = items.map((item) => {
       const slug = (item.slug || item.id || toSlug(item.title)).toLowerCase().trim();
       const verified = Boolean(item.verified);
       const lastVerified = verified && item.lastVerified ? new Date(item.lastVerified) : null;
+      return { item, slug, verified, lastVerified };
+    });
 
-      const schemeDoc = await SchemeMongoModel.findOneAndUpdate(
-        { slug },
-        {
-          $set: {
-            slug,
-            title: item.title,
-            shortDescription: item.shortDescription,
-            category: item.category,
-            level: item.level,
-            state: item.state || 'All',
-            benefits: item.benefits || [],
-            documentsRequired: item.documentsRequired || [],
-            applyUrl: item.applyUrl || 'https://www.myscheme.gov.in/',
-            sourceUrl: item.sourceUrl || 'https://www.myscheme.gov.in/',
-            isActive: item.isActive !== false,
-            verified,
-            lastVerified,
-            isSample: Boolean(item.isSample),
-            translations: item.translations || {},
-          },
-          $setOnInsert: {
-            createdAt: new Date(),
-          },
-        },
-        { upsert: true, new: true }
-      ).lean();
-
-      schemesUpserted += 1;
-
-      if (schemeDoc && Array.isArray(item.rules)) {
-        await CriteriaMongoModel.findOneAndUpdate(
-          { schemeId: String(schemeDoc._id) },
-          {
-            $set: {
-              schemeId: String(schemeDoc._id),
-              rules: item.rules,
+    if (normalizedItems.length > 0) {
+      await SchemeMongoModel.bulkWrite(
+        normalizedItems.map(({ item, slug, verified, lastVerified }) => ({
+          updateOne: {
+            filter: { slug },
+            update: {
+              $set: {
+                slug,
+                title: item.title,
+                shortDescription: item.shortDescription,
+                category: item.category,
+                level: item.level,
+                state: item.state || 'All',
+                benefits: item.benefits || [],
+                documentsRequired: item.documentsRequired || [],
+                applyUrl: item.applyUrl || 'https://www.myscheme.gov.in/',
+                sourceUrl: item.sourceUrl || 'https://www.myscheme.gov.in/',
+                isActive: item.isActive !== false,
+                verified,
+                lastVerified,
+                isSample: Boolean(item.isSample),
+                translations: item.translations || {},
+              },
+              $setOnInsert: {
+                createdAt: new Date(),
+              },
             },
+            upsert: true,
           },
-          { upsert: true }
-        );
-        criteriaUpserted += 1;
+        })),
+        { ordered: false }
+      );
+      schemesUpserted = normalizedItems.length;
+
+      const slugs = normalizedItems.map((x) => x.slug);
+      const schemeDocs = await SchemeMongoModel.find(
+        { slug: { $in: slugs } },
+        { _id: 1, slug: 1 }
+      ).lean();
+      const idBySlug = new Map<string, string>();
+      for (const d of schemeDocs) {
+        idBySlug.set(d.slug, String(d._id));
+      }
+
+      const criteriaOps = normalizedItems
+        .filter(({ item, slug }) => Array.isArray(item.rules) && idBySlug.has(slug))
+        .map(({ item, slug }) => {
+          const schemeId = idBySlug.get(slug)!;
+          return {
+            updateOne: {
+              filter: { schemeId },
+              update: {
+                $set: {
+                  schemeId,
+                  rules: item.rules,
+                },
+              },
+              upsert: true,
+            },
+          };
+        });
+
+      if (criteriaOps.length > 0) {
+        await CriteriaMongoModel.bulkWrite(criteriaOps, { ordered: false });
+        criteriaUpserted = criteriaOps.length;
       }
     }
 
@@ -484,6 +510,7 @@ export async function upsertSeedData(
     }
 
     let demoUser = await UserMongoModel.findOne({ email: 'demo@schemesaathi.test' }).lean();
+    let demoCreated = false;
     if (!demoUser) {
       const demoHash = await bcrypt.hash('Demo@123', 10);
       demoUser = await UserMongoModel.findOneAndUpdate(
@@ -501,14 +528,16 @@ export async function upsertSeedData(
         { upsert: true, new: true }
       ).lean();
       demoAccountsInserted += 1;
+      demoCreated = true;
     }
 
     if (demoUser) {
+      const demoUserId = String(demoUser._id);
       await ProfileMongoModel.updateOne(
-        { userId: String(demoUser._id) },
+        { userId: demoUserId },
         {
           $setOnInsert: {
-            userId: String(demoUser._id),
+            userId: demoUserId,
             age: 62,
             incomeRange: 'low',
             state: 'Karnataka',
@@ -520,6 +549,27 @@ export async function upsertSeedData(
         },
         { upsert: true }
       );
+
+      if (demoCreated) {
+        const starterSlugs = ['kar-006-sandhya-suraksha-yojana', 'kar-002-gruha-jyothi-scheme'];
+        const starterSchemes = await SchemeMongoModel.find(
+          { slug: { $in: starterSlugs } },
+          { _id: 1 }
+        ).lean();
+        for (const s of starterSchemes) {
+          await SavedSchemeMongoModel.updateOne(
+            { userId: demoUserId, schemeId: String(s._id) },
+            {
+              $setOnInsert: {
+                userId: demoUserId,
+                schemeId: String(s._id),
+                savedAt: new Date(),
+              },
+            },
+            { upsert: true }
+          );
+        }
+      }
     }
 
     return { schemesUpserted, criteriaUpserted, demoAccountsInserted };

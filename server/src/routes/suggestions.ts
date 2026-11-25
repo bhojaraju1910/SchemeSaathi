@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import { SuggestionModel } from '../models/Suggestion';
 import { validateAndSanitizeSuggestion } from '../utils/suggestionValidation';
+import { rateLimitKeyGenerator } from '../utils/rateLimitKey';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'schemesaathi_super_secret_jwt_key_2026';
@@ -16,6 +17,7 @@ const suggestionLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKeyGenerator,
 });
 
 function extractOptionalUserId(req: Request): string | undefined {
