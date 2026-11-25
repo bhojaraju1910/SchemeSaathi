@@ -109,6 +109,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ) {
       return `The /api backend route is not responding with JSON. ${fallbackAction}`;
     }
+    if (err?.response?.status === 404 || err?.response?.status === 405) {
+      return `API route not found (HTTP ${err.response.status}). Make sure the latest backend is deployed. ${fallbackAction}`;
+    }
     if (err?.response?.status) {
       return `Server database error (HTTP ${err.response.status}). ${fallbackAction}`;
     }
