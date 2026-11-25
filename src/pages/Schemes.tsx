@@ -106,10 +106,6 @@ export const Schemes: React.FC = () => {
       setTotalPages(cached.data.totalPages);
       registerSchemes(cached.data.schemes);
       setLoading(false);
-      if (!cached.isStale) {
-        setIsFallback(false);
-        return;
-      }
     } else {
       setLoading(true);
     }

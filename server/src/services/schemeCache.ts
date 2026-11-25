@@ -1,7 +1,7 @@
 import { CriteriaModel, IScheme, SchemeModel } from '../models/index';
 import type { Rule, SchemeWithRules } from './eligibilityEngine';
 
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 5 * 1000; // 5 seconds (burst deduplication; reflects direct DB edits promptly)
 
 interface CachedCatalog {
   schemesWithRules: SchemeWithRules[];

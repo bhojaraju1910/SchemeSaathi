@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600';
+const PUBLIC_CACHE_HEADER = 'no-store';
 
 // Public list with server-side pagination, projection, and search
 router.get('/', async (req: Request, res: Response): Promise<void> => {

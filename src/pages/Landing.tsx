@@ -117,10 +117,6 @@ export const Landing: React.FC = () => {
       setMirrorCatalog(cached.data as any);
       registerSchemes(cached.data);
       setLoading(false);
-      if (!cached.isStale) {
-        setIsFallback(false);
-        return;
-      }
     }
 
     try {

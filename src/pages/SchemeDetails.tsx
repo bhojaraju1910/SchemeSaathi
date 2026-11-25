@@ -164,8 +164,19 @@ export const SchemeDetails: React.FC = () => {
         const found = savedRes.data.some((s: any) => s.schemeId === id);
         setIsSaved(found);
       }
-    } catch {
-      await fallbackLookup();
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        try {
+          window.sessionStorage?.removeItem(`ss_cache_scheme_${id}`);
+        } catch {
+          // ignore
+        }
+        setData(null);
+        setIsFallback(false);
+        setError('Scheme could not be loaded or was removed.');
+      } else {
+        await fallbackLookup();
+      }
     } finally {
       setLoading(false);
     }
