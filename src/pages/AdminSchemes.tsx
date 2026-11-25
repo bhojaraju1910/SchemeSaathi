@@ -141,6 +141,13 @@ export const AdminSchemes: React.FC = () => {
         actions={
           <>
             <Link
+              to="/admin/users"
+              className="btn-outline-dark-pill px-5 py-2.5 inline-flex items-center justify-center text-sm"
+            >
+              Registered Users
+            </Link>
+
+            <Link
               to="/admin/suggestions"
               className="btn-outline-dark-pill px-5 py-2.5 inline-flex items-center justify-center text-sm"
             >

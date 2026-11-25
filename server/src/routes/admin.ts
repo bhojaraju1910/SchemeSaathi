@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { SchemeModel, CriteriaModel, toSlug } from '../models/index';
+import { SchemeModel, CriteriaModel, UserModel, toSlug } from '../models/index';
 import { SuggestionModel } from '../models/Suggestion';
 import {
   ALLOWED_SUGGESTION_STATUSES,
@@ -299,6 +299,54 @@ router.delete('/suggestions/:id', async (req: AuthRequest, res: Response): Promi
     res.status(200).json({ message: 'Suggestion deleted successfully' });
   } catch (err: any) {
     res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to delete suggestion' });
+  }
+});
+
+// List registered users (admin only, safe fields only, never passwordHash)
+router.get('/users', async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const users = await UserModel.findAll();
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).json({ users, total: users.length });
+  } catch (err: any) {
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to fetch users' });
+  }
+});
+
+// Delete a non-admin user account (admin only)
+router.delete('/users/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = typeof req.params.id === 'string' ? req.params.id.trim() : '';
+    if (!id) {
+      res.status(400).json({ message: 'Valid user ID is required.' });
+      return;
+    }
+
+    if (id === req.user!.id) {
+      res.status(400).json({ message: 'You cannot delete your own active administrator account.' });
+      return;
+    }
+
+    const existing = await UserModel.findById(id);
+    if (!existing) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    if (existing.role === 'admin') {
+      res.status(403).json({ message: 'Administrator accounts cannot be deleted here.' });
+      return;
+    }
+
+    const deleted = await UserModel.deleteById(existing._id);
+    if (!deleted) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.status(200).json({ message: 'User account deleted successfully' });
+  } catch (err: any) {
+    res.status(err?.statusCode || 500).json({ message: err.message || 'Failed to delete user' });
   }
 });
 

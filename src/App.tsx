@@ -22,6 +22,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminSchemes = lazy(() => import('./pages/AdminSchemes'));
 const AdminSchemeForm = lazy(() => import('./pages/AdminSchemeForm'));
 const AdminSuggestions = lazy(() => import('./pages/AdminSuggestions'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
 const Suggest = lazy(() => import('./pages/Suggest'));
 const Faq = lazy(() => import('./pages/Faq'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -131,6 +132,14 @@ export default function App() {
                     element={
                       <ProtectedRoute adminOnly>
                         <AdminSuggestions />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminUsers />
                       </ProtectedRoute>
                     }
                   />

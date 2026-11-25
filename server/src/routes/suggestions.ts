@@ -4,9 +4,9 @@ import jwt from 'jsonwebtoken';
 import { SuggestionModel } from '../models/Suggestion';
 import { validateAndSanitizeSuggestion } from '../utils/suggestionValidation';
 import { rateLimitKeyGenerator } from '../utils/rateLimitKey';
+import { getJwtSecret } from '../utils/jwt';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'schemesaathi_super_secret_jwt_key_2026';
 
 // Rate-limit public suggestion submissions to 5 per hour per IP
 const suggestionLimiter = rateLimit({
@@ -25,7 +25,7 @@ function extractOptionalUserId(req: Request): string | undefined {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { id?: string };
+      const decoded = jwt.verify(token, getJwtSecret()) as { id?: string };
       if (decoded?.id) {
         return String(decoded.id);
       }

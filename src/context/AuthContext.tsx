@@ -2,12 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axios';
 import i18n from '../i18n';
 import {
-  getMirrorUserById,
-  getUserIdFromMirrorToken,
   isApiUnavailableError,
   isMirrorToken,
-  mirrorLogin,
-  mirrorRegister,
   saveMirrorProfile,
   syncMirrorUser,
 } from '../services/authMirrorService';
@@ -70,29 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (isMirrorToken(token)) {
-        try {
-          const healthRes = await api.get('/health');
-          if (healthRes.data?.storageMode === 'mongodb') {
-            logout();
-            setLoading(false);
-            return;
-          }
-        } catch {
-          // Backend unreachable; keep offline mirror session
-        }
-
-        const userId = getUserIdFromMirrorToken(token);
-        const mirrorUser = getMirrorUserById(userId) || user;
-        if (mirrorUser) {
-          setUser(mirrorUser);
-          localStorage.setItem('schemesaathi_user', JSON.stringify(mirrorUser));
-          if (mirrorUser.preferredLanguage && ['en', 'kn', 'hi'].includes(mirrorUser.preferredLanguage)) {
-            i18n.changeLanguage(mirrorUser.preferredLanguage);
-            localStorage.setItem('schemesaathi_lang', mirrorUser.preferredLanguage);
-          }
-        } else {
-          logout();
-        }
+        logout();
         setLoading(false);
         return;
       }
@@ -132,13 +106,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!newToken || !newUser) {
         throw new Error('Invalid login response');
       }
-      syncMirrorUser(newUser, password);
+      syncMirrorUser(newUser);
       persistSession(newToken, newUser);
     } catch (err: any) {
       if (isApiUnavailableError(err)) {
-        const mirrorResult = mirrorLogin(email, password);
-        persistSession(mirrorResult.token, mirrorResult.user);
-        return;
+        throw new Error(
+          err?.response?.data?.message ||
+            'Unable to reach the server database. Please check your connection and try again.'
+        );
       }
       throw err;
     }
@@ -165,14 +140,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!newToken || !newUser) {
         throw new Error('Invalid registration response');
       }
-      syncMirrorUser(newUser, password);
+      syncMirrorUser(newUser);
       saveMirrorProfile(newUser.id, { category: [], occupation: '', state: 'Karnataka' });
       persistSession(newToken, newUser);
     } catch (err: any) {
       if (isApiUnavailableError(err)) {
-        const mirrorResult = mirrorRegister(name, email, password, cleanLang);
-        persistSession(mirrorResult.token, mirrorResult.user);
-        return;
+        throw new Error(
+          err?.response?.data?.message ||
+            'Unable to reach the server database. Your account was not saved—please try again.'
+        );
       }
       throw err;
     }

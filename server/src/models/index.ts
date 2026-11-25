@@ -735,6 +735,53 @@ export const UserModel = {
       Object.assign(u, update);
     }
   },
+
+  async findAll(): Promise<Omit<IUser, 'passwordHash'>[]> {
+    if (useMongo()) {
+      const docs = await UserMongoModel.find({}, { passwordHash: 0 })
+        .sort({ createdAt: -1 })
+        .lean();
+      return docs.map((d) => normalizeDoc<Omit<IUser, 'passwordHash'>>(d));
+    }
+
+    return Array.from(inMemoryDB.users.values())
+      .map(({ passwordHash: _pw, ...publicUser }) => ({ ...publicUser }))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
+
+  async countDocuments(): Promise<number> {
+    if (useMongo()) {
+      return UserMongoModel.countDocuments();
+    }
+    return inMemoryDB.users.size;
+  },
+
+  async deleteById(id: string): Promise<boolean> {
+    if (useMongo()) {
+      if (!mongoose.isValidObjectId(id)) return false;
+      const deleted = await UserMongoModel.findByIdAndDelete(id);
+      if (!deleted) return false;
+      const uid = String(deleted._id);
+      await Promise.all([
+        ProfileMongoModel.deleteOne({ userId: uid }),
+        SavedSchemeMongoModel.deleteMany({ userId: uid }),
+        ApplicationMongoModel.deleteMany({ userId: uid }),
+      ]);
+      return true;
+    }
+
+    const existed = inMemoryDB.users.delete(id);
+    if (existed) {
+      inMemoryDB.profiles.delete(id);
+      for (const [key, item] of inMemoryDB.savedSchemes.entries()) {
+        if (item.userId === id) inMemoryDB.savedSchemes.delete(key);
+      }
+      for (const [key, item] of inMemoryDB.applications.entries()) {
+        if (item.userId === id) inMemoryDB.applications.delete(key);
+      }
+    }
+    return existed;
+  },
 };
 
 export const ProfileModel = {

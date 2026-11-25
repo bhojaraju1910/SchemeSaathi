@@ -17,7 +17,6 @@ import {
 import {
   getMirrorCatalog,
   getMirrorProfile,
-  isApiUnavailableError,
   isMirrorToken,
   saveMirrorProfile,
   setMirrorCatalog,
@@ -214,11 +213,7 @@ export const Profile: React.FC = () => {
       });
       setSavedSuccess(true);
     } catch (err: any) {
-      if (isApiUnavailableError(err) || err?.response?.status === 401) {
-        setSavedSuccess(true);
-      } else {
-        setError(err.response?.data?.message || 'Failed to update profile.');
-      }
+      setError(err?.response?.data?.message || 'Failed to update profile on server.');
     } finally {
       setSaving(false);
     }

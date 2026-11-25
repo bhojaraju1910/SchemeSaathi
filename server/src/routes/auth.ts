@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UserModel, ProfileModel } from '../models/index';
 import { auth, AuthRequest } from '../middleware/auth';
+import { getJwtSecret } from '../utils/jwt';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'schemesaathi_super_secret_jwt_key_2026';
 
 // Register
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
@@ -38,12 +38,17 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    const cleanPreferredLanguage =
+      typeof preferredLanguage === 'string' && ['en', 'kn', 'hi'].includes(preferredLanguage)
+        ? (preferredLanguage as 'en' | 'kn' | 'hi')
+        : 'en';
+
     const user = await UserModel.create({
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
       role: 'user',
-      preferredLanguage: ['en', 'kn', 'hi'].includes(preferredLanguage) ? preferredLanguage : 'en',
+      preferredLanguage: cleanPreferredLanguage,
     });
 
     // Create an empty profile for the new user
@@ -53,7 +58,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       { upsert: true }
     );
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
 
     res.status(201).json({
       token,
@@ -66,6 +71,10 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err: any) {
+    if (err?.code === 11000) {
+      res.status(400).json({ message: 'An account with this email already exists.' });
+      return;
+    }
     res.status(err?.statusCode || 500).json({ message: err.message || 'Registration failed' });
   }
 });
@@ -75,12 +84,12 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
       res.status(400).json({ message: 'Email and password are required.' });
       return;
     }
 
-    const normalizedEmail = String(email).trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
     const user = await UserModel.findOne({ email: normalizedEmail });
 
     if (!user) {
@@ -94,7 +103,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
 
     res.status(200).json({
       token,

@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/index';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'schemesaathi_super_secret_jwt_key_2026';
+import { getJwtSecret } from '../utils/jwt';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -25,7 +24,7 @@ export async function auth(req: AuthRequest, res: Response, next: NextFunction):
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role: 'user' | 'admin' };
+    const decoded = jwt.verify(token, getJwtSecret()) as { id: string; role: 'user' | 'admin' };
     const user = await UserModel.findById(decoded.id);
 
     if (!user) {
